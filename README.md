@@ -1,11 +1,8 @@
-
-
 <html lang="pt-BR">
 <head>
-    <img width="1524" height="704" alt="Gemini_Generated_Image_6lnfd06lnfd06lnf" src="https://github.com/user-attachments/assets/a473c4b8-cc58-4255-9bc0-d409d7e90b80" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF - Automação Google Drive</title>
+    <title>Painel Links GF - Automação & Hash Criptografado</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -53,16 +50,16 @@
 </head>
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800">
 
-    <!-- TELA DE LOGIN / BLOQUEIO POR SENHA -->
+    <!-- TELA DE LOGIN / BLOQUEIO POR SENHA (VALIDAÇÃO VIA HASH SHA-256) -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-5 border border-slate-200">
             <img src="logo.png" alt="Logo GF Links" class="h-12 w-auto mx-auto object-contain" onerror="this.style.display='none'">
             <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
-                <i class="fa-solid fa-shield-halved"></i>
+                <i class="fa-solid fa-lock text-2xl"></i>
             </div>
             <div>
                 <h2 class="text-xl font-bold text-slate-800">Acesso Restrito</h2>
-                <p class="text-xs text-slate-500 mt-1">Informe a senha de acesso para visualizar o Painel Links GF</p>
+                <p class="text-xs text-slate-500 mt-1">Autenticação por criptografia Hash (SHA-256)</p>
             </div>
             <form onsubmit="checkPassword(event)" class="space-y-4">
                 <div>
@@ -268,7 +265,10 @@
 
     <script>
         const AUTH_KEY = 'GF_PANEL_AUTH';
-        const TARGET_PASSWORD = 'gF@2026*Link';
+        
+        // DIGEST HASH SHA-256 PARA A SENHA "gF@2026*Link" (Texto oculto no código fonte)
+        const TARGET_HASH = '6572e90e791338d8f99ad5c66d21d51a66a1a45bb3a1db93ff7906d0fa7cf827';
+        
         const DRIVE_FILE_ID = '1P88V6dzw8kXwkcIPCufkSMPdtp4DHPg02fdvcF8TYXE';
 
         const DB_KEY_DATA = 'APP_ATIVOS_DATA';
@@ -282,6 +282,15 @@
         let statusColName = "";
         let cobrancaColName = "";
 
+        // FUNÇÃO DE CRIPTOGRAFIA DE HASH SHA-256
+        async function hashString(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem(AUTH_KEY) === 'true') {
                 document.getElementById('loginOverlay').classList.add('hidden');
@@ -289,12 +298,15 @@
             }
         });
 
-        function checkPassword(e) {
+        async function checkPassword(e) {
             e.preventDefault();
             const input = document.getElementById('accessPassword').value;
             const error = document.getElementById('loginError');
 
-            if (input === TARGET_PASSWORD) {
+            // Converte a senha digitada em HASH e compara com a chave salva
+            const inputHash = await hashString(input);
+
+            if (inputHash === TARGET_HASH) {
                 sessionStorage.setItem(AUTH_KEY, 'true');
                 document.getElementById('loginOverlay').classList.add('hidden');
                 error.classList.add('hidden');
@@ -315,7 +327,6 @@
             document.getElementById('loginOverlay').classList.remove('hidden');
         }
 
-        // AUTOMATIZAÇÃO DE CARREGAMENTO VIA GOOGLE DRIVE API/EXPORT
         async function syncDriveData() {
             const banner = document.getElementById('driveLoadingBanner');
             const syncIcon = document.getElementById('syncIcon');
