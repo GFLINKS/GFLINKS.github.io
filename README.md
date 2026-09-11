@@ -1,5 +1,3 @@
-<img width="316" height="146" alt="logo" src="https://github.com/user-attachments/assets/c23f0e1d-9e50-4088-8f74-dd0ae70a05bc" />
-
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
