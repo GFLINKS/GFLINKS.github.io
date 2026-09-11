@@ -1,3 +1,5 @@
+<img width="1524" height="704" alt="Gemini_Generated_Image_6lnfd06lnfd06lnf" src="https://github.com/user-attachments/assets/a473c4b8-cc58-4255-9bc0-d409d7e90b80" />
+
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
