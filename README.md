@@ -1,7 +1,3 @@
-# GFLINKS.github.io
-
-[GFLINKS1.HTML](https://github.com/user-attachments/files/32096685/GFLINKS1.HTML)
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
