@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF - Acesso Restrito</title>
+    <title>Painel Links GF - Automação Google Drive</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -86,8 +86,12 @@
             </div>
             
             <div class="flex items-center gap-3 flex-wrap">
+                <button onclick="syncDriveData()" id="btnSyncDrive" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-rotate text-base" id="syncIcon"></i> Sincronizar Google Drive
+                </button>
+
                 <label for="excelFile" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg cursor-pointer transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel text-base"></i> Carregar Excel
+                    <i class="fa-solid fa-file-excel text-base"></i> Carregar Manual
                 </label>
                 <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="hidden">
 
@@ -100,7 +104,7 @@
                 </button>
 
                 <button onclick="clearDatabase()" id="btnClearDb" class="bg-rose-700 hover:bg-rose-600 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-trash-can text-base"></i> Limpar Banco de Dados
+                    <i class="fa-solid fa-trash-can text-base"></i> Limpar Banco
                 </button>
 
                 <button onclick="logout()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-3 py-2.5 rounded-lg transition shadow flex items-center gap-1.5" title="Sair do Painel">
@@ -111,6 +115,17 @@
     </header>
 
     <main class="max-w-[1800px] mx-auto px-6 py-6 space-y-6" id="pdfContent">
+
+        <!-- Banner de Carregamento Automático do Drive -->
+        <div id="driveLoadingBanner" class="hidden bg-sky-50 border-l-4 border-sky-500 text-sky-800 p-4 rounded-xl shadow-sm flex items-center justify-between no-print">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-circle-notch fa-spin text-sky-600 text-xl"></i>
+                <div>
+                    <p class="text-xs font-bold">Sincronizando com o Google Drive...</p>
+                    <p class="text-[11px] text-sky-600">Buscando atualizações da planilha na nuvem.</p>
+                </div>
+            </div>
+        </div>
 
         <!-- MÓDULO 1: CONSULTA BD_AUXILIAR -->
         <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
@@ -155,8 +170,8 @@
         <div id="dropZone" class="bg-white border-2 border-dashed border-slate-300 rounded-xl p-12 text-center shadow-sm hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('excelFile').click()">
             <img src="logo.png" alt="Logo GF Links" class="h-16 w-auto mx-auto mb-3 object-contain opacity-80" onerror="this.style.display='none'">
             <i class="fa-solid fa-cloud-arrow-up text-5xl text-indigo-500 mb-3"></i>
-            <h3 class="text-lg font-bold text-slate-700">Clique ou arraste a planilha Excel aqui</h3>
-            <p class="text-xs text-slate-500 mt-1">Ao carregar, os dados do Painel Links GF serão salvos automaticamente no banco local.</p>
+            <h3 class="text-lg font-bold text-slate-700">Clique para carregar uma planilha local ou use a sincronização do Drive</h3>
+            <p class="text-xs text-slate-500 mt-1">Os dados do Painel Links GF são atualizados e salvos automaticamente.</p>
         </div>
 
         <!-- Dashboard -->
@@ -212,7 +227,7 @@
                 <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-50/50">
                     <div>
                         <h3 class="text-sm font-bold text-slate-800">Tabela Geral de Registros - Painel Links GF</h3>
-                        <p class="text-xs text-slate-500">Dados persistidos no Banco de Dados Local</p>
+                        <p class="text-xs text-slate-500">Dados sincronizados do Google Drive & BD Local</p>
                     </div>
 
                     <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end no-print">
@@ -251,6 +266,7 @@
     <script>
         const AUTH_KEY = 'GF_PANEL_AUTH';
         const TARGET_PASSWORD = 'gF@2026*Link';
+        const DRIVE_FILE_ID = '1P88V6dzw8kXwkcIPCufkSMPdtp4DHPg02fdvcF8TYXE';
 
         const DB_KEY_DATA = 'APP_ATIVOS_DATA';
         const DB_KEY_HEADERS = 'APP_ATIVOS_HEADERS';
@@ -263,11 +279,10 @@
         let statusColName = "";
         let cobrancaColName = "";
 
-        // VERIFICAÇÃO DE AUTENTICAÇÃO AO CARREGAR
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem(AUTH_KEY) === 'true') {
                 document.getElementById('loginOverlay').classList.add('hidden');
-                loadFromDatabase();
+                initApp();
             }
         });
 
@@ -280,16 +295,46 @@
                 sessionStorage.setItem(AUTH_KEY, 'true');
                 document.getElementById('loginOverlay').classList.add('hidden');
                 error.classList.add('hidden');
-                loadFromDatabase();
+                initApp();
             } else {
                 error.classList.remove('hidden');
             }
+        }
+
+        function initApp() {
+            loadFromDatabase();
+            syncDriveData();
         }
 
         function logout() {
             sessionStorage.removeItem(AUTH_KEY);
             document.getElementById('accessPassword').value = '';
             document.getElementById('loginOverlay').classList.remove('hidden');
+        }
+
+        // AUTOMATIZAÇÃO DE CARREGAMENTO VIA GOOGLE DRIVE API/EXPORT
+        async function syncDriveData() {
+            const banner = document.getElementById('driveLoadingBanner');
+            const syncIcon = document.getElementById('syncIcon');
+
+            if (banner) banner.classList.remove('hidden');
+            if (syncIcon) syncIcon.classList.add('fa-spin');
+
+            const downloadUrl = `https://docs.google.com/spreadsheets/d/${DRIVE_FILE_ID}/export?format=xlsx`;
+
+            try {
+                const response = await fetch(downloadUrl);
+                if (!response.ok) throw new Error('Falha ao baixar do Google Drive');
+
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true, dateNF: 'dd/mm/yyyy' });
+                parseWorkbook(workbook);
+            } catch (err) {
+                console.warn("Automação Drive necessita de permissão aberta ou execução via servidor web:", err);
+            } finally {
+                if (banner) banner.classList.add('hidden');
+                if (syncIcon) syncIcon.classList.remove('fa-spin');
+            }
         }
 
         document.getElementById('excelFile').addEventListener('change', (e) => {
