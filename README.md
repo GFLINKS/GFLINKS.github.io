@@ -1,1 +1,760 @@
 # GFLINKS.github.io
+
+[GFLINKS1.HTML](https://github.com/user-attachments/files/32096685/GFLINKS1.HTML)
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Gestão - Ativos Vivo Claro & BD Auxiliar</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS (XLSX) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; font-size: 10pt; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white shadow-lg no-print">
+        <div class="max-w-[1800px] mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-calculator text-emerald-400 text-2xl"></i>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">Painel de Ativos Vivo/Claro</h1>
+                    <p class="text-xs text-slate-400">Clique em qualquer banner de métrica para filtrar a tabela automaticamente</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <label for="excelFile" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg cursor-pointer transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel text-base"></i> Carregar Planilha Excel
+                </label>
+                <input type="file" id="excelFile" accept=".xlsx, .xls" class="hidden">
+
+                <button onclick="exportToExcel()" id="btnExport" disabled class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-download text-base"></i> Exportar Dados
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1800px] mx-auto px-6 py-6 space-y-6">
+
+        <!-- MÓDULO 1: CONSULTA EXCLUSIVA BD_AUXILIAR -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-address-book text-indigo-600 text-lg"></i>
+                        Consulta de Cadastros e CIs (BD_Auxiliar)
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5" id="bdStatusText">
+                        Pesquise por Código CIS, Sigla, Unidade ou Endereço cadastrado na aba BD_Auxiliar.
+                    </p>
+                </div>
+                <div class="relative w-full md:w-96">
+                    <input type="text" id="bdSearchInput" onkeyup="searchBDByCIS()" placeholder="Digite CIS, Sigla ou Endereço..." class="w-full text-xs pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium bg-slate-50 focus:bg-white">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+                </div>
+            </div>
+
+            <div id="bdSearchResult" class="mt-4 hidden border-t border-slate-100 pt-3">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-white font-semibold">
+                                <th class="p-2.5">CI / CÓDIGO</th>
+                                <th class="p-2.5">SIGLA</th>
+                                <th class="p-2.5">RESTAURANTE / UNIDADE</th>
+                                <th class="p-2.5">ENDEREÇO COMPLETO</th>
+                                <th class="p-2.5">UF</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bdSearchResultBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dropzone de Arquivo -->
+        <div id="dropZone" class="bg-white border-2 border-dashed border-slate-300 rounded-xl p-12 text-center shadow-sm hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('excelFile').click()">
+            <i class="fa-solid fa-cloud-arrow-up text-5xl text-indigo-500 mb-3"></i>
+            <h3 class="text-lg font-bold text-slate-700">Clique ou arraste o arquivo Excel aqui</h3>
+            <p class="text-xs text-slate-500 mt-1">Carrega a planilha, analisa datas da Coluna M, Status (Col F) e apura métricas de Cobrança (Col E).</p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardSection" class="hidden space-y-6">
+
+            <!-- BLOCO 1: MÉTRICAS DE STATUS (COLUNA F) -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-sky-600 text-base"></i>
+                        Métricas de STATUS (Coluna F)
+                    </h3>
+                    <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-hand-pointer mr-1"></i>Clique no banner para filtrar a tabela</span>
+                </div>
+                <div id="statusCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+            </div>
+
+            <!-- BLOCO 2: MÉTRICAS DE COBRANÇA (COLUNA E) -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice-dollar text-emerald-600 text-base"></i>
+                        Métricas de COBRANÇA (Coluna E)
+                    </h3>
+                    <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-hand-pointer mr-1"></i>Clique no banner para filtrar a tabela</span>
+                </div>
+                <div id="cobrancaCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-indigo-500"></i> Distribuição dos Status (Coluna F)
+                    </h4>
+                    <div class="h-64 relative">
+                        <canvas id="chartStatus"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-column text-emerald-500"></i> Distribuição das Cobranças (Coluna E)
+                    </h4>
+                    <div class="h-64 relative">
+                        <canvas id="chartCobranca"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÓDULO 3: TABELA E FILTROS -->
+            <div id="tableSectionContainer" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-50/50">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800">Tabela Geral de Registros</h3>
+                        <p class="text-xs text-slate-500">Filtre por Status (Col F), Cobrança (Col E) ou visualize apenas CIS Numérica + Cobrança N/I.</p>
+                    </div>
+
+                    <!-- Filtros em linha -->
+                    <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end">
+                        <div class="relative w-full sm:w-56">
+                            <input type="text" id="tableSearchInput" onkeyup="filterTable()" placeholder="Buscar texto, data, CIS..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <i class="fa-solid fa-search absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                        </div>
+
+                        <!-- Filtro CIS Numérica N/I -->
+                        <select id="filterCisNumNI" onchange="filterTable()" class="text-xs bg-amber-50 border border-amber-300 text-amber-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold">
+                            <option value="">Filtro CIS Numérica: Todos</option>
+                            <option value="ONLY_NUMERIC_NI">Apenas CIS Numérica + Cobrança N/I</option>
+                        </select>
+
+                        <!-- Filtro de Status (Col F) -->
+                        <select id="filterStatusColF" onchange="filterTable()" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-slate-700">
+                            <option value="">STATUS (Col. F): Todos</option>
+                        </select>
+
+                        <!-- Filtro de Cobrança (Col E) -->
+                        <select id="filterCobrancaColE" onchange="filterTable()" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-slate-700">
+                            <option value="">COBRANÇA (Col. E): Todas</option>
+                        </select>
+
+                        <button onclick="resetFilters()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-filter-circle-xmark"></i> Limpar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabela Dinâmica -->
+                <div class="overflow-x-auto max-h-[600px]">
+                    <table class="w-full text-left border-collapse text-[11px]">
+                        <thead>
+                            <tr id="tableHeader" class="bg-slate-800 text-white font-semibold sticky top-0 z-10"></tr>
+                        </thead>
+                        <tbody id="ativosTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                    </table>
+                </div>
+
+                <div class="p-3 bg-slate-50 text-xs text-slate-500 flex justify-between items-center border-t border-slate-100">
+                    <span>Mostrando <b id="displayedCount">0</b> de <b id="totalCount">0</b> registros</span>
+                    <span class="text-[11px] text-slate-400">Suporte a datas DD/MM/AAAA e validação numérica</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let rawAtivosData = [];
+        let excelHeaders = [];
+        let bdAuxiliarMap = new Map();
+        let chartStatusObj, chartCobrancaObj;
+        let statusColName = "";
+        let cobrancaColName = "";
+
+        const excelInput = document.getElementById('excelFile');
+        excelInput.addEventListener('change', (e) => {
+            if (e.target.files.length) processExcelFile(e.target.files[0]);
+        });
+
+        const dropZone = document.getElementById('dropZone');
+        ['dragenter', 'dragover'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-500', 'bg-indigo-50'); });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('border-indigo-500', 'bg-indigo-50'); });
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) processExcelFile(e.dataTransfer.files[0]);
+        });
+
+        function cleanStr(val) {
+            if (val === undefined || val === null) return "";
+            return String(val).trim();
+        }
+
+        function isNumericCIS(val) {
+            if (val === undefined || val === null) return false;
+            let str = String(val).trim();
+            if (!str || str === "-" || str === "N/I" || str === "0") return false;
+            if (str.endsWith('.0')) str = str.slice(0, -2);
+            return /^\d+$/.test(str);
+        }
+
+        function formatValue(val) {
+            if (val === undefined || val === null) return "-";
+            
+            if (val instanceof Date) {
+                if (isNaN(val.getTime())) return "-";
+                const day = String(val.getUTCDate()).padStart(2, '0');
+                const month = String(val.getUTCMonth() + 1).padStart(2, '0');
+                const year = val.getUTCFullYear();
+                return `${day}/${month}/${year}`;
+            }
+
+            if (typeof val === 'number' && val > 20000 && val < 60000) {
+                const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+                const dateObj = new Date(excelEpoch.getTime() + val * 86400000);
+                const day = String(dateObj.getUTCDate()).padStart(2, '0');
+                const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+                const year = dateObj.getUTCFullYear();
+                return `${day}/${month}/${year}`;
+            }
+
+            const str = String(val).trim();
+            if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+                const parts = str.split('T')[0].split('-');
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+
+            return str || "-";
+        }
+
+        function processExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true, dateNF: 'dd/mm/yyyy' });
+                parseWorkbook(workbook);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseWorkbook(workbook) {
+            let sheetAtivos = null;
+            let sheetBD = null;
+
+            workbook.SheetNames.forEach(name => {
+                const norm = name.trim().toUpperCase();
+                if (norm.includes("ATIVO") || norm.includes("VIVO") || norm.includes("CLARO")) {
+                    sheetAtivos = workbook.Sheets[name];
+                } else if (norm.includes("BD") || norm.includes("AUXILIAR") || norm.includes("CADASTRO")) {
+                    sheetBD = workbook.Sheets[name];
+                }
+            });
+
+            if (!sheetAtivos) sheetAtivos = workbook.Sheets[workbook.SheetNames[0]];
+            if (!sheetBD && workbook.SheetNames.length > 1) sheetBD = workbook.Sheets[workbook.SheetNames[1]];
+
+            // 1. Processa BD_Auxiliar
+            bdAuxiliarMap.clear();
+            if (sheetBD) {
+                const rowsBD = XLSX.utils.sheet_to_json(sheetBD, { defval: "", cellDates: true });
+                rowsBD.forEach(r => {
+                    const ci = cleanStr(r["CIS"] || r["CI"] || r["CÓDIGO"] || r["CODIGO"] || r["CÓDIGO CIS"]);
+                    const sigla = cleanStr(r["SIGLA"] || r["Sigla"]);
+                    const nome = cleanStr(r["NOME DO RESTAURANTE"] || r["RESTAURANTE"] || r["UNIDADE"] || r["NOME"]);
+                    const endereco = cleanStr(r["ENDEREÇO"] || r["ENDERECO"] || r["LOGRADOURO"]);
+                    const uf = cleanStr(r["ESTADO"] || r["UF"]);
+
+                    const entry = { ci, sigla, nome, endereco, uf };
+                    if (ci) bdAuxiliarMap.set(ci.toUpperCase(), entry);
+                    if (sigla) bdAuxiliarMap.set(sigla.toUpperCase(), entry);
+                });
+
+                document.getElementById('bdStatusText').innerText = `Base BD_Auxiliar carregada com ${bdAuxiliarMap.size} cadastros.`;
+            }
+
+            // 2. Processa Ativos Vivo Claro
+            rawAtivosData = [];
+            excelHeaders = [];
+
+            if (sheetAtivos) {
+                const jsonWithHeaders = XLSX.utils.sheet_to_json(sheetAtivos, { defval: "", cellDates: true });
+                
+                if (jsonWithHeaders.length > 0) {
+                    excelHeaders = Object.keys(jsonWithHeaders[0]);
+
+                    if (excelHeaders.length >= 5) cobrancaColName = excelHeaders[4];
+                    else cobrancaColName = excelHeaders.find(h => h.toUpperCase().includes("COBRANÇA") || h.toUpperCase().includes("COBRANCA")) || excelHeaders[0];
+
+                    if (excelHeaders.length >= 6) statusColName = excelHeaders[5];
+                    else statusColName = excelHeaders.find(h => h.toUpperCase().includes("STATUS") || h.toUpperCase().includes("SITUAÇÃO")) || excelHeaders[0];
+
+                    if (!excelHeaders.some(h => h.toUpperCase().includes("ENDEREÇO") || h.toUpperCase().includes("ENDERECO"))) {
+                        excelHeaders.push("ENDEREÇO (BD_AUXILIAR)");
+                    }
+
+                    jsonWithHeaders.forEach(row => {
+                        let ci = "";
+                        let sigla = "";
+                        let operadora = "";
+                        let linha = "";
+                        let iccid = "";
+
+                        const fullRowFormatted = {};
+
+                        Object.keys(row).forEach(k => {
+                            const formattedVal = formatValue(row[k]);
+                            fullRowFormatted[k] = formattedVal;
+
+                            const keyUpper = k.toUpperCase();
+                            if (keyUpper.includes("CIS") || keyUpper === "CI" || keyUpper.includes("CÓDIGO") || keyUpper.includes("CODIGO")) ci = formattedVal;
+                            if (keyUpper.includes("SIGLA")) sigla = formattedVal;
+                            if (keyUpper.includes("OPERADORA") || keyUpper.includes("PROVEDORA")) operadora = formattedVal;
+                            if (keyUpper.includes("LINHA") || keyUpper.includes("NUMERO") || keyUpper.includes("TELEFONE")) linha = formattedVal;
+                            if (keyUpper.includes("ICCID") || keyUpper.includes("CHIP")) iccid = formattedVal;
+                        });
+
+                        // Normalização da Coluna F (Status)
+                        let rawStatusColF = cleanStr(fullRowFormatted[statusColName]);
+                        let statusNormalized = rawStatusColF.toUpperCase();
+                        if (!rawStatusColF || statusNormalized === "N/I" || statusNormalized === "NI" || statusNormalized === "NÃO INFORMADO" || statusNormalized === "NAO INFORMADO") {
+                            rawStatusColF = "N/I";
+                        } else if (statusNormalized.includes("ANALISE") || statusNormalized.includes("ANÁLISE")) {
+                            rawStatusColF = "EM ANÁLISE";
+                        }
+
+                        // Normalização da Coluna E (Cobrança)
+                        let rawCobrancaColE = cleanStr(fullRowFormatted[cobrancaColName]);
+                        let cobrancaNormalized = rawCobrancaColE.toUpperCase();
+                        if (!rawCobrancaColE || cobrancaNormalized === "N/I" || cobrancaNormalized === "NI" || cobrancaNormalized === "NÃO INFORMADO" || cobrancaNormalized === "NAO INFORMADO") {
+                            rawCobrancaColE = "N/I";
+                        } else if (cobrancaNormalized.includes("ANALISE") || cobrancaNormalized.includes("ANÁLISE")) {
+                            rawCobrancaColE = "EM ANÁLISE";
+                        }
+
+                        const bdInfo = bdAuxiliarMap.get(ci.toUpperCase()) || bdAuxiliarMap.get(sigla.toUpperCase()) || {};
+
+                        fullRowFormatted[statusColName] = rawStatusColF;
+                        fullRowFormatted[cobrancaColName] = rawCobrancaColE;
+                        fullRowFormatted["ENDEREÇO (BD_AUXILIAR)"] = bdInfo.endereco || fullRowFormatted["ENDEREÇO"] || fullRowFormatted["ENDERECO"] || "-";
+
+                        rawAtivosData.push({
+                            ci: ci || bdInfo.ci || "-",
+                            sigla: sigla || bdInfo.sigla || "-",
+                            linha: linha || "-",
+                            iccid: iccid || "-",
+                            endereco: fullRowFormatted["ENDEREÇO (BD_AUXILIAR)"],
+                            statusColF: rawStatusColF,
+                            cobrancaColE: rawCobrancaColE,
+                            isCisNumeric: isNumericCIS(ci || bdInfo.ci),
+                            operadora: operadora || "Vivo/Claro",
+                            originalRow: fullRowFormatted
+                        });
+                    });
+                }
+            }
+
+            document.getElementById('dropZone').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('btnExport').disabled = false;
+
+            renderTableHeaders();
+            calculateMetrics();
+            filterTable();
+        }
+
+        function renderTableHeaders() {
+            const headerRow = document.getElementById('tableHeader');
+            headerRow.innerHTML = '';
+
+            excelHeaders.forEach(h => {
+                const th = document.createElement('th');
+                th.className = 'p-3 whitespace-nowrap border-b border-slate-700';
+                th.innerText = h.toUpperCase();
+                headerRow.appendChild(th);
+            });
+        }
+
+        function searchBDByCIS() {
+            const query = document.getElementById('bdSearchInput').value.trim().toUpperCase();
+            const resultBox = document.getElementById('bdSearchResult');
+            const tbody = document.getElementById('bdSearchResultBody');
+
+            if (!query) {
+                resultBox.classList.add('hidden');
+                return;
+            }
+
+            const matches = [];
+            for (let [key, val] of bdAuxiliarMap.entries()) {
+                if (key.includes(query) || 
+                    val.nome.toUpperCase().includes(query) || 
+                    val.endereco.toUpperCase().includes(query)) {
+                    if (!matches.some(m => m.ci === val.ci && m.sigla === val.sigla)) {
+                        matches.push(val);
+                    }
+                }
+            }
+
+            tbody.innerHTML = '';
+            if (matches.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400 font-medium">Nenhum registro encontrado no BD_Auxiliar para "${query}".</td></tr>`;
+            } else {
+                matches.slice(0, 10).forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition';
+                    tr.innerHTML = `
+                        <td class="p-2.5 font-bold text-slate-900">${m.ci || '-'}</td>
+                        <td class="p-2.5 font-bold text-indigo-600">${m.sigla || '-'}</td>
+                        <td class="p-2.5 font-medium">${m.nome || '-'}</td>
+                        <td class="p-2.5 text-slate-600">${m.endereco || '-'}</td>
+                        <td class="p-2.5 font-semibold text-slate-700">${m.uf || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            resultBox.classList.remove('hidden');
+        }
+
+        // FUNÇÃO DE SELEÇÃO EXATA NO SELECT
+        function setSelectOption(selectEl, targetValue) {
+            if (!selectEl) return;
+            const target = String(targetValue).trim().toUpperCase();
+            let matched = false;
+            for (let i = 0; i < selectEl.options.length; i++) {
+                if (selectEl.options[i].value.trim().toUpperCase() === target) {
+                    selectEl.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                selectEl.value = targetValue;
+            }
+        }
+
+        // APLICAÇÃO DO FILTRO VIA CLIQUE NO CARD
+        function triggerCardFilter(type, value) {
+            // 1. Limpa todos os filtros
+            document.getElementById('tableSearchInput').value = '';
+            const selStatus = document.getElementById('filterStatusColF');
+            const selCobranca = document.getElementById('filterCobrancaColE');
+            const selCisNum = document.getElementById('filterCisNumNI');
+
+            if (selStatus) selStatus.value = '';
+            if (selCobranca) selCobranca.value = '';
+            if (selCisNum) selCisNum.value = '';
+
+            // 2. Define o filtro referente ao card clicado
+            if (type === 'STATUS') {
+                setSelectOption(selStatus, value);
+            } else if (type === 'COBRANÇA') {
+                setSelectOption(selCobranca, value);
+            } else if (type === 'CIS_NUM_NI') {
+                if (selCisNum) selCisNum.value = 'ONLY_NUMERIC_NI';
+            }
+
+            // 3. Atualiza a tabela
+            filterTable();
+
+            // 4. Rolagem suave até a tabela
+            const tableSection = document.getElementById('tableSectionContainer');
+            if (tableSection) {
+                tableSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function calculateMetrics() {
+            const total = rawAtivosData.length;
+            const statusCounts = {};
+            const cobrancaCounts = {};
+            let cisNumCobrancaNI = 0;
+
+            rawAtivosData.forEach(item => {
+                const st = item.statusColF;
+                statusCounts[st] = (statusCounts[st] || 0) + 1;
+
+                const cob = item.cobrancaColE;
+                cobrancaCounts[cob] = (cobrancaCounts[cob] || 0) + 1;
+
+                if (item.isCisNumeric && cob === "N/I") {
+                    cisNumCobrancaNI++;
+                }
+            });
+
+            const colorPalette = [
+                { bg: "border-l-sky-500", text: "text-sky-600", badge: "bg-sky-100", icon: "fa-magnifying-glass-chart" },
+                { bg: "border-l-emerald-500", text: "text-emerald-600", badge: "bg-emerald-100", icon: "fa-circle-check" },
+                { bg: "border-l-amber-500", text: "text-amber-600", badge: "bg-amber-100", icon: "fa-triangle-exclamation" },
+                { bg: "border-l-indigo-500", text: "text-indigo-600", badge: "bg-indigo-100", icon: "fa-sliders" },
+                { bg: "border-l-purple-500", text: "text-purple-600", badge: "bg-purple-100", icon: "fa-tag" },
+                { bg: "border-l-rose-500", text: "text-rose-600", badge: "bg-rose-100", icon: "fa-circle-xmark" }
+            ];
+
+            // 1. CARDS DE STATUS (COLUNA F)
+            const statusContainer = document.getElementById('statusCardsContainer');
+            statusContainer.innerHTML = '';
+            statusContainer.appendChild(createMetricCard("TOTAL DE ATIVOS", total, "100%", "fa-list-check", () => triggerCardFilter('RESET', '')));
+
+            const filterStatusSelect = document.getElementById('filterStatusColF');
+            filterStatusSelect.innerHTML = '<option value="">STATUS (Col. F): Todos</option>';
+
+            let colorIdxStatus = 0;
+            Object.keys(statusCounts).sort().forEach(stKey => {
+                const count = statusCounts[stKey];
+                const pct = total ? ((count / total) * 100).toFixed(1) + "%" : "0.0%";
+                let palette = colorPalette[colorIdxStatus % colorPalette.length];
+
+                if (stKey.toUpperCase().includes("EM ANÁLISE")) palette = colorPalette[0];
+                else if (stKey.toUpperCase().includes("OK") || stKey.toUpperCase().includes("ATIV")) palette = colorPalette[1];
+                else if (stKey === "N/I") palette = colorPalette[2];
+
+                statusContainer.appendChild(createStatusCard(stKey, count, pct, palette, () => triggerCardFilter('STATUS', stKey)));
+                colorIdxStatus++;
+
+                const opt = document.createElement('option');
+                opt.value = stKey;
+                opt.textContent = `${stKey} (${count})`;
+                filterStatusSelect.appendChild(opt);
+            });
+
+            // 2. CARDS DE COBRANÇA (COLUNA E)
+            const cobrancaContainer = document.getElementById('cobrancaCardsContainer');
+            cobrancaContainer.innerHTML = '';
+            cobrancaContainer.appendChild(createMetricCard("TOTAL DE REGISTROS", total, "100%", "fa-receipt", () => triggerCardFilter('RESET', '')));
+
+            // Card Especial de CIS Numérica N/I
+            const pctCisNI = total ? ((cisNumCobrancaNI / total) * 100).toFixed(1) + "%" : "0.0%";
+            cobrancaContainer.appendChild(createStatusCard("CIS NUMÉRICA N/I", cisNumCobrancaNI, pctCisNI, {
+                bg: "border-l-amber-500",
+                text: "text-amber-700",
+                badge: "bg-amber-100",
+                icon: "fa-triangle-exclamation"
+            }, () => triggerCardFilter('CIS_NUM_NI', 'ONLY_NUMERIC_NI')));
+
+            const filterCobrancaSelect = document.getElementById('filterCobrancaColE');
+            filterCobrancaSelect.innerHTML = '<option value="">COBRANÇA (Col. E): Todas</option>';
+
+            let colorIdxCob = 0;
+            Object.keys(cobrancaCounts).sort().forEach(cobKey => {
+                const count = cobrancaCounts[cobKey];
+                const pct = total ? ((count / total) * 100).toFixed(1) + "%" : "0.0%";
+                let palette = colorPalette[colorIdxCob % colorPalette.length];
+
+                if (cobKey.toUpperCase().includes("ATIVA") || cobKey.toUpperCase().includes("OK")) palette = colorPalette[1];
+                else if (cobKey.toUpperCase().includes("EM ANÁLISE")) palette = colorPalette[0];
+                else if (cobKey === "N/I") palette = colorPalette[2];
+
+                cobrancaContainer.appendChild(createStatusCard(cobKey, count, pct, palette, () => triggerCardFilter('COBRANÇA', cobKey)));
+                colorIdxCob++;
+
+                const opt = document.createElement('option');
+                opt.value = cobKey;
+                opt.textContent = `${cobKey} (${count})`;
+                filterCobrancaSelect.appendChild(opt);
+            });
+
+            renderCharts(statusCounts, cobrancaCounts);
+        }
+
+        function createMetricCard(title, count, pct, iconClass, onClickHandler) {
+            const div = document.createElement('div');
+            div.className = `bg-slate-50 p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-slate-400 transition-all active:scale-95 group`;
+            div.addEventListener('click', (e) => {
+                e.preventDefault();
+                onClickHandler();
+            });
+            div.innerHTML = `
+                <div class="flex items-center justify-between pointer-events-none">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide group-hover:text-slate-600">${title}</p>
+                        <h3 class="text-2xl font-bold text-slate-800 mt-1">${count}</h3>
+                    </div>
+                    <div class="bg-slate-200 p-3 rounded-lg text-slate-700 group-hover:bg-slate-300 transition">
+                        <i class="fa-solid ${iconClass} text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-xs font-bold text-slate-500 mt-2 pointer-events-none">${pct} do total <span class="text-[10px] font-semibold text-indigo-600 ml-1">(Exibir todos)</span></p>
+            `;
+            return div;
+        }
+
+        function createStatusCard(title, count, pct, palette, onClickHandler) {
+            const div = document.createElement('div');
+            div.className = `bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 ${palette.bg} cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group`;
+            div.addEventListener('click', (e) => {
+                e.preventDefault();
+                onClickHandler();
+            });
+            div.innerHTML = `
+                <div class="flex items-center justify-between pointer-events-none">
+                    <div>
+                        <p class="text-[11px] font-bold ${palette.text} uppercase tracking-wide truncate max-w-[130px]" title="${title}">${title}</p>
+                        <h3 class="text-2xl font-bold ${palette.text} mt-1">${count}</h3>
+                    </div>
+                    <div class="${palette.badge} p-3 rounded-lg ${palette.text} group-hover:scale-110 transition">
+                        <i class="fa-solid ${palette.icon || 'fa-tag'} text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-xs font-bold ${palette.text} mt-2 pointer-events-none">${pct} do total <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
+            `;
+            return div;
+        }
+
+        function renderCharts(statusCountsObj, cobrancaCountsObj) {
+            if (chartStatusObj) chartStatusObj.destroy();
+            const statusLabels = Object.keys(statusCountsObj);
+            const statusData = Object.values(statusCountsObj);
+            const colors = ['#0284c7', '#10b981', '#f59e0b', '#6366f1', '#a855f7', '#f43f5e', '#64748b'];
+
+            chartStatusObj = new Chart(document.getElementById('chartStatus'), {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels.length ? statusLabels : ['Sem dados'],
+                    datasets: [{
+                        data: statusData.length ? statusData : [0],
+                        backgroundColor: colors.slice(0, Math.max(statusLabels.length, 1))
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            if (chartCobrancaObj) chartCobrancaObj.destroy();
+            const cobrancaLabels = Object.keys(cobrancaCountsObj);
+            const cobrancaData = Object.values(cobrancaCountsObj);
+
+            chartCobrancaObj = new Chart(document.getElementById('chartCobranca'), {
+                type: 'bar',
+                data: {
+                    labels: cobrancaLabels.length ? cobrancaLabels : ['Sem dados'],
+                    datasets: [{
+                        label: 'Qtd Registros',
+                        data: cobrancaData.length ? cobrancaData : [0],
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function filterTable() {
+            const q = document.getElementById('tableSearchInput').value.toLowerCase();
+            const selectedStatus = document.getElementById('filterStatusColF').value;
+            const selectedCobranca = document.getElementById('filterCobrancaColE').value;
+            const onlyNumericNI = document.getElementById('filterCisNumNI').value;
+
+            const filtered = rawAtivosData.filter(item => {
+                const allValues = Object.values(item.originalRow).map(v => String(v).toLowerCase()).join(' ');
+                
+                const matchQuery = !q || 
+                    item.ci.toLowerCase().includes(q) ||
+                    item.sigla.toLowerCase().includes(q) ||
+                    item.endereco.toLowerCase().includes(q) ||
+                    item.linha.toLowerCase().includes(q) ||
+                    item.iccid.toLowerCase().includes(q) ||
+                    allValues.includes(q);
+
+                const matchStatus = !selectedStatus || item.statusColF.toUpperCase() === selectedStatus.toUpperCase();
+                const matchCobranca = !selectedCobranca || item.cobrancaColE.toUpperCase() === selectedCobranca.toUpperCase();
+                const matchCisNumNI = !onlyNumericNI || (item.isCisNumeric && item.cobrancaColE === "N/I");
+
+                return matchQuery && matchStatus && matchCobranca && matchCisNumNI;
+            });
+
+            renderTableBody(filtered);
+        }
+
+        function renderTableBody(data) {
+            const tbody = document.getElementById('ativosTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+
+                excelHeaders.forEach(header => {
+                    const td = document.createElement('td');
+                    td.className = 'p-3 whitespace-nowrap font-medium';
+
+                    const cellVal = item.originalRow[header] || "-";
+
+                    if (header === statusColName || header === cobrancaColName) {
+                        if (cellVal === 'EM ANÁLISE') {
+                            td.innerHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200"><i class="fa-solid fa-spinner mr-1"></i>EM ANÁLISE</span>`;
+                        } else if (cellVal === 'OK' || cellVal.includes('ATIV')) {
+                            td.innerHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200"><i class="fa-solid fa-check mr-1"></i>${cellVal}</span>`;
+                        } else if (cellVal === 'N/I') {
+                            td.innerHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200"><i class="fa-solid fa-exclamation mr-1"></i>N/I</span>`;
+                        } else {
+                            td.innerHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${cellVal}</span>`;
+                        }
+                    } else {
+                        td.innerText = cellVal;
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('displayedCount').innerText = data.length;
+            document.getElementById('totalCount').innerText = rawAtivosData.length;
+        }
+
+        function resetFilters() {
+            document.getElementById('tableSearchInput').value = '';
+            document.getElementById('filterStatusColF').value = '';
+            document.getElementById('filterCobrancaColE').value = '';
+            document.getElementById('filterCisNumNI').value = '';
+            filterTable();
+        }
+
+        function exportToExcel() {
+            if (!rawAtivosData.length) return;
+            const exportRows = rawAtivosData.map(item => item.originalRow);
+            const ws = XLSX.utils.json_to_sheet(exportRows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Ativos Processados");
+            XLSX.writeFile(wb, "Relatorio_Ativos.xlsx");
+        }
+    </script>
+</body>
+</html>
