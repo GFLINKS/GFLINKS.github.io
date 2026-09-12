@@ -320,7 +320,7 @@
             if (driveTimer) clearInterval(driveTimer);
             driveTimer = setInterval(() => {
                 syncDriveData();
-            }, 60000);
+            }, 300000);
         }
 
         function logout() {
