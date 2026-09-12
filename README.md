@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF (1 min)</title>
+    <title>Painel Links GF - (1 min)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -320,7 +320,6 @@
             loadFromDatabase();
             syncDriveData();
 
-            // TEMPORIZADOR DE 1 MINUTO (60.000 ms)
             if (driveTimer) clearInterval(driveTimer);
             driveTimer = setInterval(() => {
                 syncDriveData();
@@ -587,12 +586,13 @@
             filterTable();
         }
 
+        // FUNÇÃO COM A OPÇÃO 1 APLICADA (FUNDO ESCURO E TEXTO BRANCO GARANTIDOS NA TABELA)
         function renderTableHeaders() {
             const headerRow = document.getElementById('tableHeader');
             headerRow.innerHTML = '';
             excelHeaders.forEach(h => {
                 const th = document.createElement('th');
-                th.className = 'p-3 whitespace-nowrap border-b border-slate-700';
+                th.className = 'p-3 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700';
                 th.innerText = h.toUpperCase();
                 headerRow.appendChild(th);
             });
