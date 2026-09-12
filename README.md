@@ -86,9 +86,13 @@
             </div>
             
             <div class="flex items-center gap-3 flex-wrap">
-                <button onclick="syncDriveData()" id="btnSyncDrive" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-rotate text-base" id="syncIcon"></i> Sincronizar Google Drive
-                </button>
+                <!-- ÁREA DE SINCRONIZAÇÃO COM TIMESTAMP DISCRETO -->
+                <div class="flex flex-col items-center md:items-end">
+                    <button onclick="syncDriveData()" id="btnSyncDrive" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                        <i class="fa-solid fa-rotate text-base" id="syncIcon"></i> Sincronizar Google Drive
+                    </button>
+                    <span id="lastUpdateBadge" class="text-[10px] text-slate-400 font-medium mt-1">Última att: Nunca</span>
+                </div>
 
                 <label for="excelFile" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg cursor-pointer transition shadow flex items-center gap-2">
                     <i class="fa-solid fa-file-excel text-base"></i> Carregar Manual
@@ -302,6 +306,16 @@
             }
         }
 
+        function updateSyncTimestamp() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('pt-BR');
+            const timeStr = now.toLocaleTimeString('pt-BR');
+            const badge = document.getElementById('lastUpdateBadge');
+            if (badge) {
+                badge.innerText = `Última att: ${dateStr} às ${timeStr}`;
+            }
+        }
+
         function initApp() {
             loadFromDatabase();
             syncDriveData();
@@ -336,6 +350,7 @@
                 const arrayBuffer = await response.arrayBuffer();
                 const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true, dateNF: 'dd/mm/yyyy' });
                 parseWorkbook(workbook);
+                updateSyncTimestamp();
             } catch (err) {
                 console.warn("Automação do Drive concluída ou mantendo base local:", err);
             } finally {
@@ -447,6 +462,7 @@
                 document.getElementById('btnPdf').disabled = true;
                 document.getElementById('excelFile').value = '';
                 document.getElementById('bdStatusText').innerText = "Pesquise por Código CIS, Sigla, Unidade ou Endereço cadastrado na aba BD_Auxiliar.";
+                document.getElementById('lastUpdateBadge').innerText = "Última att: Nunca";
 
                 updateDbBadge(false);
                 alert("Banco de dados local limpo com sucesso!");
@@ -470,6 +486,7 @@
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array', cellDates: true, dateNF: 'dd/mm/yyyy' });
                 parseWorkbook(workbook);
+                updateSyncTimestamp();
             };
             reader.readAsArrayBuffer(file);
         }
