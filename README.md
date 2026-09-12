@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF - (1 min)</title>
+    <title>Painel Links GF - Automação Temporizada (1 min)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -594,6 +594,7 @@
             });
         }
 
+        // BUSCA COM PRIORIDADE E ORDENAÇÃO NUMÉRICA (CIS BAIMOS NO TOPO)
         function searchBDByCIS() {
             const query = document.getElementById('bdSearchInput').value.trim().toUpperCase();
             const resultBox = document.getElementById('bdSearchResult');
@@ -602,18 +603,53 @@
             if (!query) { resultBox.classList.add('hidden'); return; }
 
             const matches = [];
+            const seen = new Set();
+
             for (let [key, val] of bdAuxiliarMap.entries()) {
-                if (key.includes(query) || val.nome.toUpperCase().includes(query) || val.endereco.toUpperCase().includes(query)) {
-                    if (!matches.some(m => m.ci === val.ci && m.sigla === val.sigla)) matches.push(val);
+                const uniqueKey = `${val.ci}_${val.sigla}`;
+                if (seen.has(uniqueKey)) continue;
+
+                const ciStr = String(val.ci || '').trim().toUpperCase();
+                const siglaStr = String(val.sigla || '').trim().toUpperCase();
+                const nomeStr = String(val.nome || '').trim().toUpperCase();
+                const endStr = String(val.endereco || '').trim().toUpperCase();
+
+                let priority = -1;
+
+                if (ciStr === query || siglaStr === query) {
+                    priority = 1; // Exato no CIS ou Sigla
+                } else if (ciStr.startsWith(query) || siglaStr.startsWith(query)) {
+                    priority = 2; // Começa com o termo buscado
+                } else if (ciStr.includes(query) || siglaStr.includes(query)) {
+                    priority = 3; // Contém no CIS ou Sigla
+                } else if (nomeStr.includes(query) || endStr.includes(query)) {
+                    priority = 4; // Presente no nome ou endereço
+                }
+
+                if (priority > 0) {
+                    seen.add(uniqueKey);
+                    const ciNum = parseInt(ciStr, 10);
+                    matches.push({
+                        item: val,
+                        priority: priority,
+                        ciNum: isNaN(ciNum) ? 999999 : ciNum
+                    });
                 }
             }
+
+            // Ordena primeiro por relevância de prioridade e depois por número de CIS crescente
+            matches.sort((a, b) => {
+                if (a.priority !== b.priority) return a.priority - b.priority;
+                return a.ciNum - b.ciNum;
+            });
 
             tbody.innerHTML = '';
             if (matches.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
             } else {
-                matches.slice(0, 10).forEach(m => {
+                matches.slice(0, 25).forEach(({ item: m }) => {
                     const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
                     tr.innerHTML = `<td class="p-2.5 font-bold">${m.ci || '-'}</td><td class="p-2.5 font-bold text-indigo-600">${m.sigla || '-'}</td><td class="p-2.5">${m.nome || '-'}</td><td class="p-2.5">${m.endereco || '-'}</td><td class="p-2.5">${m.uf || '-'}</td>`;
                     tbody.appendChild(tr);
                 });
