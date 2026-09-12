@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF (1 min)</title>
+    <title>Painel Links GF - (5 min)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -123,7 +123,7 @@
                 <i class="fa-solid fa-circle-notch fa-spin text-sky-600 text-xl"></i>
                 <div>
                     <p class="text-xs font-bold">Sincronizando com o Google Drive...</p>
-                    <p class="text-[11px] text-sky-600">Buscando atualizações da planilha na nuvem (Atualização automática a cada 1 min).</p>
+                    <p class="text-[11px] text-sky-600">Buscando atualizações da planilha na nuvem (Atualização automática a cada 5 min).</p>
                 </div>
             </div>
         </div>
@@ -153,12 +153,12 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
-                            <tr class="bg-slate-800 text-white font-semibold">
-                                <th class="p-2.5">CI / CÓDIGO</th>
-                                <th class="p-2.5">SIGLA</th>
-                                <th class="p-2.5">RESTAURANTE / UNIDADE</th>
-                                <th class="p-2.5">ENDEREÇO COMPLETO</th>
-                                <th class="p-2.5">UF</th>
+                            <tr id="bdSearchResultHeader" class="bg-slate-800 text-white font-semibold">
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">CI / CÓDIGO</th>
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">SIGLA</th>
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">RESTAURANTE / UNIDADE</th>
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">ENDEREÇO COMPLETO</th>
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">UF</th>
                             </tr>
                         </thead>
                         <tbody id="bdSearchResultBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
@@ -172,7 +172,7 @@
             <img src="logo.png" alt="Logo GF Links" class="h-16 w-auto mx-auto mb-3 object-contain opacity-80" onerror="this.style.display='none'">
             <i class="fa-solid fa-cloud-arrow-up text-5xl text-indigo-500 mb-3"></i>
             <h3 class="text-lg font-bold text-slate-700">Clique para carregar uma planilha local ou use a sincronização do Drive</h3>
-            <p class="text-xs text-slate-500 mt-1">Os dados do Painel Links GF são atualizados e salvos automaticamente a cada 1 minuto.</p>
+            <p class="text-xs text-slate-500 mt-1">Os dados do Painel Links GF são atualizados e salvos automaticamente a cada 5 minutos.</p>
         </div>
 
         <!-- Dashboard -->
@@ -272,10 +272,14 @@
         const DB_KEY_DATA = 'APP_ATIVOS_DATA';
         const DB_KEY_HEADERS = 'APP_ATIVOS_HEADERS';
         const DB_KEY_AUX = 'APP_BD_AUXILIAR';
+        const DB_KEY_AUX_HEADERS = 'APP_BD_AUXILIAR_HEADERS';
+        const DB_KEY_AUX_DATA = 'APP_BD_AUXILIAR_DATA';
 
         let rawAtivosData = [];
         let excelHeaders = [];
         let bdAuxiliarMap = new Map();
+        let bdAuxiliarHeaders = [];
+        let bdAuxiliarData = [];
         let chartStatusObj, chartCobrancaObj;
         let statusColName = "";
         let cobrancaColName = "";
@@ -317,6 +321,7 @@
             loadFromDatabase();
             syncDriveData();
 
+            // TEMPORIZADOR DE 5 MINUTOS (300.000 ms)
             if (driveTimer) clearInterval(driveTimer);
             driveTimer = setInterval(() => {
                 syncDriveData();
@@ -407,6 +412,8 @@
                 localStorage.setItem(DB_KEY_DATA, JSON.stringify(rawAtivosData));
                 localStorage.setItem(DB_KEY_HEADERS, JSON.stringify(excelHeaders));
                 localStorage.setItem(DB_KEY_AUX, JSON.stringify(Array.from(bdAuxiliarMap.entries())));
+                localStorage.setItem(DB_KEY_AUX_HEADERS, JSON.stringify(bdAuxiliarHeaders));
+                localStorage.setItem(DB_KEY_AUX_DATA, JSON.stringify(bdAuxiliarData));
                 updateDbBadge(true);
             } catch (err) {
                 console.error("Erro ao salvar no banco local:", err);
@@ -417,11 +424,15 @@
             const storedData = localStorage.getItem(DB_KEY_DATA);
             const storedHeaders = localStorage.getItem(DB_KEY_HEADERS);
             const storedAux = localStorage.getItem(DB_KEY_AUX);
+            const storedAuxHeaders = localStorage.getItem(DB_KEY_AUX_HEADERS);
+            const storedAuxData = localStorage.getItem(DB_KEY_AUX_DATA);
 
             if (storedData && storedHeaders) {
                 rawAtivosData = JSON.parse(storedData);
                 excelHeaders = JSON.parse(storedHeaders);
                 if (storedAux) bdAuxiliarMap = new Map(JSON.parse(storedAux));
+                if (storedAuxHeaders) bdAuxiliarHeaders = JSON.parse(storedAuxHeaders);
+                if (storedAuxData) bdAuxiliarData = JSON.parse(storedAuxData);
 
                 if (excelHeaders.length >= 5) cobrancaColName = excelHeaders[4];
                 if (excelHeaders.length >= 6) statusColName = excelHeaders[5];
@@ -431,7 +442,7 @@
                 document.getElementById('btnExport').disabled = false;
                 document.getElementById('btnPdf').disabled = false;
 
-                document.getElementById('bdStatusText').innerText = `Base BD_Auxiliar carregada do banco local (${bdAuxiliarMap.size} cadastros).`;
+                document.getElementById('bdStatusText').innerText = `Base BD_Auxiliar carregada do banco local (${bdAuxiliarData.length || bdAuxiliarMap.size} cadastros, ${bdAuxiliarHeaders.length} colunas).`;
 
                 renderTableHeaders();
                 calculateMetrics();
@@ -447,10 +458,14 @@
                 localStorage.removeItem(DB_KEY_DATA);
                 localStorage.removeItem(DB_KEY_HEADERS);
                 localStorage.removeItem(DB_KEY_AUX);
+                localStorage.removeItem(DB_KEY_AUX_HEADERS);
+                localStorage.removeItem(DB_KEY_AUX_DATA);
 
                 rawAtivosData = [];
                 excelHeaders = [];
                 bdAuxiliarMap.clear();
+                bdAuxiliarHeaders = [];
+                bdAuxiliarData = [];
 
                 document.getElementById('dashboardSection').classList.add('hidden');
                 document.getElementById('dropZone').classList.remove('hidden');
@@ -500,20 +515,33 @@
             if (!sheetBD && workbook.SheetNames.length > 1) sheetBD = workbook.Sheets[workbook.SheetNames[1]];
 
             bdAuxiliarMap.clear();
+            bdAuxiliarHeaders = [];
+            bdAuxiliarData = [];
+
             if (sheetBD) {
                 const rowsBD = XLSX.utils.sheet_to_json(sheetBD, { defval: "", cellDates: true });
-                rowsBD.forEach(r => {
-                    const ci = cleanStr(r["CIS"] || r["CI"] || r["CÓDIGO"] || r["CODIGO"] || r["CÓDIGO CIS"]);
-                    const sigla = cleanStr(r["SIGLA"] || r["Sigla"]);
-                    const nome = cleanStr(r["NOME DO RESTAURANTE"] || r["RESTAURANTE"] || r["UNIDADE"] || r["NOME"]);
-                    const endereco = cleanStr(r["ENDEREÇO"] || r["ENDERECO"] || r["LOGRADOURO"]);
-                    const uf = cleanStr(r["ESTADO"] || r["UF"]);
+                if (rowsBD.length > 0) {
+                    bdAuxiliarHeaders = Object.keys(rowsBD[0]);
+                    rowsBD.forEach(r => {
+                        const formattedRow = {};
+                        Object.keys(r).forEach(k => {
+                            formattedRow[k] = formatValue(r[k]);
+                        });
 
-                    const entry = { ci, sigla, nome, endereco, uf };
-                    if (ci) bdAuxiliarMap.set(ci.toUpperCase(), entry);
-                    if (sigla) bdAuxiliarMap.set(sigla.toUpperCase(), entry);
-                });
-                document.getElementById('bdStatusText').innerText = `Base BD_Auxiliar carregada com ${bdAuxiliarMap.size} cadastros.`;
+                        const ci = cleanStr(r["CIS"] || r["CI"] || r["CÓDIGO"] || r["CODIGO"] || r["CÓDIGO CIS"] || (bdAuxiliarHeaders[0] ? r[bdAuxiliarHeaders[0]] : ""));
+                        const sigla = cleanStr(r["SIGLA"] || r["Sigla"] || (bdAuxiliarHeaders[1] ? r[bdAuxiliarHeaders[1]] : ""));
+                        const nome = cleanStr(r["NOME DO RESTAURANTE"] || r["RESTAURANTE"] || r["UNIDADE"] || r["NOME"] || (bdAuxiliarHeaders[2] ? r[bdAuxiliarHeaders[2]] : ""));
+                        const endereco = cleanStr(r["ENDEREÇO"] || r["ENDERECO"] || r["LOGRADOURO"] || (bdAuxiliarHeaders[3] ? r[bdAuxiliarHeaders[3]] : ""));
+                        const uf = cleanStr(r["ESTADO"] || r["UF"] || (bdAuxiliarHeaders[4] ? r[bdAuxiliarHeaders[4]] : ""));
+
+                        const entry = { ci, sigla, nome, endereco, uf, rawRow: formattedRow };
+                        bdAuxiliarData.push(entry);
+
+                        if (ci) bdAuxiliarMap.set(ci.toUpperCase(), entry);
+                        if (sigla) bdAuxiliarMap.set(sigla.toUpperCase(), entry);
+                    });
+                }
+                document.getElementById('bdStatusText').innerText = `Base BD_Auxiliar carregada com ${bdAuxiliarData.length} cadastros (${bdAuxiliarHeaders.length} colunas).`;
             }
 
             rawAtivosData = [];
@@ -594,7 +622,21 @@
             });
         }
 
-        // BUSCA COM PRIORIDADE E ORDENAÇÃO NUMÉRICA (CIS BAIMOS NO TOPO)
+        function renderBdSearchResultHeaders() {
+            const headerRow = document.getElementById('bdSearchResultHeader');
+            if (!headerRow) return;
+            headerRow.innerHTML = '';
+            
+            const headersToUse = bdAuxiliarHeaders.length > 0 ? bdAuxiliarHeaders : ["CI / CÓDIGO", "SIGLA", "RESTAURANTE / UNIDADE", "ENDEREÇO COMPLETO", "UF"];
+            
+            headersToUse.forEach(h => {
+                const th = document.createElement('th');
+                th.className = 'p-2.5 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700';
+                th.innerText = String(h).toUpperCase();
+                headerRow.appendChild(th);
+            });
+        }
+
         function searchBDByCIS() {
             const query = document.getElementById('bdSearchInput').value.trim().toUpperCase();
             const resultBox = document.getElementById('bdSearchResult');
@@ -604,26 +646,30 @@
 
             const matches = [];
             const seen = new Set();
+            const dataToSearch = bdAuxiliarData.length > 0 ? bdAuxiliarData : Array.from(bdAuxiliarMap.values());
 
-            for (let [key, val] of bdAuxiliarMap.entries()) {
-                const uniqueKey = `${val.ci}_${val.sigla}`;
+            for (let i = 0; i < dataToSearch.length; i++) {
+                const val = dataToSearch[i];
+                const uniqueKey = `${val.ci}_${val.sigla}_${i}`;
                 if (seen.has(uniqueKey)) continue;
 
                 const ciStr = String(val.ci || '').trim().toUpperCase();
                 const siglaStr = String(val.sigla || '').trim().toUpperCase();
-                const nomeStr = String(val.nome || '').trim().toUpperCase();
-                const endStr = String(val.endereco || '').trim().toUpperCase();
+                
+                const allRowStr = val.rawRow 
+                    ? Object.values(val.rawRow).map(v => String(v).toUpperCase()).join(' ')
+                    : `${ciStr} ${siglaStr} ${String(val.nome || '').toUpperCase()} ${String(val.endereco || '').toUpperCase()} ${String(val.uf || '').toUpperCase()}`;
 
                 let priority = -1;
 
                 if (ciStr === query || siglaStr === query) {
-                    priority = 1; // Exato no CIS ou Sigla
+                    priority = 1;
                 } else if (ciStr.startsWith(query) || siglaStr.startsWith(query)) {
-                    priority = 2; // Começa com o termo buscado
+                    priority = 2;
                 } else if (ciStr.includes(query) || siglaStr.includes(query)) {
-                    priority = 3; // Contém no CIS ou Sigla
-                } else if (nomeStr.includes(query) || endStr.includes(query)) {
-                    priority = 4; // Presente no nome ou endereço
+                    priority = 3;
+                } else if (allRowStr.includes(query)) {
+                    priority = 4;
                 }
 
                 if (priority > 0) {
@@ -637,20 +683,32 @@
                 }
             }
 
-            // Ordena primeiro por relevância de prioridade e depois por número de CIS crescente
             matches.sort((a, b) => {
                 if (a.priority !== b.priority) return a.priority - b.priority;
                 return a.ciNum - b.ciNum;
             });
 
             tbody.innerHTML = '';
+            renderBdSearchResultHeaders();
+
             if (matches.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                const colSpan = bdAuxiliarHeaders.length || 5;
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="p-3 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
             } else {
                 matches.slice(0, 25).forEach(({ item: m }) => {
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
-                    tr.innerHTML = `<td class="p-2.5 font-bold">${m.ci || '-'}</td><td class="p-2.5 font-bold text-indigo-600">${m.sigla || '-'}</td><td class="p-2.5">${m.nome || '-'}</td><td class="p-2.5">${m.endereco || '-'}</td><td class="p-2.5">${m.uf || '-'}</td>`;
+
+                    if (bdAuxiliarHeaders.length > 0 && m.rawRow) {
+                        bdAuxiliarHeaders.forEach(col => {
+                            const td = document.createElement('td');
+                            td.className = 'p-2.5 whitespace-nowrap font-medium';
+                            td.innerText = (m.rawRow[col] !== undefined && m.rawRow[col] !== null && m.rawRow[col] !== "") ? m.rawRow[col] : "-";
+                            tr.appendChild(td);
+                        });
+                    } else {
+                        tr.innerHTML = `<td class="p-2.5 font-bold">${m.ci || '-'}</td><td class="p-2.5 font-bold text-indigo-600">${m.sigla || '-'}</td><td class="p-2.5">${m.nome || '-'}</td><td class="p-2.5">${m.endereco || '-'}</td><td class="p-2.5">${m.uf || '-'}</td>`;
+                    }
                     tbody.appendChild(tr);
                 });
             }
