@@ -82,17 +82,14 @@
                 <div>
                     <h1 class="text-xl font-bold tracking-wide">Painel Links GF</h1>
                     <p class="text-xs text-slate-400" id="dbStatusBadge">Status DB: Vazio</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-0.5" id="lastUpdateBadge">Ultima atualização: Nunca</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-3 flex-wrap">
-                <!-- ÁREA DE SINCRONIZAÇÃO COM TIMESTAMP DISCRETO -->
-                <div class="flex flex-col items-center md:items-end">
-                    <button onclick="syncDriveData()" id="btnSyncDrive" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
-                        <i class="fa-solid fa-rotate text-base" id="syncIcon"></i> Sincronizar Google Drive
-                    </button>
-                    <span id="lastUpdateBadge" class="text-[10px] text-slate-400 font-medium mt-1">Última att: Nunca</span>
-                </div>
+                <button onclick="syncDriveData()" id="btnSyncDrive" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-rotate text-base" id="syncIcon"></i> Sincronizar Google Drive
+                </button>
 
                 <label for="excelFile" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg cursor-pointer transition shadow flex items-center gap-2">
                     <i class="fa-solid fa-file-excel text-base"></i> Carregar Manual
@@ -312,7 +309,7 @@
             const timeStr = now.toLocaleTimeString('pt-BR');
             const badge = document.getElementById('lastUpdateBadge');
             if (badge) {
-                badge.innerText = `Última att: ${dateStr} às ${timeStr}`;
+                badge.innerText = `Ultima atualização: ${dateStr} às ${timeStr}`;
             }
         }
 
@@ -461,7 +458,7 @@
                 document.getElementById('btnPdf').disabled = true;
                 document.getElementById('excelFile').value = '';
                 document.getElementById('bdStatusText').innerText = "Pesquise por Código CIS, Sigla, Unidade ou Endereço cadastrado na aba BD_Auxiliar.";
-                document.getElementById('lastUpdateBadge').innerText = "Última att: Nunca";
+                document.getElementById('lastUpdateBadge').innerText = "Ultima atualização: Nunca";
 
                 updateDbBadge(false);
                 alert("Banco de dados local limpo com sucesso!");
@@ -586,7 +583,6 @@
             filterTable();
         }
 
-        // FUNÇÃO COM A OPÇÃO 1 APLICADA (FUNDO ESCURO E TEXTO BRANCO GARANTIDOS NA TABELA)
         function renderTableHeaders() {
             const headerRow = document.getElementById('tableHeader');
             headerRow.innerHTML = '';
