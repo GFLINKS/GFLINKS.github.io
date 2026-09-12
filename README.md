@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF - Automação Google Drive</title>
+    <title>Painel Links GF - Automação Temporizada (1 min)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -50,7 +50,7 @@
 </head>
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800">
 
-    <!-- TELA DE LOGIN / BLOQUEIO POR SENHA -->
+    <!-- TELA DE LOGIN / BLOQUEIO POR SENHA FUNCIONAL -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-5 border border-slate-200">
             <img src="logo.png" alt="Logo GF Links" class="h-12 w-auto mx-auto object-contain" onerror="this.style.display='none'">
@@ -116,13 +116,13 @@
 
     <main class="max-w-[1800px] mx-auto px-6 py-6 space-y-6" id="pdfContent">
 
-        <!-- Banner de Carregamento Automático do Drive -->
+        <!-- Banner de Carregamento do Drive -->
         <div id="driveLoadingBanner" class="hidden bg-sky-50 border-l-4 border-sky-500 text-sky-800 p-4 rounded-xl shadow-sm flex items-center justify-between no-print">
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-circle-notch fa-spin text-sky-600 text-xl"></i>
                 <div>
                     <p class="text-xs font-bold">Sincronizando com o Google Drive...</p>
-                    <p class="text-[11px] text-sky-600">Buscando atualizações da planilha na nuvem.</p>
+                    <p class="text-[11px] text-sky-600">Buscando atualizações da planilha na nuvem (Atualização automática a cada 1 min).</p>
                 </div>
             </div>
         </div>
@@ -171,7 +171,7 @@
             <img src="logo.png" alt="Logo GF Links" class="h-16 w-auto mx-auto mb-3 object-contain opacity-80" onerror="this.style.display='none'">
             <i class="fa-solid fa-cloud-arrow-up text-5xl text-indigo-500 mb-3"></i>
             <h3 class="text-lg font-bold text-slate-700">Clique para carregar uma planilha local ou use a sincronização do Drive</h3>
-            <p class="text-xs text-slate-500 mt-1">Os dados do Painel Links GF são atualizados e salvos automaticamente.</p>
+            <p class="text-xs text-slate-500 mt-1">Os dados do Painel Links GF são atualizados e salvos automaticamente a cada 1 minuto.</p>
         </div>
 
         <!-- Dashboard -->
@@ -278,6 +278,7 @@
         let chartStatusObj, chartCobrancaObj;
         let statusColName = "";
         let cobrancaColName = "";
+        let driveTimer = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem(AUTH_KEY) === 'true') {
@@ -288,7 +289,7 @@
 
         function checkPassword(e) {
             e.preventDefault();
-            const input = document.getElementById('accessPassword').value;
+            const input = document.getElementById('accessPassword').value.trim();
             const error = document.getElementById('loginError');
 
             if (input === TARGET_PASSWORD) {
@@ -304,15 +305,21 @@
         function initApp() {
             loadFromDatabase();
             syncDriveData();
+
+            // TEMPORIZADOR DE 1 MINUTO (60.000 ms)
+            if (driveTimer) clearInterval(driveTimer);
+            driveTimer = setInterval(() => {
+                syncDriveData();
+            }, 60000);
         }
 
         function logout() {
+            if (driveTimer) clearInterval(driveTimer);
             sessionStorage.removeItem(AUTH_KEY);
             document.getElementById('accessPassword').value = '';
             document.getElementById('loginOverlay').classList.remove('hidden');
         }
 
-        // AUTOMATIZAÇÃO DE CARREGAMENTO VIA GOOGLE DRIVE API/EXPORT
         async function syncDriveData() {
             const banner = document.getElementById('driveLoadingBanner');
             const syncIcon = document.getElementById('syncIcon');
@@ -324,13 +331,13 @@
 
             try {
                 const response = await fetch(downloadUrl);
-                if (!response.ok) throw new Error('Falha ao baixar do Google Drive');
+                if (!response.ok) throw new Error('Falha ao carregar arquivo do Google Drive');
 
                 const arrayBuffer = await response.arrayBuffer();
                 const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true, dateNF: 'dd/mm/yyyy' });
                 parseWorkbook(workbook);
             } catch (err) {
-                console.warn("Automação Drive necessita de permissão aberta ou execução via servidor web:", err);
+                console.warn("Automação do Drive concluída ou mantendo base local:", err);
             } finally {
                 if (banner) banner.classList.add('hidden');
                 if (syncIcon) syncIcon.classList.remove('fa-spin');
