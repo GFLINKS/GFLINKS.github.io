@@ -321,7 +321,6 @@
             loadFromDatabase();
             syncDriveData();
 
-            // TEMPORIZADOR DE 5 MINUTOS (300.000 ms)
             if (driveTimer) clearInterval(driveTimer);
             driveTimer = setInterval(() => {
                 syncDriveData();
@@ -523,6 +522,10 @@
                 if (rowsBD.length > 0) {
                     bdAuxiliarHeaders = Object.keys(rowsBD[0]);
                     rowsBD.forEach(r => {
+                        // IGNORA LINHAS COMPLETAMENTE VAZIAS NA ABA BD_AUXILIAR
+                        const isBDRowEmpty = Object.values(r).every(v => v === undefined || v === null || String(v).trim() === "");
+                        if (isBDRowEmpty) return;
+
                         const formattedRow = {};
                         Object.keys(r).forEach(k => {
                             formattedRow[k] = formatValue(r[k]);
@@ -559,6 +562,10 @@
                     }
 
                     jsonWithHeaders.forEach(row => {
+                        // IGNORA LINHAS COMPLETAMENTE VAZIAS NA TABELA DE ATIVOS
+                        const isRowEmpty = Object.values(row).every(v => v === undefined || v === null || String(v).trim() === "");
+                        if (isRowEmpty) return;
+
                         let ci = "", sigla = "", operadora = "", linha = "", iccid = "";
                         const fullRowFormatted = {};
 
