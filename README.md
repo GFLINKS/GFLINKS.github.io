@@ -57,8 +57,8 @@
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div>
-                <h3 class="text-lg font-bold text-slate-800">Confirmar Alteração</h3>
-                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação no Google Drive, digite o código de confirmação abaixo:</p>
+                <h3 class="text-lg font-bold text-slate-800">Confirmar Alterações em Massa</h3>
+                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação de todos os registros alterados no Google Drive, digite o código de confirmação:</p>
             </div>
             <div>
                 <input type="text" id="confirmCodeInput" placeholder="Digite gf01..." class="w-full text-sm px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold tracking-wider bg-slate-50 uppercase">
@@ -67,7 +67,7 @@
             <div class="flex gap-2">
                 <button onclick="cancelarEdicao()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg transition text-xs">Cancelar</button>
                 <button onclick="validarEExecutarEdicao()" class="w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition text-xs shadow flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-check"></i> Confirmar
+                    <i class="fa-solid fa-check"></i> Confirmar e Salvar
                 </button>
             </div>
         </div>
@@ -251,10 +251,15 @@
                 <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-50/50">
                     <div>
                         <h3 class="text-sm font-bold text-slate-800">Tabela Geral de Registros - Painel Links GF</h3>
-                        <p class="text-xs text-slate-500">Dados sincronizados do Google Drive & BD Local</p>
+                        <p class="text-xs text-slate-500">Edite as colunas diretamente na tabela e salve tudo em massa</p>
                     </div>
 
                     <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end no-print">
+                        <!-- BOTÃO ÚNICO DE SALVAR EM MASSA -->
+                        <button onclick="solicitarSalvarEmMassa()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5 animate-pulse hover:animate-none">
+                            <i class="fa-solid fa-floppy-disk text-sm"></i> Salvar Alterações em Massa
+                        </button>
+
                         <input type="text" id="tableSearchInput" onkeyup="filterTable()" placeholder="Buscar..." class="text-xs px-3 py-2 border border-slate-300 rounded-lg bg-white">
                         <select id="filterCisNumNI" onchange="filterTable()" class="text-xs bg-amber-50 border border-amber-300 text-amber-900 rounded-lg px-3 py-2 font-bold">
                             <option value="">Filtro CIS Numérica: Todos</option>
@@ -291,7 +296,7 @@
         const AUTH_KEY = 'GF_PANEL_AUTH';
         const TARGET_PASSWORD = 'gF@2026*Link';
         const DRIVE_FILE_ID = '1P88V6dzw8kXwkcIPCufkSMPdtp4DHPg02fdvcF8TYXE';
-        const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyMCeKHDgbO1o1nc_ILPtKcO3AcViZpcN_rYaN74l9AfpWk5GWaEJr-52LH003FXA6x/exec";
+        const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwGPDuTWi8HgU3kT9oHH0gRP3Y910mgwQSNtHvVMdrqVliMsgeeWfJVOWGzQtfTrP7LxA/exec";
 
         const DB_KEY_DATA = 'APP_ATIVOS_DATA';
         const DB_KEY_HEADERS = 'APP_ATIVOS_HEADERS';
@@ -679,11 +684,6 @@
             const headerRow = document.getElementById('tableHeader');
             headerRow.innerHTML = '';
 
-            const thAction = document.createElement('th');
-            thAction.className = 'p-3 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700 text-center no-print';
-            thAction.innerText = 'AÇÃO';
-            headerRow.appendChild(thAction);
-
             excelHeaders.forEach(h => {
                 const th = document.createElement('th');
                 th.className = 'p-3 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700';
@@ -785,31 +785,48 @@
             resultBox.classList.remove('hidden');
         }
 
-        function solicitarEdicaoLinha(excelRowIndex, tableRowIdx) {
+        function solicitarSalvarEmMassa() {
             const startIdx = getEnderecoStartIndex();
-            const changes = [];
+            const batch = [];
+            const trList = document.querySelectorAll('#ativosTableBody tr');
 
-            excelHeaders.forEach((header, colIdx) => {
-                if (colIdx >= startIdx) {
-                    const inputEl = document.getElementById(`input_row_${tableRowIdx}_col_${colIdx}`);
-                    if (inputEl) {
-                        let val = inputEl.value;
-                        if (inputEl.type === 'date') {
-                            val = fromInputDate(val);
+            if (trList.length === 0) {
+                alert("Nenhum registro exibido na tabela para salvar.");
+                return;
+            }
+
+            trList.forEach((tr) => {
+                const excelRowIndex = parseInt(tr.dataset.excelRowIndex, 10);
+                const rowIdx = tr.dataset.rowIdx;
+                if (isNaN(excelRowIndex)) return;
+
+                const changes = [];
+                excelHeaders.forEach((header, colIdx) => {
+                    if (colIdx >= startIdx) {
+                        const inputEl = document.getElementById(`input_row_${rowIdx}_col_${colIdx}`);
+                        if (inputEl) {
+                            let val = inputEl.value;
+                            if (inputEl.type === 'date') {
+                                val = fromInputDate(val);
+                            }
+                            changes.push({
+                                colIndex: colIdx + 1,
+                                header: header,
+                                value: val
+                            });
                         }
-                        changes.push({
-                            colIndex: colIdx + 1,
-                            header: header,
-                            value: val
-                        });
                     }
+                });
+
+                if (changes.length > 0) {
+                    batch.push({
+                        rowIndex: excelRowIndex,
+                        changes: changes
+                    });
                 }
             });
 
-            pendingEdit = {
-                rowIndex: excelRowIndex,
-                changes: changes
-            };
+            pendingEdit = { batch: batch };
 
             document.getElementById('confirmCodeInput').value = '';
             document.getElementById('confirmError').classList.add('hidden');
@@ -828,27 +845,24 @@
 
             if (codeInput === 'gf01') {
                 document.getElementById('confirmModal').classList.add('hidden');
-                if (pendingEdit) {
-                    executarSalvarAppsScript(pendingEdit.rowIndex, pendingEdit.changes);
+                if (pendingEdit && pendingEdit.batch) {
+                    executarSalvarEmMassaAppsScript(pendingEdit.batch);
                 }
             } else {
                 errorMsg.classList.remove('hidden');
             }
         }
 
-        async function executarSalvarAppsScript(rowIndex, changes) {
+        async function executarSalvarEmMassaAppsScript(batch) {
             try {
                 const response = await fetch(APPS_SCRIPT_WEBAPP_URL, {
                     method: "POST",
-                    body: JSON.stringify({
-                        rowIndex: rowIndex,
-                        changes: changes
-                    })
+                    body: JSON.stringify({ batch: batch })
                 });
 
                 const result = await response.json();
                 if (result.status === "success") {
-                    alert("Alteração salva com sucesso no Google Drive!");
+                    alert(result.message || "Alterações salvas em massa com sucesso no Google Drive!");
                     syncDriveData();
                 } else {
                     alert("Erro ao gravar no Drive: " + result.message);
@@ -867,16 +881,8 @@
             data.forEach((item, rowIdx) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
-
-                const tdAction = document.createElement('td');
-                tdAction.className = 'p-2 text-center no-print whitespace-nowrap';
-
-                tdAction.innerHTML = `
-                    <button onclick="solicitarEdicaoLinha(${item.excelRowIndex}, ${rowIdx})" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold px-2.5 py-1.5 rounded transition shadow flex items-center gap-1 mx-auto" title="Salvar alterações no Google Drive">
-                        <i class="fa-solid fa-floppy-disk"></i> Salvar
-                    </button>
-                `;
-                tr.appendChild(tdAction);
+                tr.dataset.excelRowIndex = item.excelRowIndex;
+                tr.dataset.rowIdx = rowIdx;
 
                 excelHeaders.forEach((header, colIdx) => {
                     const td = document.createElement('td');
