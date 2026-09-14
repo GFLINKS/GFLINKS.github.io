@@ -57,8 +57,8 @@
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div>
-                <h3 class="text-lg font-bold text-slate-800">Confirmar Alterações em Massa</h3>
-                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação de todos os registros alterados no Google Drive, digite o código de confirmação:</p>
+                <h3 class="text-lg font-bold text-slate-800">Confirmar Alterações Modificadas</h3>
+                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação dos registros alterados no Google Drive, digite o código de confirmação:</p>
             </div>
             <div>
                 <input type="text" id="confirmCodeInput" placeholder="Digite gf01..." class="w-full text-sm px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold tracking-wider bg-slate-50 uppercase">
@@ -251,11 +251,11 @@
                 <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-50/50">
                     <div>
                         <h3 class="text-sm font-bold text-slate-800">Tabela Geral de Registros - Painel Links GF</h3>
-                        <p class="text-xs text-slate-500">Edite as colunas livremente na tabela e salve tudo em massa</p>
+                        <p class="text-xs text-slate-500">Edite as colunas diretamente na tabela. Apenas os campos modificados serão salvos.</p>
                     </div>
 
                     <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end no-print">
-                        <!-- BOTÃO ÚNICO DE SALVAR EM MASSA -->
+                        <!-- BOTÃO MANTIDO NO MESMO LUGAR (SALVA APENAS MODIFICAÇÕES) -->
                         <button onclick="solicitarSalvarEmMassa()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5 animate-pulse hover:animate-none">
                             <i class="fa-solid fa-floppy-disk text-sm"></i> Salvar Alterações em Massa
                         </button>
@@ -460,7 +460,6 @@
             return idx !== -1 ? idx : 4;
         }
 
-        // Permite texto livre para todas as colunas editáveis
         function getEditorType(headerName) {
             const u = String(headerName || "").toUpperCase();
             if (u.includes("DATA") || u.includes("VENCIMENTO") || u.includes("ATIVAC") || u.includes("DT_") || u.includes("DT ")) return "DATE_INPUT";
@@ -783,6 +782,7 @@
             resultBox.classList.remove('hidden');
         }
 
+        // FUNÇÃO ATUALIZADA: SALVA APENAS OS CAMPOS QUE FORAM EFETIVAMENTE MODIFICADOS
         function solicitarSalvarEmMassa() {
             const startIdx = getEnderecoStartIndex();
             const batch = [];
@@ -804,14 +804,20 @@
                         const inputEl = document.getElementById(`input_row_${rowIdx}_col_${colIdx}`);
                         if (inputEl) {
                             let val = inputEl.value;
-                            if (inputEl.type === 'date') {
-                                val = fromInputDate(val);
+                            let originalVal = inputEl.dataset.original || "";
+
+                            // Compara o valor atual com o valor original carregado
+                            if (val !== originalVal) {
+                                let valueToSend = val;
+                                if (inputEl.type === 'date') {
+                                    valueToSend = fromInputDate(val);
+                                }
+                                changes.push({
+                                    colIndex: colIdx + 1,
+                                    header: header,
+                                    value: valueToSend
+                                });
                             }
-                            changes.push({
-                                colIndex: colIdx + 1,
-                                header: header,
-                                value: val
-                            });
                         }
                     }
                 });
@@ -823,6 +829,11 @@
                     });
                 }
             });
+
+            if (batch.length === 0) {
+                alert("Nenhuma alteração foi detectada para salvar.");
+                return;
+            }
 
             pendingEdit = { batch: batch };
 
@@ -899,11 +910,11 @@
                         if (editorType === "DATE_INPUT") {
                             const formattedIsoDate = toInputDate(rawVal);
                             td.innerHTML = `
-                                <input type="date" id="${inputId}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
+                                <input type="date" id="${inputId}" data-original="${formattedIsoDate}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
                             `;
                         } else {
                             td.innerHTML = `
-                                <input type="text" id="${inputId}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full min-w-[150px]">
+                                <input type="text" id="${inputId}" data-original="${rawVal}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full min-w-[150px]">
                             `;
                         }
                     } else {
