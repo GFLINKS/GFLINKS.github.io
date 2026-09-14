@@ -296,7 +296,7 @@
         const AUTH_KEY = 'GF_PANEL_AUTH';
         const TARGET_PASSWORD = 'gF@2026*Link';
         const DRIVE_FILE_ID = '1P88V6dzw8kXwkcIPCufkSMPdtp4DHPg02fdvcF8TYXE';
-        const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwN5RA_h46PoYjNA7wKD5XH4DW6l0GsWN1ixHwZDAtoN_vpw2IFzNQ9BxyQQ1vvlqis2w/exec";
+        const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzoYrxjqF6OgzsZ3_ieKAM7JmS9qyVDIOJOzVqApwws0Myy8f5KAeTfJjjbKB6E_WCFJw/exec";
 
         const DB_KEY_DATA = 'APP_ATIVOS_DATA';
         const DB_KEY_HEADERS = 'APP_ATIVOS_HEADERS';
@@ -857,20 +857,23 @@
             try {
                 const response = await fetch(APPS_SCRIPT_WEBAPP_URL, {
                     method: "POST",
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8"
+                    },
                     body: JSON.stringify({ batch: batch })
                 });
 
                 const result = await response.json();
                 if (result.status === "success") {
-                    alert(result.message || "Alterações salvas em massa com sucesso no Google Drive!");
+                    alert(result.message || "Alterações salvas na planilha com sucesso!");
                     setTimeout(() => {
                         syncDriveData();
-                    }, 5000);
+                    }, 4000);
                 } else {
-                    alert("Erro ao gravar no Drive: " + result.message);
+                    alert("Erro retornado pelo Google Sheets: " + result.message);
                 }
             } catch (err) {
-                alert("Erro ao conectar com o Apps Script: " + err.toString());
+                alert("Erro de conexão/CORS com o Apps Script: " + err.toString());
             }
         }
 
