@@ -296,7 +296,7 @@
         const AUTH_KEY = 'GF_PANEL_AUTH';
         const TARGET_PASSWORD = 'gF@2026*Link';
         const DRIVE_FILE_ID = '1P88V6dzw8kXwkcIPCufkSMPdtp4DHPg02fdvcF8TYXE';
-        const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwGPDuTWi8HgU3kT9oHH0gRP3Y910mgwQSNtHvVMdrqVliMsgeeWfJVOWGzQtfTrP7LxA/exec";
+        const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwN5RA_h46PoYjNA7wKD5XH4DW6l0GsWN1ixHwZDAtoN_vpw2IFzNQ9BxyQQ1vvlqis2w/exec";
 
         const DB_KEY_DATA = 'APP_ATIVOS_DATA';
         const DB_KEY_HEADERS = 'APP_ATIVOS_HEADERS';
@@ -863,7 +863,9 @@
                 const result = await response.json();
                 if (result.status === "success") {
                     alert(result.message || "Alterações salvas em massa com sucesso no Google Drive!");
-                    syncDriveData();
+                    setTimeout(() => {
+                        syncDriveData();
+                    }, 5000);
                 } else {
                     alert("Erro ao gravar no Drive: " + result.message);
                 }
