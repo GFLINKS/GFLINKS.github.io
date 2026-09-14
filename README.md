@@ -291,7 +291,7 @@
         const AUTH_KEY = 'GF_PANEL_AUTH';
         const TARGET_PASSWORD = 'gF@2026*Link';
         const DRIVE_FILE_ID = '1P88V6dzw8kXwkcIPCufkSMPdtp4DHPg02fdvcF8TYXE';
-        const APPS_SCRIPT_WEBAPP_URL = "SUA_URL_DO_WEB_APP_AQUI"; // Cole a URL gerada do seu Apps Script aqui
+        const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyMCeKHDgbO1o1nc_ILPtKcO3AcViZpcN_rYaN74l9AfpWk5GWaEJr-52LH003FXA6x/exec";
 
         const DB_KEY_DATA = 'APP_ATIVOS_DATA';
         const DB_KEY_HEADERS = 'APP_ATIVOS_HEADERS';
@@ -309,7 +309,6 @@
         let cobrancaColName = "";
         let driveTimer = null;
 
-        // Variável temporária para armazenar a alteração pendente
         let pendingEdit = null;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -431,6 +430,38 @@
                 return `${parts[2]}/${parts[1]}/${parts[0]}`;
             }
             return str || "-";
+        }
+
+        function toInputDate(valStr) {
+            if (!valStr || valStr === "-") return "";
+            if (/^\d{4}-\d{2}-\d{2}$/.test(valStr)) return valStr;
+            const parts = valStr.split('/');
+            if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            return "";
+        }
+
+        function fromInputDate(valStr) {
+            if (!valStr) return "-";
+            const parts = valStr.split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            return valStr;
+        }
+
+        function getEnderecoStartIndex() {
+            let idx = excelHeaders.findIndex(h => {
+                const u = h.toUpperCase();
+                return u.includes("ENDEREÇO") || u.includes("ENDERECO");
+            });
+            return idx !== -1 ? idx : 4;
+        }
+
+        function getEditorType(headerName) {
+            const u = String(headerName || "").toUpperCase();
+            if (u.includes("STATUS")) return "STATUS_SELECT";
+            if (u.includes("COBRANÇ") || u.includes("COBRANC")) return "COBRANCA_SELECT";
+            if (u.includes("OPERADORA") || u.includes("PROVEDOR")) return "OPERADORA_SELECT";
+            if (u.includes("DATA") || u.includes("VENCIMENTO") || u.includes("ATIVAC") || u.includes("DT_") || u.includes("DT ")) return "DATE_INPUT";
+            return "TEXT_INPUT";
         }
 
         function saveToDatabase() {
@@ -618,7 +649,7 @@
                         fullRowFormatted["ENDEREÇO (BD_AUXILIAR)"] = bdInfo.endereco || fullRowFormatted["ENDEREÇO"] || "-";
 
                         rawAtivosData.push({
-                            excelRowIndex: index + 2, // Índice real da linha na planilha Excel (cabeçalho é linha 1)
+                            excelRowIndex: index + 2,
                             ci: ci || bdInfo.ci || "-",
                             sigla: sigla || bdInfo.sigla || "-",
                             linha: linha || "-",
@@ -648,7 +679,6 @@
             const headerRow = document.getElementById('tableHeader');
             headerRow.innerHTML = '';
 
-            // Coluna de Ações para Salvar/Editar
             const thAction = document.createElement('th');
             thAction.className = 'p-3 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700 text-center no-print';
             thAction.innerText = 'AÇÃO';
@@ -755,15 +785,30 @@
             resultBox.classList.remove('hidden');
         }
 
-        // --- SISTEMA DE CONFIRMAÇÃO COM CÓDIGO "gf01" ---
-        function solicitarEdicaoLinha(rowIndex, selectCobrancaId, selectStatusId) {
-            const cobrancaVal = document.getElementById(selectCobrancaId).value;
-            const statusVal = document.getElementById(selectStatusId).value;
+        function solicitarEdicaoLinha(excelRowIndex, tableRowIdx) {
+            const startIdx = getEnderecoStartIndex();
+            const changes = [];
+
+            excelHeaders.forEach((header, colIdx) => {
+                if (colIdx >= startIdx) {
+                    const inputEl = document.getElementById(`input_row_${tableRowIdx}_col_${colIdx}`);
+                    if (inputEl) {
+                        let val = inputEl.value;
+                        if (inputEl.type === 'date') {
+                            val = fromInputDate(val);
+                        }
+                        changes.push({
+                            colIndex: colIdx + 1,
+                            header: header,
+                            value: val
+                        });
+                    }
+                }
+            });
 
             pendingEdit = {
-                rowIndex: rowIndex,
-                cobranca: cobrancaVal,
-                status: statusVal
+                rowIndex: excelRowIndex,
+                changes: changes
             };
 
             document.getElementById('confirmCodeInput').value = '';
@@ -784,26 +829,20 @@
             if (codeInput === 'gf01') {
                 document.getElementById('confirmModal').classList.add('hidden');
                 if (pendingEdit) {
-                    executarSalvarAppsScript(pendingEdit.rowIndex, pendingEdit.cobranca, pendingEdit.status);
+                    executarSalvarAppsScript(pendingEdit.rowIndex, pendingEdit.changes);
                 }
             } else {
                 errorMsg.classList.remove('hidden');
             }
         }
 
-        async function executarSalvarAppsScript(rowIndex, novaCobranca, novoStatus) {
-            if (!APPS_SCRIPT_WEBAPP_URL || APPS_SCRIPT_WEBAPP_URL.includes("SUA_URL_DO_WEB_APP_AQUI")) {
-                alert("Sua requisição foi confirmada com 'gf01', porém a URL do Apps Script precisa ser configurada no código fonte.");
-                return;
-            }
-
+        async function executarSalvarAppsScript(rowIndex, changes) {
             try {
                 const response = await fetch(APPS_SCRIPT_WEBAPP_URL, {
                     method: "POST",
                     body: JSON.stringify({
                         rowIndex: rowIndex,
-                        cobranca: novaCobranca,
-                        status: novoStatus
+                        changes: changes
                     })
                 });
 
@@ -823,52 +862,74 @@
             const tbody = document.getElementById('ativosTableBody');
             tbody.innerHTML = '';
 
-            data.forEach((item, idx) => {
+            const startIdx = getEnderecoStartIndex();
+
+            data.forEach((item, rowIdx) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
 
-                // Botão Salvar por Linha
                 const tdAction = document.createElement('td');
                 tdAction.className = 'p-2 text-center no-print whitespace-nowrap';
-                
-                const selCobrancaId = `sel_cob_${idx}`;
-                const selStatusId = `sel_stat_${idx}`;
 
                 tdAction.innerHTML = `
-                    <button onclick="solicitarEdicaoLinha(${item.excelRowIndex}, '${selCobrancaId}', '${selStatusId}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold px-2.5 py-1.5 rounded transition shadow flex items-center gap-1 mx-auto" title="Salvar alterações desta linha no Google Drive">
+                    <button onclick="solicitarEdicaoLinha(${item.excelRowIndex}, ${rowIdx})" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold px-2.5 py-1.5 rounded transition shadow flex items-center gap-1 mx-auto" title="Salvar alterações no Google Drive">
                         <i class="fa-solid fa-floppy-disk"></i> Salvar
                     </button>
                 `;
                 tr.appendChild(tdAction);
 
-                excelHeaders.forEach(header => {
+                excelHeaders.forEach((header, colIdx) => {
                     const td = document.createElement('td');
                     td.className = 'p-3 whitespace-nowrap font-medium';
 
-                    // Se for a coluna de Cobrança, renderiza Menu Suspenso
-                    if (header === cobrancaColName) {
-                        td.innerHTML = `
-                            <select id="${selCobrancaId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
-                                <option value="COBRANÇA OK" ${item.cobrancaColE === 'COBRANÇA OK' ? 'selected' : ''}>COBRANÇA OK</option>
-                                <option value="N/I" ${item.cobrancaColE === 'N/I' ? 'selected' : ''}>N/I</option>
-                                <option value="ISENTO" ${item.cobrancaColE === 'ISENTO' ? 'selected' : ''}>ISENTO</option>
-                                <option value="CANCELADO" ${item.cobrancaColE === 'CANCELADO' ? 'selected' : ''}>CANCELADO</option>
-                                <option value="PENDENTE" ${item.cobrancaColE === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
-                            </select>
-                        `;
-                    } 
-                    // Se for a coluna de Status, renderiza Menu Suspenso
-                    else if (header === statusColName) {
-                        td.innerHTML = `
-                            <select id="${selStatusId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
-                                <option value="ATIVO" ${item.statusColF === 'ATIVO' ? 'selected' : ''}>ATIVO</option>
-                                <option value="DESATIVADO" ${item.statusColF === 'DESATIVADO' ? 'selected' : ''}>DESATIVADO</option>
-                                <option value="BLOQUEADO" ${item.statusColF === 'BLOQUEADO' ? 'selected' : ''}>BLOQUEADO</option>
-                                <option value="N/I" ${item.statusColF === 'N/I' ? 'selected' : ''}>N/I</option>
-                            </select>
-                        `;
+                    const rawVal = item.originalRow[header] || "";
+                    const editorType = getEditorType(header);
+                    const inputId = `input_row_${rowIdx}_col_${colIdx}`;
+
+                    if (colIdx >= startIdx) {
+                        if (editorType === "COBRANCA_SELECT") {
+                            td.innerHTML = `
+                                <select id="${inputId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
+                                    <option value="COBRANÇA OK" ${rawVal === 'COBRANÇA OK' ? 'selected' : ''}>COBRANÇA OK</option>
+                                    <option value="N/I" ${rawVal === 'N/I' ? 'selected' : ''}>N/I</option>
+                                    <option value="ISENTO" ${rawVal === 'ISENTO' ? 'selected' : ''}>ISENTO</option>
+                                    <option value="CANCELADO" ${rawVal === 'CANCELADO' ? 'selected' : ''}>CANCELADO</option>
+                                    <option value="PENDENTE" ${rawVal === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+                                </select>
+                            `;
+                        } else if (editorType === "STATUS_SELECT") {
+                            td.innerHTML = `
+                                <select id="${inputId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
+                                    <option value="ATIVO" ${rawVal === 'ATIVO' ? 'selected' : ''}>ATIVO</option>
+                                    <option value="DESATIVADO" ${rawVal === 'DESATIVADO' ? 'selected' : ''}>DESATIVADO</option>
+                                    <option value="BLOQUEADO" ${rawVal === 'BLOQUEADO' ? 'selected' : ''}>BLOQUEADO</option>
+                                    <option value="N/I" ${rawVal === 'N/I' ? 'selected' : ''}>N/I</option>
+                                </select>
+                            `;
+                        } else if (editorType === "OPERADORA_SELECT") {
+                            td.innerHTML = `
+                                <select id="${inputId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
+                                    <option value="VIVO" ${rawVal.toUpperCase().includes('VIVO') ? 'selected' : ''}>VIVO</option>
+                                    <option value="CLARO" ${rawVal.toUpperCase().includes('CLARO') ? 'selected' : ''}>CLARO</option>
+                                    <option value="TIM" ${rawVal.toUpperCase().includes('TIM') ? 'selected' : ''}>TIM</option>
+                                    <option value="OI" ${rawVal.toUpperCase().includes('OI') ? 'selected' : ''}>OI</option>
+                                    <option value="ALGAR" ${rawVal.toUpperCase().includes('ALGAR') ? 'selected' : ''}>ALGAR</option>
+                                    <option value="OUTROS" ${rawVal.toUpperCase().includes('OUTROS') ? 'selected' : ''}>OUTROS</option>
+                                    <option value="N/I" ${rawVal === 'N/I' || !rawVal ? 'selected' : ''}>N/I</option>
+                                </select>
+                            `;
+                        } else if (editorType === "DATE_INPUT") {
+                            const formattedIsoDate = toInputDate(rawVal);
+                            td.innerHTML = `
+                                <input type="date" id="${inputId}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
+                            `;
+                        } else {
+                            td.innerHTML = `
+                                <input type="text" id="${inputId}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full min-w-[150px]">
+                            `;
+                        }
                     } else {
-                        td.innerText = item.originalRow[header] || "-";
+                        td.innerText = rawVal || "-";
                     }
 
                     tr.appendChild(td);
