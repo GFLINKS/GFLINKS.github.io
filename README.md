@@ -251,7 +251,7 @@
                 <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-50/50">
                     <div>
                         <h3 class="text-sm font-bold text-slate-800">Tabela Geral de Registros - Painel Links GF</h3>
-                        <p class="text-xs text-slate-500">Edite as colunas diretamente na tabela e salve tudo em massa</p>
+                        <p class="text-xs text-slate-500">Edite as colunas livremente na tabela e salve tudo em massa</p>
                     </div>
 
                     <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end no-print">
@@ -460,11 +460,9 @@
             return idx !== -1 ? idx : 4;
         }
 
+        // Permite texto livre para todas as colunas editáveis
         function getEditorType(headerName) {
             const u = String(headerName || "").toUpperCase();
-            if (u.includes("STATUS")) return "STATUS_SELECT";
-            if (u.includes("COBRANÇ") || u.includes("COBRANC")) return "COBRANCA_SELECT";
-            if (u.includes("OPERADORA") || u.includes("PROVEDOR")) return "OPERADORA_SELECT";
             if (u.includes("DATA") || u.includes("VENCIMENTO") || u.includes("ATIVAC") || u.includes("DT_") || u.includes("DT ")) return "DATE_INPUT";
             return "TEXT_INPUT";
         }
@@ -898,39 +896,7 @@
                     const inputId = `input_row_${rowIdx}_col_${colIdx}`;
 
                     if (colIdx >= startIdx) {
-                        if (editorType === "COBRANCA_SELECT") {
-                            td.innerHTML = `
-                                <select id="${inputId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
-                                    <option value="ATIVA" ${rawVal === 'ATIVA' ? 'selected' : ''}>ATIVA</option>
-                                    <option value="SUSPENSA" ${rawVal === 'SUSPENSA' ? 'selected' : ''}>SUSPENSA</option>
-                                    <option value="N/I" ${rawVal === 'N/I' ? 'selected' : ''}>N/I</option>
-                                    <option value="GUARDIAN" ${rawVal === 'GUARDIAN' ? 'selected' : ''}>GUARDIAN</option>
-                                    <option value="CORPORATIVO" ${rawVal === 'CORPORATIVO' ? 'selected' : ''}>CORPORATIVO</option>
-                                    <option value="ESTOQUE" ${rawVal === 'ESTOQUE' ? 'selected' : ''}>ESTOQUE</option>
-                                </select>
-                            `;
-                        } else if (editorType === "STATUS_SELECT") {
-                            td.innerHTML = `
-                                <select id="${inputId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
-                                    <option value="ATIVO" ${rawVal === 'ATIVO' ? 'selected' : ''}>ATIVO</option>
-                                    <option value="DESATIVADO" ${rawVal === 'DESATIVADO' ? 'selected' : ''}>DESATIVADO</option>
-                                    <option value="BLOQUEADO" ${rawVal === 'BLOQUEADO' ? 'selected' : ''}>BLOQUEADO</option>
-                                    <option value="N/I" ${rawVal === 'N/I' ? 'selected' : ''}>N/I</option>
-                                </select>
-                            `;
-                        } else if (editorType === "OPERADORA_SELECT") {
-                            td.innerHTML = `
-                                <select id="${inputId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
-                                    <option value="VIVO" ${rawVal.toUpperCase().includes('VIVO') ? 'selected' : ''}>VIVO</option>
-                                    <option value="CLARO" ${rawVal.toUpperCase().includes('CLARO') ? 'selected' : ''}>CLARO</option>
-                                    <option value="TIM" ${rawVal.toUpperCase().includes('TIM') ? 'selected' : ''}>TIM</option>
-                                    <option value="OI" ${rawVal.toUpperCase().includes('OI') ? 'selected' : ''}>OI</option>
-                                    <option value="ALGAR" ${rawVal.toUpperCase().includes('ALGAR') ? 'selected' : ''}>ALGAR</option>
-                                    <option value="OUTROS" ${rawVal.toUpperCase().includes('OUTROS') ? 'selected' : ''}>OUTROS</option>
-                                    <option value="N/I" ${rawVal === 'N/I' || !rawVal ? 'selected' : ''}>N/I</option>
-                                </select>
-                            `;
-                        } else if (editorType === "DATE_INPUT") {
+                        if (editorType === "DATE_INPUT") {
                             const formattedIsoDate = toInputDate(rawVal);
                             td.innerHTML = `
                                 <input type="date" id="${inputId}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
