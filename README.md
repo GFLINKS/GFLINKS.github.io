@@ -901,11 +901,12 @@
                         if (editorType === "COBRANCA_SELECT") {
                             td.innerHTML = `
                                 <select id="${inputId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
-                                    <option value="COBRANÇA OK" ${rawVal === 'COBRANÇA OK' ? 'selected' : ''}>COBRANÇA OK</option>
+                                    <option value="ATIVA" ${rawVal === 'ATIVA' ? 'selected' : ''}>ATIVA</option>
+                                    <option value="SUSPENSA" ${rawVal === 'SUSPENSA' ? 'selected' : ''}>SUSPENSA</option>
                                     <option value="N/I" ${rawVal === 'N/I' ? 'selected' : ''}>N/I</option>
-                                    <option value="ISENTO" ${rawVal === 'ISENTO' ? 'selected' : ''}>ISENTO</option>
-                                    <option value="CANCELADO" ${rawVal === 'CANCELADO' ? 'selected' : ''}>CANCELADO</option>
-                                    <option value="PENDENTE" ${rawVal === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+                                    <option value="GUARDIAN" ${rawVal === 'GUARDIAN' ? 'selected' : ''}>GUARDIAN</option>
+                                    <option value="CORPORATIVO" ${rawVal === 'CORPORATIVO' ? 'selected' : ''}>CORPORATIVO</option>
+                                    <option value="ESTOQUE" ${rawVal === 'ESTOQUE' ? 'selected' : ''}>ESTOQUE</option>
                                 </select>
                             `;
                         } else if (editorType === "STATUS_SELECT") {
