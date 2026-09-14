@@ -173,8 +173,8 @@
             </div>
 
             <div id="bdSearchResult" class="mt-4 hidden border-t border-slate-100 pt-3">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full min-w-max text-left text-xs border-collapse">
                         <thead>
                             <tr id="bdSearchResultHeader" class="bg-slate-800 text-white font-semibold">
                                 <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">CI / CÓDIGO</th>
@@ -255,7 +255,6 @@
                     </div>
 
                     <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end no-print">
-                        <!-- BOTÃO MANTIDO NO MESMO LUGAR (SALVA APENAS MODIFICAÇÕES) -->
                         <button onclick="solicitarSalvarEmMassa()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5 animate-pulse hover:animate-none">
                             <i class="fa-solid fa-floppy-disk text-sm"></i> Salvar Alterações em Massa
                         </button>
@@ -275,8 +274,9 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto max-h-[600px]">
-                    <table class="w-full text-left border-collapse text-[11px]">
+                <!-- CONTAINER COM ROLAGEM HORIZONTAL E VERTICAL HABILITADAS -->
+                <div class="overflow-x-auto overflow-y-auto max-h-[600px] w-full">
+                    <table class="min-w-max w-full text-left border-collapse text-[11px]">
                         <thead>
                             <tr id="tableHeader" class="bg-slate-800 text-white font-semibold sticky top-0 z-10"></tr>
                         </thead>
@@ -782,7 +782,6 @@
             resultBox.classList.remove('hidden');
         }
 
-        // FUNÇÃO ATUALIZADA: SALVA APENAS OS CAMPOS QUE FORAM EFETIVAMENTE MODIFICADOS
         function solicitarSalvarEmMassa() {
             const startIdx = getEnderecoStartIndex();
             const batch = [];
@@ -806,7 +805,6 @@
                             let val = inputEl.value;
                             let originalVal = inputEl.dataset.original || "";
 
-                            // Compara o valor atual com o valor original carregado
                             if (val !== originalVal) {
                                 let valueToSend = val;
                                 if (inputEl.type === 'date') {
