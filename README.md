@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF - (5 min)</title>
+    <title>Painel Links GF - Automação Temporizada (5 min)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -49,6 +49,29 @@
     </style>
 </head>
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800">
+
+    <!-- MODAL DE CONFIRMAÇÃO DE ALTERAÇÃO (GF01) -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/80 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full text-center space-y-4 border border-slate-200">
+            <div class="bg-amber-100 text-amber-600 w-14 h-14 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">Confirmar Alteração</h3>
+                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação no Google Drive, digite o código de confirmação abaixo:</p>
+            </div>
+            <div>
+                <input type="text" id="confirmCodeInput" placeholder="Digite gf01..." class="w-full text-sm px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold tracking-wider bg-slate-50 uppercase">
+                <p id="confirmError" class="text-xs text-rose-600 font-semibold mt-1.5 hidden"><i class="fa-solid fa-circle-xmark mr-1"></i>Código incorreto! Digite gf01 para confirmar.</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="cancelarEdicao()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg transition text-xs">Cancelar</button>
+                <button onclick="validarEExecutarEdicao()" class="w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition text-xs shadow flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- TELA DE LOGIN / BLOQUEIO POR SENHA FUNCIONAL -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -268,6 +291,7 @@
         const AUTH_KEY = 'GF_PANEL_AUTH';
         const TARGET_PASSWORD = 'gF@2026*Link';
         const DRIVE_FILE_ID = '1P88V6dzw8kXwkcIPCufkSMPdtp4DHPg02fdvcF8TYXE';
+        const APPS_SCRIPT_WEBAPP_URL = "SUA_URL_DO_WEB_APP_AQUI"; // Cole a URL gerada do seu Apps Script aqui
 
         const DB_KEY_DATA = 'APP_ATIVOS_DATA';
         const DB_KEY_HEADERS = 'APP_ATIVOS_HEADERS';
@@ -284,6 +308,9 @@
         let statusColName = "";
         let cobrancaColName = "";
         let driveTimer = null;
+
+        // Variável temporária para armazenar a alteração pendente
+        let pendingEdit = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem(AUTH_KEY) === 'true') {
@@ -522,7 +549,6 @@
                 if (rowsBD.length > 0) {
                     bdAuxiliarHeaders = Object.keys(rowsBD[0]);
                     rowsBD.forEach(r => {
-                        // IGNORA LINHAS COMPLETAMENTE VAZIAS NA ABA BD_AUXILIAR
                         const isBDRowEmpty = Object.values(r).every(v => v === undefined || v === null || String(v).trim() === "");
                         if (isBDRowEmpty) return;
 
@@ -561,8 +587,7 @@
                         excelHeaders.push("ENDEREÇO (BD_AUXILIAR)");
                     }
 
-                    jsonWithHeaders.forEach(row => {
-                        // IGNORA LINHAS COMPLETAMENTE VAZIAS NA TABELA DE ATIVOS
+                    jsonWithHeaders.forEach((row, index) => {
                         const isRowEmpty = Object.values(row).every(v => v === undefined || v === null || String(v).trim() === "");
                         if (isRowEmpty) return;
 
@@ -593,6 +618,7 @@
                         fullRowFormatted["ENDEREÇO (BD_AUXILIAR)"] = bdInfo.endereco || fullRowFormatted["ENDEREÇO"] || "-";
 
                         rawAtivosData.push({
+                            excelRowIndex: index + 2, // Índice real da linha na planilha Excel (cabeçalho é linha 1)
                             ci: ci || bdInfo.ci || "-",
                             sigla: sigla || bdInfo.sigla || "-",
                             linha: linha || "-",
@@ -621,6 +647,13 @@
         function renderTableHeaders() {
             const headerRow = document.getElementById('tableHeader');
             headerRow.innerHTML = '';
+
+            // Coluna de Ações para Salvar/Editar
+            const thAction = document.createElement('th');
+            thAction.className = 'p-3 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700 text-center no-print';
+            thAction.innerText = 'AÇÃO';
+            headerRow.appendChild(thAction);
+
             excelHeaders.forEach(h => {
                 const th = document.createElement('th');
                 th.className = 'p-3 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700';
@@ -722,6 +755,132 @@
             resultBox.classList.remove('hidden');
         }
 
+        // --- SISTEMA DE CONFIRMAÇÃO COM CÓDIGO "gf01" ---
+        function solicitarEdicaoLinha(rowIndex, selectCobrancaId, selectStatusId) {
+            const cobrancaVal = document.getElementById(selectCobrancaId).value;
+            const statusVal = document.getElementById(selectStatusId).value;
+
+            pendingEdit = {
+                rowIndex: rowIndex,
+                cobranca: cobrancaVal,
+                status: statusVal
+            };
+
+            document.getElementById('confirmCodeInput').value = '';
+            document.getElementById('confirmError').classList.add('hidden');
+            document.getElementById('confirmModal').classList.remove('hidden');
+            document.getElementById('confirmCodeInput').focus();
+        }
+
+        function cancelarEdicao() {
+            pendingEdit = null;
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        function validarEExecutarEdicao() {
+            const codeInput = document.getElementById('confirmCodeInput').value.trim().toLowerCase();
+            const errorMsg = document.getElementById('confirmError');
+
+            if (codeInput === 'gf01') {
+                document.getElementById('confirmModal').classList.add('hidden');
+                if (pendingEdit) {
+                    executarSalvarAppsScript(pendingEdit.rowIndex, pendingEdit.cobranca, pendingEdit.status);
+                }
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        async function executarSalvarAppsScript(rowIndex, novaCobranca, novoStatus) {
+            if (!APPS_SCRIPT_WEBAPP_URL || APPS_SCRIPT_WEBAPP_URL.includes("SUA_URL_DO_WEB_APP_AQUI")) {
+                alert("Sua requisição foi confirmada com 'gf01', porém a URL do Apps Script precisa ser configurada no código fonte.");
+                return;
+            }
+
+            try {
+                const response = await fetch(APPS_SCRIPT_WEBAPP_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        rowIndex: rowIndex,
+                        cobranca: novaCobranca,
+                        status: novoStatus
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === "success") {
+                    alert("Alteração salva com sucesso no Google Drive!");
+                    syncDriveData();
+                } else {
+                    alert("Erro ao gravar no Drive: " + result.message);
+                }
+            } catch (err) {
+                alert("Erro ao conectar com o Apps Script: " + err.toString());
+            }
+        }
+
+        function renderTableBody(data) {
+            const tbody = document.getElementById('ativosTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+
+                // Botão Salvar por Linha
+                const tdAction = document.createElement('td');
+                tdAction.className = 'p-2 text-center no-print whitespace-nowrap';
+                
+                const selCobrancaId = `sel_cob_${idx}`;
+                const selStatusId = `sel_stat_${idx}`;
+
+                tdAction.innerHTML = `
+                    <button onclick="solicitarEdicaoLinha(${item.excelRowIndex}, '${selCobrancaId}', '${selStatusId}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold px-2.5 py-1.5 rounded transition shadow flex items-center gap-1 mx-auto" title="Salvar alterações desta linha no Google Drive">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar
+                    </button>
+                `;
+                tr.appendChild(tdAction);
+
+                excelHeaders.forEach(header => {
+                    const td = document.createElement('td');
+                    td.className = 'p-3 whitespace-nowrap font-medium';
+
+                    // Se for a coluna de Cobrança, renderiza Menu Suspenso
+                    if (header === cobrancaColName) {
+                        td.innerHTML = `
+                            <select id="${selCobrancaId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
+                                <option value="COBRANÇA OK" ${item.cobrancaColE === 'COBRANÇA OK' ? 'selected' : ''}>COBRANÇA OK</option>
+                                <option value="N/I" ${item.cobrancaColE === 'N/I' ? 'selected' : ''}>N/I</option>
+                                <option value="ISENTO" ${item.cobrancaColE === 'ISENTO' ? 'selected' : ''}>ISENTO</option>
+                                <option value="CANCELADO" ${item.cobrancaColE === 'CANCELADO' ? 'selected' : ''}>CANCELADO</option>
+                                <option value="PENDENTE" ${item.cobrancaColE === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+                            </select>
+                        `;
+                    } 
+                    // Se for a coluna de Status, renderiza Menu Suspenso
+                    else if (header === statusColName) {
+                        td.innerHTML = `
+                            <select id="${selStatusId}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
+                                <option value="ATIVO" ${item.statusColF === 'ATIVO' ? 'selected' : ''}>ATIVO</option>
+                                <option value="DESATIVADO" ${item.statusColF === 'DESATIVADO' ? 'selected' : ''}>DESATIVADO</option>
+                                <option value="BLOQUEADO" ${item.statusColF === 'BLOQUEADO' ? 'selected' : ''}>BLOQUEADO</option>
+                                <option value="N/I" ${item.statusColF === 'N/I' ? 'selected' : ''}>N/I</option>
+                            </select>
+                        `;
+                    } else {
+                        td.innerText = item.originalRow[header] || "-";
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('displayedCount').innerText = data.length;
+            document.getElementById('totalCount').innerText = rawAtivosData.length;
+        }
+
         function setSelectOption(selectEl, targetValue) {
             if (!selectEl) return;
             const target = String(targetValue).trim().toUpperCase();
@@ -773,14 +932,12 @@
                 if (item.isCisNumeric && item.cobrancaColE === "N/I") cisNumCobrancaNI++;
             });
 
-            // Populate Status
             const statusContainer = document.getElementById('statusCardsContainer');
             statusContainer.innerHTML = '';
             statusContainer.appendChild(createMetricCard("TOTAL DE ATIVOS", total, "100%", "fa-list-check", () => triggerCardFilter('RESET', '')));
 
             populateCards(statusContainer, statusCounts, total, 'filterStatusColF', 'STATUS', 'STATUS');
 
-            // Populate Cobrança
             const cobrancaContainer = document.getElementById('cobrancaCardsContainer');
             cobrancaContainer.innerHTML = '';
             cobrancaContainer.appendChild(createMetricCard("TOTAL DE REGISTROS", total, "100%", "fa-receipt", () => triggerCardFilter('RESET', '')));
@@ -915,28 +1072,6 @@
             });
 
             renderTableBody(filtered);
-        }
-
-        function renderTableBody(data) {
-            const tbody = document.getElementById('ativosTableBody');
-            tbody.innerHTML = '';
-
-            data.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
-
-                excelHeaders.forEach(header => {
-                    const td = document.createElement('td');
-                    td.className = 'p-3 whitespace-nowrap font-medium';
-                    td.innerText = item.originalRow[header] || "-";
-                    tr.appendChild(td);
-                });
-
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('displayedCount').innerText = data.length;
-            document.getElementById('totalCount').innerText = rawAtivosData.length;
         }
 
         function resetFilters() {
