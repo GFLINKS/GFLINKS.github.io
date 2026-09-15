@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF - </title>
+    <title>Painel Links GF - Automação Temporizada (5 min)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -255,7 +255,8 @@
                     </div>
 
                     <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end no-print">
-                        <button onclick="solicitarSalvarEmMassa()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5 animate-pulse hover:animate-none">
+                        <!-- BOTÃO SEM ANIMAÇÃO DE PISCAR -->
+                        <button onclick="solicitarSalvarEmMassa()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5">
                             <i class="fa-solid fa-floppy-disk text-sm"></i> Salvar Alterações em Massa
                         </button>
 
@@ -473,7 +474,6 @@
             return "TEXT_INPUT";
         }
 
-        // MONTA SELECT DEDICADO SEM ERROS DE VALIDAÇÃO
         function buildSelectHtml(inputId, rawVal, optionsList) {
             const currentUpper = cleanStr(rawVal).toUpperCase();
             let hasMatch = false;
@@ -484,7 +484,6 @@
                 return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt}</option>`;
             }).join('');
 
-            // Se o valor da planilha não estiver na lista predefinida, preserva o valor atual para não gerar erro
             if (currentUpper && currentUpper !== "-" && !hasMatch) {
                 optionsHtml += `<option value="${rawVal}" selected>${rawVal}</option>`;
             }
@@ -886,27 +885,24 @@
             }
         }
 
+        // MENSAGEM DE AVISO AO SALVAR INFORMANDO PARA AGUARDAR O PROCESSAMENTO DO BANCO DE DADOS
         async function executarSalvarEmMassaAppsScript(batch) {
             try {
-                const response = await fetch(APPS_SCRIPT_WEBAPP_URL, {
+                await fetch(APPS_SCRIPT_WEBAPP_URL, {
                     method: "POST",
+                    mode: "no-cors",
                     headers: {
                         "Content-Type": "text/plain;charset=utf-8"
                     },
                     body: JSON.stringify({ batch: batch })
                 });
 
-                const result = await response.json();
-                if (result.status === "success") {
-                    alert(result.message || "Alterações salvas na planilha com sucesso!");
-                    setTimeout(() => {
-                        syncDriveData();
-                    }, 4000);
-                } else {
-                    alert("Erro retornado pelo Google Sheets: " + result.message);
-                }
+                alert("Alterações enviadas com sucesso!\n\nPor favor, aguarde alguns instantes enquanto o banco de dados é atualizado na nuvem.");
+                setTimeout(() => {
+                    syncDriveData();
+                }, 4000);
             } catch (err) {
-                alert("Erro de conexão/CORS com o Apps Script: " + err.toString());
+                alert("Erro ao enviar dados para o servidor: " + err.toString());
             }
         }
 
