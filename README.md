@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF </title>
+    <title>Painel Links GF - Automação Temporizada (5 min)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -274,7 +274,6 @@
                     </div>
                 </div>
 
-                <!-- CONTAINER COM ROLAGEM HORIZONTAL E VERTICAL HABILITADAS -->
                 <div class="overflow-x-auto overflow-y-auto max-h-[600px] w-full">
                     <table class="min-w-max w-full text-left border-collapse text-[11px]">
                         <thead>
@@ -303,6 +302,11 @@
         const DB_KEY_AUX = 'APP_BD_AUXILIAR';
         const DB_KEY_AUX_HEADERS = 'APP_BD_AUXILIAR_HEADERS';
         const DB_KEY_AUX_DATA = 'APP_BD_AUXILIAR_DATA';
+
+        // LISTAS OFICIAIS EXTRAÍDAS DA VALIDAÇÃO DO GOOGLE SHEETS
+        const OPCOES_COBRANCA = ["ATIVA", "SUSPENSA", "N/I", "GUARDIAN", "CORPORATIVO", "ESTOQUE"];
+        const OPCOES_STATUS = ["OK", "CANCELADA", "SUSPENSA", "EM ANALISE", "DUPLICIDADE", "EM CANCELAMENTO", "MANUTENCAO", "TRANSFERENCIA CNPJ", "TRANSFERENCIA ENDERECO"];
+        const OPCOES_OPERADORA = ["VIVO", "CLARO", "TIM", "OI", "ALGAR", "OUTROS", "N/I"];
 
         let rawAtivosData = [];
         let excelHeaders = [];
@@ -462,8 +466,30 @@
 
         function getEditorType(headerName) {
             const u = String(headerName || "").toUpperCase();
+            if (u.includes("STATUS")) return "STATUS_SELECT";
+            if (u.includes("COBRANÇ") || u.includes("COBRANC")) return "COBRANCA_SELECT";
+            if (u.includes("OPERADORA") || u.includes("PROVEDOR")) return "OPERADORA_SELECT";
             if (u.includes("DATA") || u.includes("VENCIMENTO") || u.includes("ATIVAC") || u.includes("DT_") || u.includes("DT ")) return "DATE_INPUT";
             return "TEXT_INPUT";
+        }
+
+        // MONTA SELECT DEDICADO SEM ERROS DE VALIDAÇÃO
+        function buildSelectHtml(inputId, rawVal, optionsList) {
+            const currentUpper = cleanStr(rawVal).toUpperCase();
+            let hasMatch = false;
+
+            let optionsHtml = optionsList.map(opt => {
+                const isSelected = (currentUpper === opt.toUpperCase());
+                if (isSelected) hasMatch = true;
+                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt}</option>`;
+            }).join('');
+
+            // Se o valor da planilha não estiver na lista predefinida, preserva o valor atual para não gerar erro
+            if (currentUpper && currentUpper !== "-" && !hasMatch) {
+                optionsHtml += `<option value="${rawVal}" selected>${rawVal}</option>`;
+            }
+
+            return `<select id="${inputId}" data-original="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">${optionsHtml}</select>`;
         }
 
         function saveToDatabase() {
@@ -905,7 +931,13 @@
                     const inputId = `input_row_${rowIdx}_col_${colIdx}`;
 
                     if (colIdx >= startIdx) {
-                        if (editorType === "DATE_INPUT") {
+                        if (editorType === "COBRANCA_SELECT") {
+                            td.innerHTML = buildSelectHtml(inputId, rawVal, OPCOES_COBRANCA);
+                        } else if (editorType === "STATUS_SELECT") {
+                            td.innerHTML = buildSelectHtml(inputId, rawVal, OPCOES_STATUS);
+                        } else if (editorType === "OPERADORA_SELECT") {
+                            td.innerHTML = buildSelectHtml(inputId, rawVal, OPCOES_OPERADORA);
+                        } else if (editorType === "DATE_INPUT") {
                             const formattedIsoDate = toInputDate(rawVal);
                             td.innerHTML = `
                                 <input type="date" id="${inputId}" data-original="${formattedIsoDate}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
