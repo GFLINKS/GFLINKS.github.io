@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF - Automação Temporizada (5 min)</title>
+    <title>Painel Links GF </title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -255,8 +255,13 @@
                     </div>
 
                     <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end no-print">
-                        <!-- BOTÃO SEM ANIMAÇÃO DE PISCAR -->
-                        <button onclick="solicitarSalvarEmMassa()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5">
+                        <!-- INDICADOR VISUAL DA ÚLTIMA ALTERAÇÃO NO BD -->
+                        <span id="lastSaveIndicator" class="text-[11px] font-medium px-2.5 py-1.5 rounded-lg border bg-slate-100 text-slate-600 border-slate-200 flex items-center gap-1.5 transition-all">
+                            <i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>
+                            <span>Última alteração no BD: Nunca</span>
+                        </span>
+
+                        <button onclick="solicitarSalvarEmMassa()" id="btnSaveBatch" class="text-xs bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5">
                             <i class="fa-solid fa-floppy-disk text-sm"></i> Salvar Alterações em Massa
                         </button>
 
@@ -303,6 +308,7 @@
         const DB_KEY_AUX = 'APP_BD_AUXILIAR';
         const DB_KEY_AUX_HEADERS = 'APP_BD_AUXILIAR_HEADERS';
         const DB_KEY_AUX_DATA = 'APP_BD_AUXILIAR_DATA';
+        const DB_KEY_LAST_SAVE = 'GF_LAST_BD_SAVE_TIMESTAMP';
 
         // LISTAS OFICIAIS EXTRAÍDAS DA VALIDAÇÃO DO GOOGLE SHEETS
         const OPCOES_COBRANCA = ["ATIVA", "SUSPENSA", "N/I", "GUARDIAN", "CORPORATIVO", "ESTOQUE"];
@@ -353,9 +359,22 @@
             }
         }
 
+        function updateSaveIndicator(text, iconClass = "fa-clock-rotate-left text-indigo-500", bgClass = "bg-slate-100 text-slate-600 border-slate-200") {
+            const el = document.getElementById('lastSaveIndicator');
+            if (el) {
+                el.className = `text-[11px] font-medium px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 transition-all ${bgClass}`;
+                el.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${text}</span>`;
+            }
+        }
+
         function initApp() {
             loadFromDatabase();
             syncDriveData();
+
+            const storedLastSave = localStorage.getItem(DB_KEY_LAST_SAVE);
+            if (storedLastSave) {
+                updateSaveIndicator(`Última alteração no BD: ${storedLastSave}`, "fa-circle-check text-emerald-600", "bg-emerald-50 text-emerald-800 border-emerald-300");
+            }
 
             if (driveTimer) clearInterval(driveTimer);
             driveTimer = setInterval(() => {
@@ -544,6 +563,7 @@
                 localStorage.removeItem(DB_KEY_AUX);
                 localStorage.removeItem(DB_KEY_AUX_HEADERS);
                 localStorage.removeItem(DB_KEY_AUX_DATA);
+                localStorage.removeItem(DB_KEY_LAST_SAVE);
 
                 rawAtivosData = [];
                 excelHeaders = [];
@@ -558,6 +578,7 @@
                 document.getElementById('excelFile').value = '';
                 document.getElementById('bdStatusText').innerText = "Pesquise por Código CIS, Sigla, Unidade ou Endereço cadastrado na aba BD_Auxiliar.";
                 document.getElementById('lastUpdateBadge').innerText = "Ultima atualização: Nunca";
+                updateSaveIndicator("Última alteração no BD: Nunca");
 
                 updateDbBadge(false);
                 alert("Banco de dados local limpo com sucesso!");
@@ -885,8 +906,13 @@
             }
         }
 
-        // MENSAGEM DE AVISO AO SALVAR INFORMANDO PARA AGUARDAR O PROCESSAMENTO DO BANCO DE DADOS
+        // SALVAMENTO DISCRETO SEM POPUPS DE ALERT, COM STATUS VISUAL E DATA/HORA
         async function executarSalvarEmMassaAppsScript(batch) {
+            const btnSave = document.getElementById('btnSaveBatch');
+            if (btnSave) btnSave.disabled = true;
+
+            updateSaveIndicator("Salvando alterações no BD...", "fa-spinner fa-spin text-amber-600", "bg-amber-50 text-amber-800 border-amber-300");
+
             try {
                 await fetch(APPS_SCRIPT_WEBAPP_URL, {
                     method: "POST",
@@ -897,12 +923,22 @@
                     body: JSON.stringify({ batch: batch })
                 });
 
-                alert("Alterações enviadas com sucesso!\n\nPor favor, aguarde alguns instantes enquanto o banco de dados é atualizado na nuvem.");
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('pt-BR');
+                const timeStr = now.toLocaleTimeString('pt-BR');
+                const timestampStr = `${dateStr} às ${timeStr}`;
+
+                localStorage.setItem(DB_KEY_LAST_SAVE, timestampStr);
+
+                updateSaveIndicator(`Última alteração no BD: ${timestampStr}`, "fa-circle-check text-emerald-600", "bg-emerald-50 text-emerald-800 border-emerald-300");
+
                 setTimeout(() => {
                     syncDriveData();
                 }, 4000);
             } catch (err) {
-                alert("Erro ao enviar dados para o servidor: " + err.toString());
+                updateSaveIndicator("Erro ao salvar no BD", "fa-circle-xmark text-rose-600", "bg-rose-50 text-rose-800 border-rose-300");
+            } finally {
+                if (btnSave) btnSave.disabled = false;
             }
         }
 
