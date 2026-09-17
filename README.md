@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF </title>
+    <title>Painel Links GF - </title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -49,6 +49,31 @@
     </style>
 </head>
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800">
+
+    <!-- MODAL DE OBSERVAÇÃO / TEXTO LONGO (NOVO) -->
+    <div id="obsModal" class="fixed inset-0 bg-slate-900/80 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i>
+                    <span id="obsModalTitle">Visualizar / Editar Observação</span>
+                </h3>
+                <button onclick="closeObsModal()" class="text-slate-400 hover:text-slate-600 text-base">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Conteúdo Completo:</label>
+                <textarea id="obsModalTextarea" rows="6" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium leading-relaxed"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeObsModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
+                <button onclick="saveObsModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> Aplicar Alteração
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- MENU FLUTUANTE DE FILTRO ESTILO EXCEL -->
     <div id="excelFilterDropdown" class="fixed hidden z-[100] bg-white border border-slate-300 shadow-2xl rounded-xl p-3 w-64 text-xs font-sans text-slate-700" onclick="event.stopPropagation()">
@@ -372,9 +397,12 @@
         let pendingEdit = null;
 
         // ESTADOS DOS AUTOFILTROS ESTILO EXCEL
-        let activeColumnFilters = {}; // { [colHeader]: Set of allowed values }
-        let currentSort = { colHeader: null, direction: null }; // 'asc' ou 'desc'
+        let activeColumnFilters = {}; 
+        let currentSort = { colHeader: null, direction: null }; 
         let activeDropdownCol = null;
+
+        // ESTADO DO MODAL DE OBSERVAÇÃO
+        let activeObsInputId = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem(AUTH_KEY) === 'true') {
@@ -382,7 +410,6 @@
                 initApp();
             }
 
-            // CORREÇÃO: Listener global ajustado para não fechar o menu ao clicar nos próprios botões de filtro
             window.addEventListener('click', (e) => {
                 const dropdown = document.getElementById('excelFilterDropdown');
                 if (dropdown && !dropdown.classList.contains('hidden')) {
@@ -395,6 +422,40 @@
             });
         });
 
+        // LÓGICA DO MODAL DE OBSERVAÇÃO / TEXTO LONGO
+        function openObsModal(inputId, headerName) {
+            const inputEl = document.getElementById(inputId);
+            if (!inputEl) return;
+
+            activeObsInputId = inputId;
+            document.getElementById('obsModalTitle').innerText = `Editar ${headerName || 'Observação'}`;
+            document.getElementById('obsModalTextarea').value = inputEl.value;
+            document.getElementById('obsModal').classList.remove('hidden');
+            
+            setTimeout(() => {
+                const txt = document.getElementById('obsModalTextarea');
+                txt.focus();
+                txt.select();
+            }, 50);
+        }
+
+        function closeObsModal() {
+            activeObsInputId = null;
+            document.getElementById('obsModal').classList.add('hidden');
+        }
+
+        function saveObsModal() {
+            if (activeObsInputId) {
+                const inputEl = document.getElementById(activeObsInputId);
+                if (inputEl) {
+                    const newVal = document.getElementById('obsModalTextarea').value;
+                    inputEl.value = newVal;
+                    inputEl.title = newVal;
+                }
+            }
+            closeObsModal();
+        }
+
         function checkPassword(e) {
             e.preventDefault();
             const input = document.getElementById('accessPassword').value.trim();
@@ -403,7 +464,7 @@
             if (input === TARGET_PASSWORD) {
                 sessionStorage.setItem(AUTH_KEY, 'true');
                 document.getElementById('loginOverlay').classList.add('hidden');
-                error.classList.remove('hidden');
+                error.classList.add('hidden');
                 initApp();
             } else {
                 error.classList.remove('hidden');
@@ -817,7 +878,6 @@
             });
         }
 
-        // CORREÇÃO: ABRIR O MENU FLUTUANTE COM POSICIONAMENTO VIEWPORT PERFEITO
         function openExcelFilterDropdown(event, colHeader) {
             if (event) {
                 event.preventDefault();
@@ -829,7 +889,6 @@
             document.getElementById('excelFilterColName').innerText = colHeader;
             document.getElementById('excelFilterSearch').value = '';
 
-            // Cálculo exato de posição fixed (relativo à janela gráfica do navegador)
             const btn = event ? event.currentTarget : null;
             if (btn) {
                 const rect = btn.getBoundingClientRect();
@@ -837,7 +896,6 @@
                 dropdown.style.left = `${Math.max(10, Math.min(rect.left, window.innerWidth - 270))}px`;
             }
 
-            // Extrair valores únicos
             const uniqueSet = new Set();
             rawAtivosData.forEach(item => {
                 const val = String(item.originalRow[colHeader] || "-").trim();
@@ -1139,6 +1197,7 @@
             }
         }
 
+        // RENDERIZAÇÃO DA TABELA COM BOTÃO DE EXPANSÃO PARA INPUTS DE TEXTO
         function renderTableBody(data) {
             const tbody = document.getElementById('ativosTableBody');
             tbody.innerHTML = '';
@@ -1172,8 +1231,14 @@
                                 <input type="date" id="${inputId}" data-original="${formattedIsoDate}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
                             `;
                         } else {
+                            // INPUT DE TEXTO COM BOTÃO DE EXPANSÃO PARA EDIÇÃO AMPLA
                             td.innerHTML = `
-                                <input type="text" id="${inputId}" data-original="${rawVal}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full min-w-[150px]">
+                                <div class="flex items-center gap-1 min-w-[170px]">
+                                    <input type="text" id="${inputId}" data-original="${rawVal}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full" title="${rawVal}">
+                                    <button type="button" onclick="openObsModal('${inputId}', '${header.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-indigo-600 p-1.5 rounded hover:bg-slate-100 transition" title="Expandir para leitura e edição">
+                                        <i class="fa-solid fa-expand text-xs"></i>
+                                    </button>
+                                </div>
                             `;
                         }
                     } else {
@@ -1378,7 +1443,6 @@
                 const matchCobranca = !selectedCobranca || item.cobrancaColE.toUpperCase() === selectedCobranca.toUpperCase();
                 const matchCisNumNI = !onlyNumericNI || (item.isCisNumeric && item.cobrancaColE === "N/I");
 
-                // Filtros das colunas do Excel
                 let matchColFilters = true;
                 for (const [colHeader, allowedSet] of Object.entries(activeColumnFilters)) {
                     if (allowedSet && allowedSet.size > 0) {
@@ -1393,7 +1457,6 @@
                 return matchQuery && matchStatus && matchCobranca && matchCisNumNI && matchColFilters;
             });
 
-            // Aplicar ordenação se existir
             if (currentSort.colHeader) {
                 const h = currentSort.colHeader;
                 const dir = currentSort.direction === 'asc' ? 1 : -1;
