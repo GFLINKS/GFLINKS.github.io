@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF - </title>
+    <title>Painel Links GF </title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -50,7 +50,7 @@
 </head>
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800">
 
-    <!-- MODAL DE OBSERVAÇÃO / TEXTO LONGO (NOVO) -->
+    <!-- MODAL DE OBSERVAÇÃO / TEXTO LONGO -->
     <div id="obsModal" class="fixed inset-0 bg-slate-900/80 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -69,7 +69,7 @@
             <div class="flex justify-end gap-2 pt-2">
                 <button onclick="closeObsModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
                 <button onclick="saveObsModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition shadow flex items-center gap-1.5">
-                    <i class="fa-solid fa-check"></i> Aplicar Alteração
+                    <i class="fa-solid fa-floppy-disk text-xs"></i> Aplicar e Salvar no Drive
                 </button>
             </div>
         </div>
@@ -444,15 +444,56 @@
             document.getElementById('obsModal').classList.add('hidden');
         }
 
+        // SALVAMENTO INDIVIDUAL COM CONFIRMAÇÃO (GF01)
         function saveObsModal() {
-            if (activeObsInputId) {
-                const inputEl = document.getElementById(activeObsInputId);
-                if (inputEl) {
-                    const newVal = document.getElementById('obsModalTextarea').value;
-                    inputEl.value = newVal;
-                    inputEl.title = newVal;
+            if (!activeObsInputId) return;
+
+            const inputEl = document.getElementById(activeObsInputId);
+            if (!inputEl) {
+                closeObsModal();
+                return;
+            }
+
+            const newVal = document.getElementById('obsModalTextarea').value;
+            const originalVal = inputEl.dataset.original || "";
+
+            // Atualiza o valor visual na célula da tabela
+            inputEl.value = newVal;
+            inputEl.title = newVal;
+
+            // Se houve alteração no conteúdo, solicita senha e grava individualmente no Drive
+            if (newVal !== originalVal) {
+                const tr = inputEl.closest('tr');
+                if (tr) {
+                    const excelRowIndex = parseInt(tr.dataset.excelRowIndex, 10);
+                    const parts = activeObsInputId.split('_col_');
+                    const colIdx = parseInt(parts[1], 10);
+                    const header = excelHeaders[colIdx];
+
+                    if (!isNaN(excelRowIndex) && !isNaN(colIdx) && header) {
+                        const batch = [{
+                            rowIndex: excelRowIndex,
+                            changes: [{
+                                colIndex: colIdx + 1,
+                                header: header,
+                                value: newVal
+                            }]
+                        }];
+
+                        pendingEdit = { batch: batch };
+
+                        closeObsModal();
+
+                        // Abre o modal de confirmação por senha (gf01)
+                        document.getElementById('confirmCodeInput').value = '';
+                        document.getElementById('confirmError').classList.add('hidden');
+                        document.getElementById('confirmModal').classList.remove('hidden');
+                        document.getElementById('confirmCodeInput').focus();
+                        return;
+                    }
                 }
             }
+
             closeObsModal();
         }
 
@@ -1231,7 +1272,6 @@
                                 <input type="date" id="${inputId}" data-original="${formattedIsoDate}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
                             `;
                         } else {
-                            // INPUT DE TEXTO COM BOTÃO DE EXPANSÃO PARA EDIÇÃO AMPLA
                             td.innerHTML = `
                                 <div class="flex items-center gap-1 min-w-[170px]">
                                     <input type="text" id="${inputId}" data-original="${rawVal}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full" title="${rawVal}">
