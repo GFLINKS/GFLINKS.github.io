@@ -51,7 +51,7 @@
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800">
 
     <!-- MENU FLUTUANTE DE FILTRO ESTILO EXCEL -->
-    <div id="excelFilterDropdown" class="fixed hidden z-[100] bg-white border border-slate-300 shadow-2xl rounded-xl p-3 w-64 text-xs font-sans text-slate-700 animate-fadeIn" onclick="event.stopPropagation()">
+    <div id="excelFilterDropdown" class="fixed hidden z-[100] bg-white border border-slate-300 shadow-2xl rounded-xl p-3 w-64 text-xs font-sans text-slate-700" onclick="event.stopPropagation()">
         <!-- Ações de Ordenação -->
         <div class="space-y-1 pb-2 border-b border-slate-200">
             <button onclick="applyColumnSort('asc')" class="w-full text-left px-2.5 py-1.5 hover:bg-slate-100 rounded-md flex items-center gap-2 font-semibold text-slate-700 transition">
@@ -382,11 +382,15 @@
                 initApp();
             }
 
-            // Fechar dropdown de filtro do Excel ao clicar fora
+            // CORREÇÃO: Listener global ajustado para não fechar o menu ao clicar nos próprios botões de filtro
             window.addEventListener('click', (e) => {
                 const dropdown = document.getElementById('excelFilterDropdown');
                 if (dropdown && !dropdown.classList.contains('hidden')) {
-                    dropdown.classList.add('hidden');
+                    const isClickInside = e.target.closest('#excelFilterDropdown');
+                    const isFilterBtn = e.target.closest('.excel-filter-btn');
+                    if (!isClickInside && !isFilterBtn) {
+                        dropdown.classList.add('hidden');
+                    }
                 }
             });
         });
@@ -399,7 +403,7 @@
             if (input === TARGET_PASSWORD) {
                 sessionStorage.setItem(AUTH_KEY, 'true');
                 document.getElementById('loginOverlay').classList.add('hidden');
-                error.classList.add('hidden');
+                error.classList.remove('hidden');
                 initApp();
             } else {
                 error.classList.remove('hidden');
@@ -804,7 +808,7 @@
                 th.innerHTML = `
                     <div class="flex items-center justify-between gap-2">
                         <span>${h.toUpperCase()}${sortBadge}</span>
-                        <button onclick="openExcelFilterDropdown(event, '${h.replace(/'/g, "\\'")}')" class="p-1.5 rounded transition ${filterBtnClass}" title="Filtrar/Ordenar ${h}">
+                        <button onclick="openExcelFilterDropdown(event, '${h.replace(/'/g, "\\'")}')" class="excel-filter-btn p-1.5 rounded transition ${filterBtnClass}" title="Filtrar/Ordenar ${h}">
                             <i class="fa-solid fa-filter text-xs"></i>
                         </button>
                     </div>
@@ -813,19 +817,25 @@
             });
         }
 
-        // ABRIR O MENU FLUTUANTE DO AUTOFILTRO
+        // CORREÇÃO: ABRIR O MENU FLUTUANTE COM POSICIONAMENTO VIEWPORT PERFEITO
         function openExcelFilterDropdown(event, colHeader) {
-            event.stopPropagation();
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
             activeDropdownCol = colHeader;
 
             const dropdown = document.getElementById('excelFilterDropdown');
             document.getElementById('excelFilterColName').innerText = colHeader;
             document.getElementById('excelFilterSearch').value = '';
 
-            // Posição flutuante perto do botão
-            const rect = event.currentTarget.getBoundingClientRect();
-            dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
-            dropdown.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 280)}px`;
+            // Cálculo exato de posição fixed (relativo à janela gráfica do navegador)
+            const btn = event ? event.currentTarget : null;
+            if (btn) {
+                const rect = btn.getBoundingClientRect();
+                dropdown.style.top = `${rect.bottom + 4}px`;
+                dropdown.style.left = `${Math.max(10, Math.min(rect.left, window.innerWidth - 270))}px`;
+            }
 
             // Extrair valores únicos
             const uniqueSet = new Set();
@@ -842,7 +852,7 @@
 
             let allChecked = !selectedSet;
 
-            uniqueList.forEach((val, idx) => {
+            uniqueList.forEach((val) => {
                 const isChecked = !selectedSet || selectedSet.has(val);
                 const label = document.createElement('label');
                 label.className = 'flex items-center gap-2 px-2 py-1 hover:bg-slate-200/60 rounded cursor-pointer text-slate-700 excel-item-label';
