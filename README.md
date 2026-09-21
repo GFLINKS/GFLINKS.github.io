@@ -389,10 +389,10 @@
         const DB_KEY_AUX_DATA = 'APP_BD_AUXILIAR_DATA';
         const DB_KEY_LAST_SAVE = 'GF_LAST_BD_SAVE_TIMESTAMP';
 
-        // LISTAS OFICIAIS ATUALIZADAS CONFORME REGRAS DE VALIDAÇÃO DO GOOGLE SHEETS
+        // LISTAS OFICIAIS ATUALIZADAS E CORRIGIDAS CONFORME REGRAS DO GOOGLE SHEETS
         const OPCOES_COBRANCA = [
             "ATIVA", "SUSPENSA", "N/I", "GUARDIAN", "CORPORATIVO", "ESTOQUE", 
-            "CANCELADA", "INATIVO", "DESATIVADA", "COBRANDO", "COBRAR NA PROXIMA", "NÃO COBRANDO"
+            "CANCELADA", "INATIVO", "DESATIVADA", "COBRANDO", "COBRAR NA PROXIMA MEDIÇÃO", "NÃO COBRANDO"
         ];
         const OPCOES_STATUS = [
             "OK", "CANCELADA", "SUSPENSA", "EM ANALISE", "DUPLICIDADE", "EM CANCELAMENTO", 
@@ -1389,7 +1389,7 @@
 
             populateCards(statusContainer, statusCounts, total, 'filterStatusColF', 'STATUS', 'STATUS');
 
-            // MÉTRICAS DE COBRANÇA (COM EXPANSÃO E CARDS PRINCIPAIS EXIGIDOS)
+            // MÉTRICAS DE COBRANÇA (COM EXPANSÃO E CARDS PRINCIPAIS)
             const cobrancaContainer = document.getElementById('cobrancaCardsContainer');
             cobrancaContainer.innerHTML = '';
 
@@ -1405,11 +1405,11 @@
             cobrancaContainer.appendChild(cobrancaMainGrid);
             cobrancaContainer.appendChild(cobrancaSecondaryGrid);
 
-            // Card Principal: TOTAL DE REGISTROS
+            // Card Principal 1: TOTAL DE REGISTROS
             cobrancaMainGrid.appendChild(createMetricCard("TOTAL DE REGISTROS", total, "100%", "fa-receipt", () => triggerCardFilter('RESET', '')));
 
-            // Definir ordem e rótulos dos Cards Principais Exigidos
-            const mainKeysOrder = ["NÃO COBRANDO", "COBRANDO", "SUSPENSA", "COBRAR NA PROXIMA"];
+            // Definir os 4 rótulos dos Cards Principais Exigidos
+            const mainKeysOrder = ["NÃO COBRANDO", "COBRANDO", "SUSPENSA", "COBRAR NA PROXIMA MEDIÇÃO"];
 
             const selectCobranca = document.getElementById('filterCobrancaColE');
             if (selectCobranca) selectCobranca.innerHTML = `<option value="">COBRANÇA: Todas</option>`;
@@ -1436,7 +1436,7 @@
                     if (targetLabel === "NÃO COBRANDO") return u === "NÃO COBRANDO" || u === "NAO COBRANDO";
                     if (targetLabel === "COBRANDO") return u === "COBRANDO";
                     if (targetLabel === "SUSPENSA") return u.includes("SUSPENS");
-                    if (targetLabel === "COBRAR NA PROXIMA") return u.includes("COBRAR NA PROXIMA");
+                    if (targetLabel === "COBRAR NA PROXIMA MEDIÇÃO") return u.includes("COBRAR NA PROXIMA");
                     return false;
                 }) || targetLabel;
 
