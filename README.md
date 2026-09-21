@@ -346,8 +346,9 @@
 
                         <input type="text" id="tableSearchInput" onkeyup="filterTable()" placeholder="Buscar..." class="text-xs px-3 py-2 border border-slate-300 rounded-lg bg-white">
                         <select id="filterCisNumNI" onchange="filterTable()" class="text-xs bg-amber-50 border border-amber-300 text-amber-900 rounded-lg px-3 py-2 font-bold">
-                            <option value="">Filtro CIS Numérica: Todos</option>
-                            <option value="ONLY_NUMERIC_NI">Apenas CIS Numérica + Cobrança N/I</option>
+                            <option value="">Filtro Especial: Todos</option>
+                            <option value="ONLY_NUMERIC_NI">CIS Numérica + Cobrança N/I</option>
+                            <option value="ONLY_DUPLICATED_CIS">Duplicidade de Link na CIS</option>
                         </select>
                         <select id="filterStatusColF" onchange="filterTable()" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700">
                             <option value="">STATUS: Todos</option>
@@ -1361,6 +1362,8 @@
                 setSelectOption(selCobranca, value);
             } else if (type === 'CIS_NUM_NI') {
                 if (selCisNum) selCisNum.value = 'ONLY_NUMERIC_NI';
+            } else if (type === 'DUPLICIDADE_CIS') {
+                if (selCisNum) selCisNum.value = 'ONLY_DUPLICATED_CIS';
             }
 
             filterTable();
@@ -1376,7 +1379,23 @@
             const statusCounts = {}, cobrancaCounts = {};
             let cisNumCobrancaNI = 0;
 
+            // ANÁLISE E CONTAGEM DE REPETIÇÃO/DUPLICIDADE NA COLUNA A (CIS)
+            const cisFrequency = {};
             rawAtivosData.forEach(item => {
+                const cleanCis = cleanStr(item.ci).toUpperCase();
+                if (cleanCis && cleanCis !== "-" && cleanCis !== "N/I" && cleanCis !== "0") {
+                    cisFrequency[cleanCis] = (cisFrequency[cleanCis] || 0) + 1;
+                }
+            });
+
+            let totalDuplicadosCis = 0;
+            rawAtivosData.forEach(item => {
+                const cleanCis = cleanStr(item.ci).toUpperCase();
+                item.isCisDuplicated = (cleanCis && cleanCis !== "-" && cleanCis !== "N/I" && cleanCis !== "0" && cisFrequency[cleanCis] > 1);
+                if (item.isCisDuplicated) {
+                    totalDuplicadosCis++;
+                }
+
                 statusCounts[item.statusColF] = (statusCounts[item.statusColF] || 0) + 1;
                 cobrancaCounts[item.cobrancaColE] = (cobrancaCounts[item.cobrancaColE] || 0) + 1;
                 if (item.isCisNumeric && item.cobrancaColE === "N/I") cisNumCobrancaNI++;
@@ -1386,6 +1405,13 @@
             const statusContainer = document.getElementById('statusCardsContainer');
             statusContainer.innerHTML = '';
             statusContainer.appendChild(createMetricCard("TOTAL DE ATIVOS", total, "100%", "fa-list-check", () => triggerCardFilter('RESET', '')));
+
+            // Adiciona o novo Cartão de Duplicidade na CIS
+            const pctDup = total ? ((totalDuplicadosCis / total) * 100).toFixed(1) + "%" : "0.0%";
+            const dupCard = createCardElement("DUPLICIDADE DE LINK NA CIS", totalDuplicadosCis, pctDup, {
+                bg: "border-l-rose-500", text: "text-rose-700", badge: "bg-rose-100", icon: "fa-copy"
+            }, () => triggerCardFilter('DUPLICIDADE_CIS', 'ONLY_DUPLICATED_CIS'));
+            statusContainer.appendChild(dupCard);
 
             populateCards(statusContainer, statusCounts, total, 'filterStatusColF', 'STATUS', 'STATUS');
 
@@ -1588,14 +1614,20 @@
             const q = document.getElementById('tableSearchInput').value.toLowerCase();
             const selectedStatus = document.getElementById('filterStatusColF').value;
             const selectedCobranca = document.getElementById('filterCobrancaColE').value;
-            const onlyNumericNI = document.getElementById('filterCisNumNI').value;
+            const specialFilter = document.getElementById('filterCisNumNI').value;
 
             let filtered = rawAtivosData.filter(item => {
                 const allValues = Object.values(item.originalRow).map(v => String(v).toLowerCase()).join(' ');
                 const matchQuery = !q || allValues.includes(q);
                 const matchStatus = !selectedStatus || item.statusColF.toUpperCase() === selectedStatus.toUpperCase();
                 const matchCobranca = !selectedCobranca || item.cobrancaColE.toUpperCase() === selectedCobranca.toUpperCase();
-                const matchCisNumNI = !onlyNumericNI || (item.isCisNumeric && item.cobrancaColE === "N/I");
+                
+                let matchSpecial = true;
+                if (specialFilter === "ONLY_NUMERIC_NI") {
+                    matchSpecial = item.isCisNumeric && item.cobrancaColE === "N/I";
+                } else if (specialFilter === "ONLY_DUPLICATED_CIS") {
+                    matchSpecial = item.isCisDuplicated === true;
+                }
 
                 let matchColFilters = true;
                 for (const [colHeader, allowedSet] of Object.entries(activeColumnFilters)) {
@@ -1608,7 +1640,7 @@
                     }
                 }
 
-                return matchQuery && matchStatus && matchCobranca && matchCisNumNI && matchColFilters;
+                return matchQuery && matchStatus && matchCobranca && matchSpecial && matchColFilters;
             });
 
             if (currentSort.colHeader) {
