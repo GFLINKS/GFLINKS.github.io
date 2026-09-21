@@ -291,7 +291,17 @@
                     </h3>
                     <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-hand-pointer mr-1"></i>Clique no banner para filtrar</span>
                 </div>
-                <div id="cobrancaCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+                
+                <!-- CONTAINER GERAL DOS CARDS DE COBRANÇA -->
+                <div id="cobrancaCardsContainer" class="space-y-4"></div>
+
+                <!-- BOTÃO DE EXPANSÃO / RECOLHIMENTO -->
+                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-center no-print">
+                    <button id="btnToggleCobrancaCards" onclick="toggleCobrancaCards()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition flex items-center gap-2 border border-indigo-200 shadow-sm">
+                        <i id="toggleCobrancaIcon" class="fa-solid fa-chevron-down text-xs"></i>
+                        <span id="toggleCobrancaText">Ver outros cards de cobrança</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Gráficos -->
@@ -428,6 +438,25 @@
                 }
             });
         });
+
+        // FUNÇÃO DE EXPANSAO / RECOLHIMENTO DOS CARDS SECUNDÁRIOS DE COBRANÇA
+        function toggleCobrancaCards() {
+            const secondaryContainer = document.getElementById('cobrancaSecondaryCardsContainer');
+            const icon = document.getElementById('toggleCobrancaIcon');
+            const text = document.getElementById('toggleCobrancaText');
+
+            if (!secondaryContainer) return;
+
+            if (secondaryContainer.classList.contains('hidden')) {
+                secondaryContainer.classList.remove('hidden');
+                if (icon) icon.className = 'fa-solid fa-chevron-up text-xs';
+                if (text) text.innerText = 'Ocultar outros cards de cobrança';
+            } else {
+                secondaryContainer.classList.add('hidden');
+                if (icon) icon.className = 'fa-solid fa-chevron-down text-xs';
+                if (text) text.innerText = 'Ver outros cards de cobrança';
+            }
+        }
 
         // LÓGICA DO MODAL DE OBSERVAÇÃO / TEXTO LONGO
         function openObsModal(inputId, headerName) {
@@ -1353,23 +1382,101 @@
                 if (item.isCisNumeric && item.cobrancaColE === "N/I") cisNumCobrancaNI++;
             });
 
+            // MÉTRICAS DE STATUS
             const statusContainer = document.getElementById('statusCardsContainer');
             statusContainer.innerHTML = '';
             statusContainer.appendChild(createMetricCard("TOTAL DE ATIVOS", total, "100%", "fa-list-check", () => triggerCardFilter('RESET', '')));
 
             populateCards(statusContainer, statusCounts, total, 'filterStatusColF', 'STATUS', 'STATUS');
 
+            // MÉTRICAS DE COBRANÇA (COM EXPANSÃO E CARDS PRINCIPAIS EXIGIDOS)
             const cobrancaContainer = document.getElementById('cobrancaCardsContainer');
             cobrancaContainer.innerHTML = '';
-            cobrancaContainer.appendChild(createMetricCard("TOTAL DE REGISTROS", total, "100%", "fa-receipt", () => triggerCardFilter('RESET', '')));
 
+            // Grid para os Cards Principais
+            const cobrancaMainGrid = document.createElement('div');
+            cobrancaMainGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full';
+
+            // Grid para os Cards Secundários (Oculto por padrão)
+            const cobrancaSecondaryGrid = document.createElement('div');
+            cobrancaSecondaryGrid.id = 'cobrancaSecondaryCardsContainer';
+            cobrancaSecondaryGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full hidden mt-4 pt-4 border-t border-slate-100';
+
+            cobrancaContainer.appendChild(cobrancaMainGrid);
+            cobrancaContainer.appendChild(cobrancaSecondaryGrid);
+
+            // Card Principal: TOTAL DE REGISTROS
+            cobrancaMainGrid.appendChild(createMetricCard("TOTAL DE REGISTROS", total, "100%", "fa-receipt", () => triggerCardFilter('RESET', '')));
+
+            // Definir ordem e rótulos dos Cards Principais Exigidos
+            const mainKeysOrder = ["NÃO COBRANDO", "COBRANDO", "SUSPENSA", "COBRAR NA PROXIMA"];
+
+            const selectCobranca = document.getElementById('filterCobrancaColE');
+            if (selectCobranca) selectCobranca.innerHTML = `<option value="">COBRANÇA: Todas</option>`;
+
+            const colorPalette = [
+                { bg: "border-l-sky-500", text: "text-sky-600", badge: "bg-sky-100", icon: "fa-magnifying-glass-chart" },
+                { bg: "border-l-emerald-500", text: "text-emerald-600", badge: "bg-emerald-100", icon: "fa-circle-check" },
+                { bg: "border-l-amber-500", text: "text-amber-600", badge: "bg-amber-100", icon: "fa-triangle-exclamation" },
+                { bg: "border-l-indigo-500", text: "text-indigo-600", badge: "bg-indigo-100", icon: "fa-sliders" }
+            ];
+
+            const allKeys = Object.keys(cobrancaCounts).sort();
+            const renderedMainKeys = new Set();
+
+            function isMainKey(k) {
+                const u = String(k || '').toUpperCase().trim();
+                return u === "NÃO COBRANDO" || u === "NAO COBRANDO" || u === "COBRANDO" || u.includes("SUSPENS") || u.includes("COBRAR NA PROXIMA");
+            }
+
+            // Gerar os 4 Cards Principais Exigidos
+            mainKeysOrder.forEach((targetLabel, idx) => {
+                const realKey = allKeys.find(k => {
+                    const u = k.toUpperCase().trim();
+                    if (targetLabel === "NÃO COBRANDO") return u === "NÃO COBRANDO" || u === "NAO COBRANDO";
+                    if (targetLabel === "COBRANDO") return u === "COBRANDO";
+                    if (targetLabel === "SUSPENSA") return u.includes("SUSPENS");
+                    if (targetLabel === "COBRAR NA PROXIMA") return u.includes("COBRAR NA PROXIMA");
+                    return false;
+                }) || targetLabel;
+
+                const count = cobrancaCounts[realKey] || 0;
+                const pct = total ? ((count / total) * 100).toFixed(1) + "%" : "0.0%";
+                let palette = colorPalette[idx % colorPalette.length];
+
+                const card = createCardElement(realKey, count, pct, palette, () => triggerCardFilter('COBRANÇA', realKey));
+                cobrancaMainGrid.appendChild(card);
+                renderedMainKeys.add(realKey);
+            });
+
+            // Card extra: CIS NUMÉRICA N/I (vai para o grid secundário)
             const pctCisNI = total ? ((cisNumCobrancaNI / total) * 100).toFixed(1) + "%" : "0.0%";
             const extraCard = createCardElement("CIS NUMÉRICA N/I", cisNumCobrancaNI, pctCisNI, {
                 bg: "border-l-amber-500", text: "text-amber-700", badge: "bg-amber-100", icon: "fa-triangle-exclamation"
             }, () => triggerCardFilter('CIS_NUM_NI', 'ONLY_NUMERIC_NI'));
-            cobrancaContainer.appendChild(extraCard);
+            cobrancaSecondaryGrid.appendChild(extraCard);
 
-            populateCards(cobrancaContainer, cobrancaCounts, total, 'filterCobrancaColE', 'COBRANÇA', 'COBRANÇA');
+            // Popula os Cards Secundários com o restante dos status existentes
+            let secondaryIdx = 1;
+            allKeys.forEach(key => {
+                if (!renderedMainKeys.has(key) && !isMainKey(key)) {
+                    const count = cobrancaCounts[key];
+                    const pct = total ? ((count / total) * 100).toFixed(1) + "%" : "0.0%";
+                    let palette = colorPalette[secondaryIdx % colorPalette.length];
+
+                    const card = createCardElement(key, count, pct, palette, () => triggerCardFilter('COBRANÇA', key));
+                    cobrancaSecondaryGrid.appendChild(card);
+                    secondaryIdx++;
+                }
+
+                // Popula o filtro dropdown
+                if (selectCobranca) {
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.textContent = `${key} (${cobrancaCounts[key]})`;
+                    selectCobranca.appendChild(opt);
+                }
+            });
 
             renderCharts(statusCounts, cobrancaCounts);
         }
