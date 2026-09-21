@@ -348,7 +348,7 @@
                         <select id="filterCisNumNI" onchange="filterTable()" class="text-xs bg-amber-50 border border-amber-300 text-amber-900 rounded-lg px-3 py-2 font-bold">
                             <option value="">Filtro Especial: Todos</option>
                             <option value="ONLY_NUMERIC_NI">CIS Numérica + Cobrança N/I</option>
-                            <option value="ONLY_DUPLICATED_CIS">Duplicidade de Link na CIS</option>
+                            <option value="ONLY_DUPLICATED_CIS">Duplicidade de Link na CIS (Apenas Números)</option>
                         </select>
                         <select id="filterStatusColF" onchange="filterTable()" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700">
                             <option value="">STATUS: Todos</option>
@@ -1379,11 +1379,11 @@
             const statusCounts = {}, cobrancaCounts = {};
             let cisNumCobrancaNI = 0;
 
-            // ANÁLISE E CONTAGEM DE REPETIÇÃO/DUPLICIDADE NA COLUNA A (CIS)
+            // ANÁLISE E CONTAGEM DE REPETIÇÃO/DUPLICIDADE APENAS PARA CIS NUMÉRICA (IGNORA LETRAS E TEXTOS)
             const cisFrequency = {};
             rawAtivosData.forEach(item => {
                 const cleanCis = cleanStr(item.ci).toUpperCase();
-                if (cleanCis && cleanCis !== "-" && cleanCis !== "N/I" && cleanCis !== "0") {
+                if (isNumericCIS(cleanCis)) {
                     cisFrequency[cleanCis] = (cisFrequency[cleanCis] || 0) + 1;
                 }
             });
@@ -1391,7 +1391,7 @@
             let totalDuplicadosCis = 0;
             rawAtivosData.forEach(item => {
                 const cleanCis = cleanStr(item.ci).toUpperCase();
-                item.isCisDuplicated = (cleanCis && cleanCis !== "-" && cleanCis !== "N/I" && cleanCis !== "0" && cisFrequency[cleanCis] > 1);
+                item.isCisDuplicated = (isNumericCIS(cleanCis) && cisFrequency[cleanCis] > 1);
                 if (item.isCisDuplicated) {
                     totalDuplicadosCis++;
                 }
@@ -1406,7 +1406,7 @@
             statusContainer.innerHTML = '';
             statusContainer.appendChild(createMetricCard("TOTAL DE ATIVOS", total, "100%", "fa-list-check", () => triggerCardFilter('RESET', '')));
 
-            // Adiciona o novo Cartão de Duplicidade na CIS
+            // Cartão de Duplicidade na CIS (Apenas Números)
             const pctDup = total ? ((totalDuplicadosCis / total) * 100).toFixed(1) + "%" : "0.0%";
             const dupCard = createCardElement("DUPLICIDADE DE LINK NA CIS", totalDuplicadosCis, pctDup, {
                 bg: "border-l-rose-500", text: "text-rose-700", badge: "bg-rose-100", icon: "fa-copy"
