@@ -1,4 +1,4 @@
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,41 +7,63 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Ícones -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            900: '#1e3a8a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    
     <style>
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        /* ESTILOS FORÇADOS PARA GARANTIR ALTO CONTRASTE E VISIBILIDADE COMPLETA */
+        body {
+            background-color: #0b0f19 !important;
+            color: #f1f5f9 !important;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
+
+        .card-panel {
+            background-color: #111827 !important;
+            border: 1px solid #1f2937 !important;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
+
+        /* Tabela Ultra-Clean com Cores Garantidas */
+        table.custom-table {
+            background-color: #111827 !important;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+
+        table.custom-table th {
+            background-color: #1f2937 !important;
+            color: #9ca3af !important;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem;
+            border-bottom: 2px solid #374151 !important;
         }
+
+        table.custom-table td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #1f2937 !important;
+            color: #d1d5db !important;
+        }
+
+        table.custom-table tr:hover td {
+            background-color: #1f2a3c !important;
+        }
+
+        /* Destaque para o nome do equipamento (Texto Branco com Peso) */
+        .equip-name {
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            font-size: 0.875rem !important;
+        }
+
+        /* Personalização da barra de rolagem */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased relative">
+<body class="min-h-screen flex flex-col antialiased">
 
     <!-- TOAST DE NOTIFICAÇÃO DA SINCRONIZAÇÃO -->
     <div id="toastSync" class="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
@@ -49,53 +71,43 @@
         <span class="text-xs font-semibold">Dados sincronizados com sucesso!</span>
     </div>
 
-    <!-- CABEÇALHO -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-2xl">
+    <!-- CABEÇALHO CLEAN -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
             
             <!-- LOGO E TÍTULO -->
             <div class="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
                 <div class="flex items-center gap-3">
-                    <!-- Logo na mesma pasta: logo.png -->
-                    <img src="logo.png" alt="Logo Grupo Forte Protege" class="h-12 w-auto object-contain max-w-[160px]" onerror="this.onerror=null; this.src='https://via.placeholder.com/150x50/1e293b/38bdf8?text=GF+PROTEGE'">
-                    <div class="h-8 w-px bg-slate-700 hidden sm:block"></div>
+                    <img src="logo.png" alt="Grupo Forte Protege" class="h-10 w-auto object-contain max-w-[150px]" onerror="this.onerror=null; this.src='https://via.placeholder.com/150x40/111827/38bdf8?text=GF+PROTEGE'">
+                    <div class="h-7 w-px bg-slate-700 hidden sm:block"></div>
                     <div>
-                        <h1 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                            Estoque & Operações
-                        </h1>
-                        <p class="text-xs text-slate-400 font-medium">TI • CFTV • Conectividade</p>
+                        <h1 class="text-lg font-bold text-white tracking-tight">Estoque & Operações</h1>
+                        <p class="text-[11px] text-slate-400 font-medium">TI • CFTV • Conectividade</p>
                     </div>
                 </div>
             </div>
 
-            <!-- ORIGEM DOS DADOS & BOTÃO SINCRONIZAR -->
+            <!-- CONTROLES DO CABEÇALHO -->
             <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
                 
-                <!-- LINK PLANILHA ORIGEM -->
-                <a href="https://docs.google.com/spreadsheets/d/1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-emerald-400 px-3 py-2 rounded-xl text-xs font-medium transition shadow-sm group">
-                    <i class="fa-solid fa-file-excel text-emerald-500 group-hover:scale-110 transition-transform"></i>
-                    <span>Planilha Google Sheets</span>
-                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-500 ml-1"></i>
-                </a>
-
-                <!-- BADGE DA ÚLTIMA ATUALIZAÇÃO -->
-                <div class="bg-slate-950 border border-slate-800 px-3 py-2 rounded-xl text-xs text-slate-400 flex items-center gap-2">
+                <!-- BADGE ATUALIZAÇÃO -->
+                <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-400 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Atualizado: <strong id="lastUpdateText" class="text-slate-200">22/09/2026 16:49</strong></span>
                 </div>
 
-                <!-- BOTÃO SINCRONIZAR MANUAL -->
-                <button onclick="syncData()" id="btnSync" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition shadow-sm">
+                <!-- BOTÃO SINCRONIZAR -->
+                <button onclick="syncData()" id="btnSync" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm">
                     <i id="iconSync" class="fa-solid fa-rotate text-blue-400"></i>
                     <span>Sincronizar</span>
                 </button>
 
-                <!-- BOTAO ALTERNAR ABAS -->
-                <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 ml-0 lg:ml-2">
-                    <button onclick="switchTab('estoque')" id="btnTabEstoque" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2">
+                <!-- SELETOR DE ABAS -->
+                <div class="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800">
+                    <button onclick="switchTab('estoque')" id="btnTabEstoque" class="px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2">
                         <i class="fa-solid fa-boxes-stacked"></i> Estoque
                     </button>
-                    <button onclick="switchTab('historico')" id="btnTabHistorico" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
+                    <button onclick="switchTab('historico')" id="btnTabHistorico" class="px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
                         <i class="fa-solid fa-clock-rotate-left"></i> Histórico
                     </button>
                 </div>
@@ -105,100 +117,85 @@
     </header>
 
     <!-- CONTEÚDO PRINCIPAL -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
 
-        <!-- METRICAS / CARDS (KPIs) -->
+        <!-- CARDS DE MÉTRICAS (KPIs) -->
         <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             
-            <!-- CENTRAL -->
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg relative overflow-hidden group hover:border-slate-700 transition">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase text-slate-400">Central</span>
-                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                        <i class="fa-solid fa-warehouse text-sm"></i>
-                    </div>
+            <div class="card-panel p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400">
+                    <span>Central</span>
+                    <i class="fa-solid fa-warehouse text-blue-400"></i>
                 </div>
-                <div class="text-3xl font-extrabold text-white mt-3" id="kpiCentral">96</div>
-                <span class="text-[11px] text-slate-400">Galpão principal</span>
+                <div class="text-2xl font-bold text-white mt-2" id="kpiCentral">96</div>
+                <span class="text-[11px] text-slate-500">Galpão principal</span>
             </div>
 
-            <!-- TÉCNICO MARCELO -->
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg relative overflow-hidden group hover:border-slate-700 transition">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase text-slate-400">Técnico Marcelo</span>
-                    <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                        <i class="fa-solid fa-user-gear text-sm"></i>
-                    </div>
+            <div class="card-panel p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400">
+                    <span>Técnico Marcelo</span>
+                    <i class="fa-solid fa-user-gear text-amber-400"></i>
                 </div>
-                <div class="text-3xl font-extrabold text-amber-400 mt-3" id="kpiTecnico">45</div>
-                <span class="text-[11px] text-slate-400">Material em campo</span>
+                <div class="text-2xl font-bold text-amber-400 mt-2" id="kpiTecnico">45</div>
+                <span class="text-[11px] text-slate-500">Material em campo</span>
             </div>
 
-            <!-- ESTOQUE OPERACIONAL -->
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg relative overflow-hidden group hover:border-slate-700 transition">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase text-slate-400">Estoque Operacional</span>
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                        <i class="fa-solid fa-truck-ramp-box text-sm"></i>
-                    </div>
+            <div class="card-panel p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400">
+                    <span>Estoque Op.</span>
+                    <i class="fa-solid fa-truck-ramp-box text-emerald-400"></i>
                 </div>
-                <div class="text-3xl font-extrabold text-emerald-400 mt-3" id="kpiOperacional">15</div>
-                <span class="text-[11px] text-slate-400">Pronta entrega</span>
+                <div class="text-2xl font-bold text-emerald-400 mt-2" id="kpiOperacional">15</div>
+                <span class="text-[11px] text-slate-500">Pronta entrega</span>
             </div>
 
-            <!-- ACERVO OPERACIONAL -->
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg relative overflow-hidden group hover:border-slate-700 transition">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase text-slate-400">Acervo</span>
-                    <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
-                        <i class="fa-solid fa-laptop text-sm"></i>
-                    </div>
+            <div class="card-panel p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400">
+                    <span>Acervo</span>
+                    <i class="fa-solid fa-laptop text-purple-400"></i>
                 </div>
-                <div class="text-3xl font-extrabold text-purple-400 mt-3" id="kpiAcervo">5</div>
-                <span class="text-[11px] text-slate-400">Patrimônio interno</span>
+                <div class="text-2xl font-bold text-purple-400 mt-2" id="kpiAcervo">5</div>
+                <span class="text-[11px] text-slate-500">Patrimônio interno</span>
             </div>
 
-            <!-- TOTAL CONSOLIDADO -->
-            <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-800/50 p-4 rounded-xl shadow-lg relative overflow-hidden">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase text-blue-300">Total Físico</span>
-                    <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-300 flex items-center justify-center">
-                        <i class="fa-solid fa-cubes text-sm"></i>
-                    </div>
+            <div class="col-span-2 sm:col-span-1 card-panel p-4 rounded-xl shadow-sm bg-gradient-to-br from-slate-900 to-blue-950 border-blue-900/50">
+                <div class="flex items-center justify-between text-xs font-semibold uppercase text-blue-300">
+                    <span>Total Físico</span>
+                    <i class="fa-solid fa-cubes text-blue-400"></i>
                 </div>
-                <div class="text-3xl font-extrabold text-blue-300 mt-3" id="kpiTotal">161</div>
-                <span class="text-[11px] text-blue-200/70">Itens rastreados</span>
+                <div class="text-2xl font-bold text-blue-300 mt-2" id="kpiTotal">161</div>
+                <span class="text-[11px] text-blue-200/70">Itens monitorados</span>
             </div>
         </section>
 
         <!-- ABA 1: SALDO DE ESTOQUE -->
-        <section id="secEstoque" class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
-            <div class="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50">
+        <section id="secEstoque" class="card-panel rounded-xl shadow-lg overflow-hidden">
+            <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-table-list text-blue-500"></i> Disponibilidade por Equipamento
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-blue-500"></i> Disponibilidade por Equipamento
                     </h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Visão consolidada da distribuição dos ativos</p>
+                    <p class="text-xs text-slate-400">Saldo atual de cada item por local de alocação</p>
                 </div>
-                <div class="relative w-full sm:w-80">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-sm"></i>
-                    <input type="text" id="searchEstoque" onkeyup="filterEstoque()" placeholder="Buscar equipamento..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                <div class="relative w-full sm:w-72">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-sm"></i>
+                    <input type="text" id="searchEstoque" onkeyup="filterEstoque()" placeholder="Buscar equipamento..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
                 </div>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
+                <table class="custom-table">
                     <thead>
-                        <tr class="bg-slate-950 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-800">
-                            <th class="py-4 px-6">Equipamento</th>
-                            <th class="py-4 px-4 text-center">Central</th>
-                            <th class="py-4 px-4 text-center">Técnico Marcelo</th>
-                            <th class="py-4 px-4 text-center">Estoque Op.</th>
-                            <th class="py-4 px-4 text-center">Acervo Op.</th>
-                            <th class="py-4 px-6 text-center">Total Geral</th>
+                        <tr>
+                            <th class="text-left">Equipamento</th>
+                            <th class="text-center">Central</th>
+                            <th class="text-center">Técnico Marcelo</th>
+                            <th class="text-center">Estoque Op.</th>
+                            <th class="text-center">Acervo Op.</th>
+                            <th class="text-center">Total Geral</th>
                         </tr>
                     </thead>
-                    <tbody id="tbodyEstoque" class="divide-y divide-slate-800/60 bg-slate-900">
+                    <tbody id="tbodyEstoque">
                         <!-- Preenchido via JS -->
                     </tbody>
                 </table>
@@ -206,41 +203,41 @@
         </section>
 
         <!-- ABA 2: HISTÓRICO DE MOVIMENTAÇÕES -->
-        <section id="secHistorico" class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden hidden">
-            <div class="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50">
+        <section id="secHistorico" class="card-panel rounded-xl shadow-lg overflow-hidden hidden">
+            <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-arrow-left text-blue-500"></i> Histórico de Entradas e Saídas
                     </h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Registro auditável de transferências e instalações</p>
+                    <p class="text-xs text-slate-400">Registro auditável de transferências e atendimentos</p>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                    <select id="filterTipo" onchange="filterHistorico()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <select id="filterTipo" onchange="filterHistorico()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500">
                         <option value="todos">Todos os Tipos</option>
-                        <option value="Entrada">Apenas Entradas</option>
-                        <option value="Saída">Apenas Saídas</option>
+                        <option value="Entrada">Entradas</option>
+                        <option value="Saída">Saídas</option>
                     </select>
-                    <div class="relative w-full sm:w-72">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-sm"></i>
-                        <input type="text" id="searchHistorico" onkeyup="filterHistorico()" placeholder="Buscar projeto, origem, OS..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-sm"></i>
+                        <input type="text" id="searchHistorico" onkeyup="filterHistorico()" placeholder="Buscar projeto, origem..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
+                <table class="custom-table">
                     <thead>
-                        <tr class="bg-slate-950 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-800">
-                            <th class="py-4 px-6">Data</th>
-                            <th class="py-4 px-6">Equipamento</th>
-                            <th class="py-4 px-4 text-center">Tipo</th>
-                            <th class="py-4 px-4 text-center">Qtd</th>
-                            <th class="py-4 px-4">Origem</th>
-                            <th class="py-4 px-4">Destino</th>
-                            <th class="py-4 px-6">Observações / Projeto</th>
+                        <tr>
+                            <th class="text-left">Data</th>
+                            <th class="text-left">Equipamento</th>
+                            <th class="text-center">Tipo</th>
+                            <th class="text-center">Qtd</th>
+                            <th class="text-left">Origem</th>
+                            <th class="text-left">Destino</th>
+                            <th class="text-left">Observações / Projeto</th>
                         </tr>
                     </thead>
-                    <tbody id="tbodyHistorico" class="divide-y divide-slate-800/60 bg-slate-900">
+                    <tbody id="tbodyHistorico">
                         <!-- Preenchido via JS -->
                     </tbody>
                 </table>
@@ -250,11 +247,11 @@
     </main>
 
     <!-- RODAPÉ -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-        Grupo Forte Protege &copy; 2026 — Todos os direitos reservados.
+    <footer class="bg-slate-900 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
+        Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
     </footer>
 
-    <!-- SCRIPT DE DADOS E COMPORTAMENTO -->
+    <!-- SCRIPT DE DADOS E LÓGICA -->
     <script>
         const estoqueData = [
             { item: "Mikrotik Hap", central: 0, tecnico: 17, op: 5, acervo: 0, total: 22 },
@@ -321,20 +318,19 @@
             tbody.innerHTML = '';
             
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500">Nenhum equipamento encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">Nenhum equipamento encontrado.</td></tr>`;
                 return;
             }
 
             data.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/80 transition duration-150 border-b border-slate-800/40';
                 tr.innerHTML = `
-                    <td class="py-3.5 px-6 font-semibold text-slate-100">${row.item}</td>
-                    <td class="py-3.5 px-4 text-center text-slate-300">${row.central || '-'}</td>
-                    <td class="py-3.5 px-4 text-center text-amber-300 font-medium">${row.tecnico || '-'}</td>
-                    <td class="py-3.5 px-4 text-center text-emerald-300 font-medium">${row.op || '-'}</td>
-                    <td class="py-3.5 px-4 text-center text-purple-300 font-medium">${row.acervo || '-'}</td>
-                    <td class="py-3.5 px-6 text-center font-bold text-blue-400 text-base">${row.total}</td>
+                    <td class="equip-name">${row.item}</td>
+                    <td class="text-center font-medium text-slate-300">${row.central || '-'}</td>
+                    <td class="text-center font-bold text-amber-400">${row.tecnico || '-'}</td>
+                    <td class="text-center font-bold text-emerald-400">${row.op || '-'}</td>
+                    <td class="text-center font-bold text-purple-400">${row.acervo || '-'}</td>
+                    <td class="text-center font-extrabold text-blue-400 text-base">${row.total}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -345,27 +341,26 @@
             tbody.innerHTML = '';
 
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
             data.forEach(row => {
                 const badgeClass = row.tipo === 'Entrada' 
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                    : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
+                    : 'bg-rose-500/10 text-rose-400 border-rose-500/30';
                 
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/80 transition duration-150 border-b border-slate-800/40';
                 tr.innerHTML = `
-                    <td class="py-3.5 px-6 text-slate-400 font-mono text-xs whitespace-nowrap">${row.data}</td>
-                    <td class="py-3.5 px-6 font-medium text-slate-100">${row.item}</td>
-                    <td class="py-3.5 px-4 text-center">
-                        <span class="px-2.5 py-1 text-xs rounded-md border ${badgeClass} font-semibold">${row.tipo}</span>
+                    <td class="text-slate-400 font-mono text-xs whitespace-nowrap">${row.data}</td>
+                    <td class="equip-name">${row.item}</td>
+                    <td class="text-center">
+                        <span class="px-2 py-0.5 text-xs rounded border ${badgeClass} font-semibold">${row.tipo}</span>
                     </td>
-                    <td class="py-3.5 px-4 text-center font-bold text-white">${row.qtd}</td>
-                    <td class="py-3.5 px-4 text-slate-300">${row.origem}</td>
-                    <td class="py-3.5 px-4 text-slate-300">${row.destino}</td>
-                    <td class="py-3.5 px-6 text-slate-400 italic">${row.obs || '-'}</td>
+                    <td class="text-center font-bold text-white">${row.qtd}</td>
+                    <td class="text-slate-300">${row.origem}</td>
+                    <td class="text-slate-300">${row.destino}</td>
+                    <td class="text-slate-400 italic">${row.obs || '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -401,34 +396,30 @@
             if (tab === 'estoque') {
                 secEstoque.classList.remove('hidden');
                 secHistorico.classList.add('hidden');
-                btnEstoque.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2';
-                btnHistorico.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
+                btnEstoque.className = 'px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2';
+                btnHistorico.className = 'px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
             } else {
                 secEstoque.classList.add('hidden');
                 secHistorico.classList.remove('hidden');
-                btnHistorico.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2';
-                btnEstoque.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
+                btnHistorico.className = 'px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2';
+                btnEstoque.className = 'px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
             }
         }
 
-        // FUNÇÃO DE SINCRONIZAÇÃO MANUAL
         function syncData() {
             const btn = document.getElementById('btnSync');
             const icon = document.getElementById('iconSync');
             const lastUpdateText = document.getElementById('lastUpdateText');
             const toast = document.getElementById('toastSync');
 
-            // Feedback visual de carregamento
             icon.classList.add('fa-spin');
             btn.disabled = true;
             btn.classList.add('opacity-75');
 
             setTimeout(() => {
-                // Atualiza visualização das tabelas
                 renderEstoque(estoqueData);
                 renderHistorico(historicoData);
 
-                // Atualiza timestamp para o momento atual
                 const now = new Date();
                 const dia = String(now.getDate()).padStart(2, '0');
                 const mes = String(now.getMonth() + 1).padStart(2, '0');
@@ -438,18 +429,16 @@
 
                 lastUpdateText.innerText = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
 
-                // Restaura o botão
                 icon.classList.remove('fa-spin');
                 btn.disabled = false;
                 btn.classList.remove('opacity-75');
 
-                // Exibe toast de notificação
                 toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
                 setTimeout(() => {
                     toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
                 }, 3000);
 
-            }, 800);
+            }, 600);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
