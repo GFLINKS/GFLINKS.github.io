@@ -9,7 +9,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        /* ESTILOS DE ALTO CONTRASTE COM TEXTO PRETO NA TABELA */
         body {
             background-color: #0b0f19 !important;
             color: #f1f5f9 !important;
@@ -21,14 +20,13 @@
             border: 1px solid #1f2937 !important;
         }
 
-        /* TABELA COM FUNDO CLARO E TEXTO PRETO FORÇADO */
+        /* TABELA COM ALTO CONTRASTE - TEXTO PRETO */
         table.custom-table {
             background-color: #ffffff !important;
             width: 100%;
             border-collapse: collapse;
         }
 
-        /* Cabeçalho Escuro com Letras Brancas */
         table.custom-table th {
             background-color: #1e293b !important;
             color: #ffffff !important;
@@ -36,38 +34,110 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            padding: 0.875rem 1rem;
+            padding: 0.75rem 0.5rem;
             border: 1px solid #334155 !important;
+            user-select: none;
         }
 
-        /* Células com Fundo Branco e Texto PRETO ABSOLUTO */
         table.custom-table td {
             background-color: #ffffff !important;
             color: #000000 !important; /* PRETO ABSOLUTO */
             font-weight: 600 !important;
             font-size: 0.875rem !important;
-            padding: 0.75rem 1rem;
+            padding: 0.65rem 0.85rem;
             border: 1px solid #e2e8f0 !important;
         }
 
-        /* Efeito ao passar o mouse */
         table.custom-table tr:hover td {
             background-color: #f1f5f9 !important;
         }
 
-        /* Texto das Células */
-        .text-black-bold {
-            color: #000000 !important;
-            font-weight: 700 !important;
+        /* MENU DE FILTRO ESTILO EXCEL */
+        .excel-filter-menu {
+            position: absolute;
+            z-index: 100;
+            background-color: #ffffff;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            width: 250px;
+            font-size: 0.8rem;
+            display: none;
         }
 
-        /* Barra de rolagem */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0b0f19; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        .excel-filter-menu .filter-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            items-center: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .excel-filter-menu .filter-option:hover {
+            background-color: #f1f5f9;
+            color: #2563eb;
+        }
+
+        .excel-filter-list {
+            max-height: 160px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background-color: #f8fafc;
+            padding: 4px;
+        }
+
+        .excel-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 6px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .excel-filter-item:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Botão de Trigger no Cabeçalho */
+        .th-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+        }
+
+        .filter-btn {
+            background-color: #334155;
+            color: #cbd5e1;
+            border-radius: 4px;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 0.65rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background-color: #2563eb;
+            color: #ffffff;
+        }
+
+        .filter-btn.active-filter {
+            background-color: #10b981 !important;
+            color: #ffffff !important;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased">
+<body class="min-h-screen flex flex-col antialiased relative" onclick="closeAllFilterMenus(event)">
 
     <!-- TOAST DE NOTIFICAÇÃO DA SINCRONIZAÇÃO -->
     <div id="toastSync" class="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
@@ -75,7 +145,7 @@
         <span class="text-xs font-semibold">Dados sincronizados com sucesso!</span>
     </div>
 
-    <!-- CABEÇALHO CLEAN -->
+    <!-- CABEÇALHO -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
             
@@ -91,22 +161,18 @@
                 </div>
             </div>
 
-            <!-- CONTROLES DO CABEÇALHO -->
+            <!-- CONTROLES -->
             <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
-                
-                <!-- BADGE ATUALIZAÇÃO -->
                 <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-400 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Atualizado: <strong id="lastUpdateText" class="text-slate-200">22/09/2026 16:49</strong></span>
                 </div>
 
-                <!-- BOTÃO SINCRONIZAR -->
                 <button onclick="syncData()" id="btnSync" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm">
                     <i id="iconSync" class="fa-solid fa-rotate text-blue-400"></i>
                     <span>Sincronizar</span>
                 </button>
 
-                <!-- SELETOR DE ABAS -->
                 <div class="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800">
                     <button onclick="switchTab('estoque')" id="btnTabEstoque" class="px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2">
                         <i class="fa-solid fa-boxes-stacked"></i> Estoque
@@ -115,7 +181,6 @@
                         <i class="fa-solid fa-clock-rotate-left"></i> Histórico
                     </button>
                 </div>
-
             </div>
         </div>
     </header>
@@ -125,7 +190,6 @@
 
         <!-- CARDS DE MÉTRICAS (KPIs) -->
         <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            
             <div class="card-panel p-4 rounded-xl shadow-sm">
                 <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400">
                     <span>Central</span>
@@ -179,24 +243,59 @@
                     <h2 class="text-base font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-list-check text-blue-500"></i> Disponibilidade por Equipamento
                     </h2>
-                    <p class="text-xs text-slate-400">Saldo atual de cada item por local de alocação</p>
+                    <p class="text-xs text-slate-400">Use os botões <i class="fa-solid fa-filter text-[10px]"></i> nos cabeçalhos para filtrar igual ao Excel</p>
                 </div>
-                <div class="relative w-full sm:w-72">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-sm"></i>
-                    <input type="text" id="searchEstoque" onkeyup="filterEstoque()" placeholder="Buscar equipamento..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="clearAllFilters('estoque')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">
+                        <i class="fa-solid fa-filter-circle-xmark text-rose-400 mr-1"></i> Limpar Filtros
+                    </button>
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-sm"></i>
+                        <input type="text" id="searchEstoque" onkeyup="filterEstoque()" placeholder="Pesquisa rápida..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+                    </div>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="custom-table">
+            <div class="overflow-x-auto relative">
+                <table class="custom-table" id="tblEstoque">
                     <thead>
                         <tr>
-                            <th class="text-left">Equipamento</th>
-                            <th class="text-center">Central</th>
-                            <th class="text-center">Técnico Marcelo</th>
-                            <th class="text-center">Estoque Op.</th>
-                            <th class="text-center">Acervo Op.</th>
-                            <th class="text-center">Total Geral</th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Equipamento</span>
+                                    <button class="filter-btn" id="fbtn-estoque-item" onclick="toggleFilterDropdown(event, 'estoque', 'item')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th class="text-center">
+                                <div class="th-container justify-center">
+                                    <span>Central</span>
+                                    <button class="filter-btn" id="fbtn-estoque-central" onclick="toggleFilterDropdown(event, 'estoque', 'central')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th class="text-center">
+                                <div class="th-container justify-center">
+                                    <span>Técnico Marcelo</span>
+                                    <button class="filter-btn" id="fbtn-estoque-tecnico" onclick="toggleFilterDropdown(event, 'estoque', 'tecnico')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th class="text-center">
+                                <div class="th-container justify-center">
+                                    <span>Estoque Op.</span>
+                                    <button class="filter-btn" id="fbtn-estoque-op" onclick="toggleFilterDropdown(event, 'estoque', 'op')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th class="text-center">
+                                <div class="th-container justify-center">
+                                    <span>Acervo Op.</span>
+                                    <button class="filter-btn" id="fbtn-estoque-acervo" onclick="toggleFilterDropdown(event, 'estoque', 'acervo')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th class="text-center">
+                                <div class="th-container justify-center">
+                                    <span>Total Geral</span>
+                                    <button class="filter-btn" id="fbtn-estoque-total" onclick="toggleFilterDropdown(event, 'estoque', 'total')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="tbodyEstoque">
@@ -213,32 +312,65 @@
                     <h2 class="text-base font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-arrow-left text-blue-500"></i> Histórico de Entradas e Saídas
                     </h2>
-                    <p class="text-xs text-slate-400">Registro auditável de transferências e atendimentos</p>
+                    <p class="text-xs text-slate-400">Filtre por datas, origem, destino ou projetos diretamente nas colunas</p>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <select id="filterTipo" onchange="filterHistorico()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500">
-                        <option value="todos">Todos os Tipos</option>
-                        <option value="Entrada">Entradas</option>
-                        <option value="Saída">Saídas</option>
-                    </select>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="clearAllFilters('historico')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">
+                        <i class="fa-solid fa-filter-circle-xmark text-rose-400 mr-1"></i> Limpar Filtros
+                    </button>
                     <div class="relative w-full sm:w-64">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-sm"></i>
-                        <input type="text" id="searchHistorico" onkeyup="filterHistorico()" placeholder="Buscar projeto, origem..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" id="searchHistorico" onkeyup="filterHistorico()" placeholder="Pesquisa rápida..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="custom-table">
+            <div class="overflow-x-auto relative">
+                <table class="custom-table" id="tblHistorico">
                     <thead>
                         <tr>
-                            <th class="text-left">Data</th>
-                            <th class="text-left">Equipamento</th>
-                            <th class="text-center">Tipo</th>
-                            <th class="text-center">Qtd</th>
-                            <th class="text-left">Origem</th>
-                            <th class="text-left">Destino</th>
-                            <th class="text-left">Observações / Projeto</th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Data</span>
+                                    <button class="filter-btn" id="fbtn-historico-data" onclick="toggleFilterDropdown(event, 'historico', 'data')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Equipamento</span>
+                                    <button class="filter-btn" id="fbtn-historico-item" onclick="toggleFilterDropdown(event, 'historico', 'item')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th class="text-center">
+                                <div class="th-container justify-center">
+                                    <span>Tipo</span>
+                                    <button class="filter-btn" id="fbtn-historico-tipo" onclick="toggleFilterDropdown(event, 'historico', 'tipo')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th class="text-center">
+                                <div class="th-container justify-center">
+                                    <span>Qtd</span>
+                                    <button class="filter-btn" id="fbtn-historico-qtd" onclick="toggleFilterDropdown(event, 'historico', 'qtd')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Origem</span>
+                                    <button class="filter-btn" id="fbtn-historico-origem" onclick="toggleFilterDropdown(event, 'historico', 'origem')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Destino</span>
+                                    <button class="filter-btn" id="fbtn-historico-destino" onclick="toggleFilterDropdown(event, 'historico', 'destino')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Observações / Projeto</span>
+                                    <button class="filter-btn" id="fbtn-historico-obs" onclick="toggleFilterDropdown(event, 'historico', 'obs')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="tbodyHistorico">
@@ -250,12 +382,45 @@
 
     </main>
 
+    <!-- CONTAINER DINÂMICO PARA O MENU ESTILO EXCEL -->
+    <div id="excelFilterDropdown" class="excel-filter-menu" onclick="event.stopPropagation()">
+        <!-- Opções de Ordenação -->
+        <div class="filter-option border-b border-slate-100" onclick="applySort('asc')">
+            <i class="fa-solid fa-arrow-down-a-z text-blue-600"></i> Classificar de A a Z
+        </div>
+        <div class="filter-option border-b border-slate-200" onclick="applySort('desc')">
+            <i class="fa-solid fa-arrow-up-z-a text-blue-600"></i> Classificar de Z a A
+        </div>
+
+        <!-- Campo de Pesquisa do Filtro -->
+        <div class="p-2 border-b border-slate-200">
+            <input type="text" id="excelSearchBox" oninput="filterExcelCheckboxList()" placeholder="Pesquisar itens..." class="w-full bg-slate-100 border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500">
+        </div>
+
+        <!-- Lista de Checkboxes -->
+        <div class="p-2">
+            <div class="excel-filter-item font-bold border-b border-slate-200 pb-1 mb-1">
+                <input type="checkbox" id="chkSelectAll" onchange="toggleSelectAllCheckboxes(this.checked)" checked>
+                <label for="chkSelectAll">(Selecionar Tudo)</label>
+            </div>
+            <div id="excelCheckboxList" class="excel-filter-list">
+                <!-- Checkboxes gerados dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="p-2 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 rounded-b-8 shadow-inner">
+            <button onclick="confirmColumnFilter()" class="px-3 py-1 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 text-xs">OK</button>
+            <button onclick="closeExcelFilterMenu()" class="px-3 py-1 bg-slate-200 text-slate-700 rounded font-semibold hover:bg-slate-300 text-xs">Cancelar</button>
+        </div>
+    </div>
+
     <!-- RODAPÉ -->
     <footer class="bg-slate-900 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
         Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
     </footer>
 
-    <!-- SCRIPT DE DADOS E LÓGICA -->
+    <!-- SCRIPT COMPLETO -->
     <script>
         const estoqueData = [
             { item: "Mikrotik Hap", central: 0, tecnico: 17, op: 5, acervo: 0, total: 22 },
@@ -317,6 +482,15 @@
             { data: "30/07/2026", item: "Mikrotik Hap", tipo: "Entrada", qtd: 9, origem: "Central", destino: "Estoque Operacional", obs: "Alocação inicial" }
         ];
 
+        // Estado dos Filtros Avançados
+        const tableState = {
+            estoque: { filters: {}, sortCol: null, sortDir: null },
+            historico: { filters: {}, sortCol: null, sortDir: null }
+        };
+
+        let currentActiveContext = { tableId: null, colKey: null };
+
+        // Renderização da Tabela Estoque
         function renderEstoque(data) {
             const tbody = document.getElementById('tbodyEstoque');
             tbody.innerHTML = '';
@@ -329,17 +503,18 @@
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="text-black-bold">${row.item}</td>
-                    <td class="text-center text-black-bold">${row.central || '-'}</td>
-                    <td class="text-center text-black-bold">${row.tecnico || '-'}</td>
-                    <td class="text-center text-black-bold">${row.op || '-'}</td>
-                    <td class="text-center text-black-bold">${row.acervo || '-'}</td>
-                    <td class="text-center text-black-bold text-base" style="color: #2563eb !important;">${row.total}</td>
+                    <td class="font-bold text-black">${row.item}</td>
+                    <td class="text-center font-bold text-black">${row.central || '-'}</td>
+                    <td class="text-center font-bold text-black">${row.tecnico || '-'}</td>
+                    <td class="text-center font-bold text-black">${row.op || '-'}</td>
+                    <td class="text-center font-bold text-black">${row.acervo || '-'}</td>
+                    <td class="text-center font-bold text-blue-600 text-base">${row.total}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
+        // Renderização da Tabela Histórico
         function renderHistorico(data) {
             const tbody = document.getElementById('tbodyHistorico');
             tbody.innerHTML = '';
@@ -356,41 +531,186 @@
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="text-black-bold font-mono text-xs whitespace-nowrap">${row.data}</td>
-                    <td class="text-black-bold">${row.item}</td>
+                    <td class="font-bold text-black font-mono text-xs whitespace-nowrap">${row.data}</td>
+                    <td class="font-bold text-black">${row.item}</td>
                     <td class="text-center">
                         <span class="px-2 py-0.5 text-xs rounded border ${badgeClass} font-bold">${row.tipo}</span>
                     </td>
-                    <td class="text-center text-black-bold">${row.qtd}</td>
-                    <td class="text-black-bold">${row.origem}</td>
-                    <td class="text-black-bold">${row.destino}</td>
-                    <td class="text-black-bold italic">${row.obs || '-'}</td>
+                    <td class="text-center font-bold text-black">${row.qtd}</td>
+                    <td class="font-bold text-black">${row.origem}</td>
+                    <td class="font-bold text-black">${row.destino}</td>
+                    <td class="font-bold text-black italic">${row.obs || '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function filterEstoque() {
-            const query = document.getElementById('searchEstoque').value.toLowerCase();
-            const filtered = estoqueData.filter(d => d.item.toLowerCase().includes(query));
-            renderEstoque(filtered);
-        }
+        // Lógica de Processamento de Filtros e Ordenação
+        function processData(tableId) {
+            const isEstoque = tableId === 'estoque';
+            let dataset = isEstoque ? [...estoqueData] : [...historicoData];
+            const state = tableState[tableId];
 
-        function filterHistorico() {
-            const query = document.getElementById('searchHistorico').value.toLowerCase();
-            const tipo = document.getElementById('filterTipo').value;
+            // 1. Pesquisa rápida por palavra-chave
+            const searchInput = document.getElementById(isEstoque ? 'searchEstoque' : 'searchHistorico').value.toLowerCase();
+            if (searchInput) {
+                dataset = dataset.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(searchInput)));
+            }
 
-            const filtered = historicoData.filter(d => {
-                const matchesSearch = d.item.toLowerCase().includes(query) || 
-                                      d.origem.toLowerCase().includes(query) || 
-                                      d.destino.toLowerCase().includes(query) ||
-                                      d.obs.toLowerCase().includes(query);
-                const matchesTipo = tipo === 'todos' || d.tipo === tipo;
-                return matchesSearch && matchesTipo;
+            // 2. Filtros por Coluna (Estilo Excel)
+            Object.keys(state.filters).forEach(col => {
+                const allowedValues = state.filters[col];
+                if (allowedValues && allowedValues.length > 0) {
+                    dataset = dataset.filter(row => allowedValues.includes(String(row[col])));
+                }
             });
-            renderHistorico(filtered);
+
+            // 3. Ordenação
+            if (state.sortCol) {
+                const col = state.sortCol;
+                const dir = state.sortDir === 'asc' ? 1 : -1;
+                dataset.sort((a, b) => {
+                    let valA = a[col];
+                    let valB = b[col];
+
+                    if (typeof valA === 'number' && typeof valB === 'number') {
+                        return (valA - valB) * dir;
+                    }
+                    return String(valA).localeCompare(String(valB), 'pt-BR', { numeric: true }) * dir;
+                });
+            }
+
+            // Atualiza botões de filtro ativos
+            updateFilterButtonStates(tableId);
+
+            if (isEstoque) renderEstoque(dataset);
+            else renderHistorico(dataset);
         }
 
+        function filterEstoque() { processData('estoque'); }
+        function filterHistorico() { processData('historico'); }
+
+        // --- MANIPULAÇÃO DO DROPDOWN ESTILO EXCEL ---
+
+        function toggleFilterDropdown(event, tableId, colKey) {
+            event.stopPropagation();
+            currentActiveContext = { tableId, colKey };
+
+            const dropdown = document.getElementById('excelFilterDropdown');
+            const btn = event.currentTarget;
+            const rect = btn.getBoundingClientRect();
+
+            // Posiciona o menu abaixo do botão clicado
+            dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
+            dropdown.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 260)}px`;
+            dropdown.style.display = 'block';
+
+            // Carrega valores únicos da coluna
+            const isEstoque = tableId === 'estoque';
+            const rawData = isEstoque ? estoqueData : historicoData;
+            const uniqueValues = [...new Set(rawData.map(r => String(r[colKey])))].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+
+            const selectedFilter = tableState[tableId].filters[colKey];
+            const checkboxContainer = document.getElementById('excelCheckboxList');
+            checkboxContainer.innerHTML = '';
+
+            document.getElementById('excelSearchBox').value = '';
+            document.getElementById('chkSelectAll').checked = !selectedFilter || selectedFilter.length === uniqueValues.length;
+
+            uniqueValues.forEach(val => {
+                const isChecked = !selectedFilter || selectedFilter.includes(val);
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'excel-filter-item';
+                itemDiv.innerHTML = `
+                    <input type="checkbox" value="${val}" class="excel-chk-item" ${isChecked ? 'checked' : ''} onchange="updateSelectAllState()">
+                    <span class="truncate">${val === '' ? '(Vazio)' : val}</span>
+                `;
+                checkboxContainer.appendChild(itemDiv);
+            });
+        }
+
+        function closeExcelFilterMenu() {
+            document.getElementById('excelFilterDropdown').style.display = 'none';
+        }
+
+        function closeAllFilterMenus(event) {
+            closeExcelFilterMenu();
+        }
+
+        function filterExcelCheckboxList() {
+            const q = document.getElementById('excelSearchBox').value.toLowerCase();
+            const items = document.querySelectorAll('#excelCheckboxList .excel-filter-item');
+            items.forEach(it => {
+                const txt = it.textContent.toLowerCase();
+                it.style.display = txt.includes(q) ? 'flex' : 'none';
+            });
+        }
+
+        function toggleSelectAllCheckboxes(checked) {
+            const chks = document.querySelectorAll('.excel-chk-item');
+            chks.forEach(c => {
+                if (c.offsetParent !== null) c.checked = checked; // Só altera os visíveis
+            });
+        }
+
+        function updateSelectAllState() {
+            const chks = Array.from(document.querySelectorAll('.excel-chk-item'));
+            const allChecked = chks.every(c => c.checked);
+            document.getElementById('chkSelectAll').checked = allChecked;
+        }
+
+        function applySort(dir) {
+            const { tableId, colKey } = currentActiveContext;
+            tableState[tableId].sortCol = colKey;
+            tableState[tableId].sortDir = dir;
+            processData(tableId);
+            closeExcelFilterMenu();
+        }
+
+        function confirmColumnFilter() {
+            const { tableId, colKey } = currentActiveContext;
+            const chks = document.querySelectorAll('.excel-chk-item');
+            const selected = [];
+
+            chks.forEach(c => {
+                if (c.checked) selected.push(c.value);
+            });
+
+            tableState[tableId].filters[colKey] = selected;
+            processData(tableId);
+            closeExcelFilterMenu();
+        }
+
+        function clearAllFilters(tableId) {
+            tableState[tableId].filters = {};
+            tableState[tableId].sortCol = null;
+            tableState[tableId].sortDir = null;
+            document.getElementById(tableId === 'estoque' ? 'searchEstoque' : 'searchHistorico').value = '';
+            processData(tableId);
+        }
+
+        function updateFilterButtonStates(tableId) {
+            const state = tableState[tableId];
+            const isEstoque = tableId === 'estoque';
+            const keys = isEstoque 
+                ? ['item', 'central', 'tecnico', 'op', 'acervo', 'total'] 
+                : ['data', 'item', 'tipo', 'qtd', 'origem', 'destino', 'obs'];
+
+            keys.forEach(k => {
+                const btn = document.getElementById(`fbtn-${tableId}-${k}`);
+                if (btn) {
+                    const hasFilter = state.filters[k] && state.filters[k].length > 0;
+                    const hasSort = state.sortCol === k;
+                    if (hasFilter || hasSort) {
+                        btn.classList.add('active-filter');
+                    } else {
+                        btn.classList.remove('active-filter');
+                    }
+                }
+            });
+        }
+
+        // Alternar Abas
         function switchTab(tab) {
             const secEstoque = document.getElementById('secEstoque');
             const secHistorico = document.getElementById('secHistorico');
@@ -410,6 +730,7 @@
             }
         }
 
+        // Sincronização Manual
         function syncData() {
             const btn = document.getElementById('btnSync');
             const icon = document.getElementById('iconSync');
@@ -421,8 +742,8 @@
             btn.classList.add('opacity-75');
 
             setTimeout(() => {
-                renderEstoque(estoqueData);
-                renderHistorico(historicoData);
+                processData('estoque');
+                processData('historico');
 
                 const now = new Date();
                 const dia = String(now.getDate()).padStart(2, '0');
@@ -446,8 +767,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderEstoque(estoqueData);
-            renderHistorico(historicoData);
+            processData('estoque');
+            processData('historico');
         });
     </script>
 </body>
