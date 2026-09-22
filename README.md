@@ -138,6 +138,46 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased relative" onclick="closeAllFilterMenus(event)">
 
+    <!-- TELA DE LOGIN OVERLAY -->
+    <div id="loginScreen" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-6">
+            
+            <!-- Logo no Login -->
+            <div class="flex justify-center mb-2">
+                <img src="logo.png" alt="Grupo Forte Protege" class="h-16 w-auto object-contain max-w-[200px]" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x60/111827/38bdf8?text=GF+PROTEGE'">
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold text-white tracking-tight">Controle de Estoque</h2>
+                <p class="text-xs text-slate-400 mt-1">Informe a senha corporativa para acessar o painel</p>
+            </div>
+
+            <!-- Formulário de Login -->
+            <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label for="inputPassword" class="block text-xs font-semibold uppercase text-slate-400 mb-1">Senha de Acesso</label>
+                    <div class="relative">
+                        <input type="password" id="inputPassword" placeholder="••••••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition pr-10">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300">
+                            <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <p id="loginError" class="text-xs text-rose-500 mt-2 hidden font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-circle-exclamation"></i> Senha incorreta. Tente novamente.
+                    </p>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Entrar no Sistema
+                </button>
+            </form>
+
+            <div class="text-[11px] text-slate-600 border-t border-slate-800/80 pt-4">
+                Grupo Forte Protege &copy; 2026 — Acesso Seguro
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST DE NOTIFICAÇÃO DA SINCRONIZAÇÃO -->
     <div id="toastSync" class="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
         <i class="fa-solid fa-circle-check text-lg"></i>
@@ -180,6 +220,11 @@
                         <i class="fa-solid fa-clock-rotate-left"></i> Histórico
                     </button>
                 </div>
+
+                <!-- Botão de Sair -->
+                <button onclick="handleLogout()" title="Sair da sessão" class="px-2.5 py-1.5 bg-slate-800 hover:bg-rose-900/50 hover:text-rose-400 text-slate-400 rounded-lg text-xs font-semibold border border-slate-700 transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -190,7 +235,6 @@
         <!-- CARDS DE MÉTRICAS CLICÁVEIS (KPIs) -->
         <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             
-            <!-- CARD CENTRAL -->
             <div onclick="filterByMetric('central')" id="kpi-card-central" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-blue-500 hover:scale-[1.02] transition-all duration-200 group">
                 <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-blue-400">
                     <span>Central</span>
@@ -200,7 +244,6 @@
                 <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
-            <!-- CARD TÉCNICO MARCELO -->
             <div onclick="filterByMetric('tecnico')" id="kpi-card-tecnico" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-amber-500 hover:scale-[1.02] transition-all duration-200 group">
                 <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-amber-400">
                     <span>Técnico Marcelo</span>
@@ -210,7 +253,6 @@
                 <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
-            <!-- CARD ESTOQUE OPERACIONAL -->
             <div onclick="filterByMetric('op')" id="kpi-card-op" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-emerald-500 hover:scale-[1.02] transition-all duration-200 group">
                 <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-emerald-400">
                     <span>Estoque Op.</span>
@@ -220,7 +262,6 @@
                 <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
-            <!-- CARD ACERVO -->
             <div onclick="filterByMetric('acervo')" id="kpi-card-acervo" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-purple-500 hover:scale-[1.02] transition-all duration-200 group">
                 <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-purple-400">
                     <span>Acervo</span>
@@ -230,7 +271,6 @@
                 <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
-            <!-- CARD TOTAL FÍSICO -->
             <div onclick="filterByMetric('total')" id="kpi-card-total" class="col-span-2 sm:col-span-1 card-panel p-4 rounded-xl shadow-sm bg-gradient-to-br from-slate-900 to-blue-950 border-blue-900/50 cursor-pointer hover:border-blue-400 hover:scale-[1.02] transition-all duration-200 group">
                 <div class="flex items-center justify-between text-xs font-semibold uppercase text-blue-300">
                     <span>Total Físico</span>
@@ -388,6 +428,57 @@
 
     <!-- SCRIPT COMPLETO -->
     <script>
+        // SENHA DE ACESSO DEFINIDA
+        const CORRECT_PASSWORD = "gF@2026*Estoque";
+
+        // LÓGICA DE AUTENTICAÇÃO
+        function checkAuth() {
+            if (sessionStorage.getItem('gf_authenticated') === 'true') {
+                document.getElementById('loginScreen').classList.add('hidden');
+            } else {
+                document.getElementById('loginScreen').classList.remove('hidden');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const passInput = document.getElementById('inputPassword');
+            const errorMsg = document.getElementById('loginError');
+
+            if (passInput.value === CORRECT_PASSWORD) {
+                sessionStorage.setItem('gf_authenticated', 'true');
+                document.getElementById('loginScreen').classList.add('hidden');
+                errorMsg.classList.add('hidden');
+                passInput.classList.remove('border-rose-500');
+            } else {
+                errorMsg.classList.remove('hidden');
+                passInput.classList.add('border-rose-500');
+                passInput.focus();
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('gf_authenticated');
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+            checkAuth();
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('inputPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // BASE DE DADOS
         const estoqueData = [
             { item: "Mikrotik Hap", central: 0, tecnico: 17, op: 5, acervo: 0, total: 22 },
             { item: "Mikrotik LTE6", central: 0, tecnico: 0, op: 0, acervo: 1, total: 1 },
@@ -448,7 +539,6 @@
             { data: "30/07/2026", item: "Mikrotik Hap", tipo: "Entrada", qtd: 9, origem: "Central", destino: "Estoque Operacional", obs: "Alocação inicial" }
         ];
 
-        // Estado dos Filtros Avançados
         const tableState = {
             estoque: { filters: {}, sortCol: null, sortDir: null, metricFilter: null },
             historico: { filters: {}, sortCol: null, sortDir: null }
@@ -456,7 +546,6 @@
 
         let currentActiveContext = { tableId: null, colKey: null };
 
-        // Definindo Colunas da Tabela de Estoque
         const estoqueColsDef = [
             { key: 'item', label: 'Equipamento', align: 'text-left', class: 'font-bold text-black' },
             { key: 'central', label: 'Central', align: 'text-center', class: 'text-center font-bold text-black' },
@@ -466,20 +555,17 @@
             { key: 'total', label: 'Total Geral', align: 'text-center', class: 'text-center font-bold text-blue-600 text-base' }
         ];
 
-        // Renderização Dinâmica de Colunas e Dados do Estoque
         function renderEstoque(data) {
             const theadTr = document.getElementById('theadEstoqueTr');
             const tbody = document.getElementById('tbodyEstoque');
             const metricFilter = tableState.estoque.metricFilter;
 
-            // Filtra colunas exibidas: se houver card selecionado, exibe apenas Equipamento, a coluna da Métrica e Total Geral
             const activeCols = estoqueColsDef.filter(col => {
                 if (col.key === 'item' || col.key === 'total') return true;
                 if (!metricFilter) return true; 
                 return col.key === metricFilter; 
             });
 
-            // Reconstrói o Cabeçalho (THEAD)
             theadTr.innerHTML = activeCols.map(col => `
                 <th class="${col.align}">
                     <div class="th-container ${col.align === 'text-center' ? 'justify-center' : ''}">
@@ -489,7 +575,6 @@
                 </th>
             `).join('');
 
-            // Reconstrói o Corpo (TBODY)
             tbody.innerHTML = '';
             
             if(data.length === 0) {
@@ -508,7 +593,6 @@
             });
         }
 
-        // Renderização da Tabela Histórico
         function renderHistorico(data) {
             const tbody = document.getElementById('tbodyHistorico');
             tbody.innerHTML = '';
@@ -539,24 +623,20 @@
             });
         }
 
-        // Processamento Central de Filtros
         function processData(tableId) {
             const isEstoque = tableId === 'estoque';
             let dataset = isEstoque ? [...estoqueData] : [...historicoData];
             const state = tableState[tableId];
 
-            // 1. Filtro por Card de Métrica
             if (isEstoque && state.metricFilter) {
                 dataset = dataset.filter(row => row[state.metricFilter] > 0);
             }
 
-            // 2. Pesquisa rápida
             const searchInput = document.getElementById(isEstoque ? 'searchEstoque' : 'searchHistorico').value.toLowerCase();
             if (searchInput) {
                 dataset = dataset.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(searchInput)));
             }
 
-            // 3. Filtros por Coluna (Estilo Excel)
             Object.keys(state.filters).forEach(col => {
                 const allowedValues = state.filters[col];
                 if (allowedValues && allowedValues.length > 0) {
@@ -564,7 +644,6 @@
                 }
             });
 
-            // 4. Ordenação
             if (state.sortCol) {
                 const col = state.sortCol;
                 const dir = state.sortDir === 'asc' ? 1 : -1;
@@ -588,7 +667,6 @@
         function filterEstoque() { processData('estoque'); }
         function filterHistorico() { processData('historico'); }
 
-        // FILTRO POR CARD DE MÉTRICAS (KPIs)
         function filterByMetric(metricKey) {
             switchTab('estoque');
             const state = tableState.estoque;
@@ -615,6 +693,13 @@
 
             highlightActiveMetricCard(state.metricFilter);
             processData('estoque');
+
+            const tableSection = document.getElementById('secEstoque');
+            if (tableSection) {
+                setTimeout(() => {
+                    tableSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 50);
+            }
         }
 
         function highlightActiveMetricCard(activeMetric) {
@@ -631,7 +716,6 @@
             });
         }
 
-        // DROPDOWN EXCEL
         function toggleFilterDropdown(event, tableId, colKey) {
             event.stopPropagation();
             currentActiveContext = { tableId, colKey };
@@ -808,6 +892,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
             processData('estoque');
             processData('historico');
         });
