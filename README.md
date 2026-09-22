@@ -141,8 +141,6 @@
     <!-- TELA DE LOGIN OVERLAY -->
     <div id="loginScreen" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-6">
-            
-            <!-- Logo no Login -->
             <div class="flex justify-center mb-2">
                 <img src="logo.png" alt="Grupo Forte Protege" class="h-16 w-auto object-contain max-w-[200px]" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x60/111827/38bdf8?text=GF+PROTEGE'">
             </div>
@@ -152,7 +150,6 @@
                 <p class="text-xs text-slate-400 mt-1">Informe a senha corporativa para acessar o painel</p>
             </div>
 
-            <!-- Formulário de Login -->
             <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
                 <div>
                     <label for="inputPassword" class="block text-xs font-semibold uppercase text-slate-400 mb-1">Senha de Acesso</label>
@@ -181,14 +178,12 @@
     <!-- TOAST DE NOTIFICAÇÃO DA SINCRONIZAÇÃO -->
     <div id="toastSync" class="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
         <i class="fa-solid fa-circle-check text-lg"></i>
-        <span class="text-xs font-semibold">Dados sincronizados com o Google Sheets!</span>
+        <span class="text-xs font-semibold">Dados sincronizados com sucesso!</span>
     </div>
 
     <!-- CABEÇALHO -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
-            
-            <!-- LOGO E TÍTULO -->
             <div class="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
                 <div class="flex items-center gap-3">
                     <img src="logo.png" alt="Grupo Forte Protege" class="h-10 w-auto object-contain max-w-[150px]" onerror="this.onerror=null; this.src='https://via.placeholder.com/150x40/111827/38bdf8?text=GF+PROTEGE'">
@@ -200,7 +195,6 @@
                 </div>
             </div>
 
-            <!-- CONTROLES -->
             <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
                 <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-400 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -221,7 +215,6 @@
                     </button>
                 </div>
 
-                <!-- Botão de Sair -->
                 <button onclick="handleLogout()" title="Sair da sessão" class="px-2.5 py-1.5 bg-slate-800 hover:bg-rose-900/50 hover:text-rose-400 text-slate-400 rounded-lg text-xs font-semibold border border-slate-700 transition">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
@@ -234,7 +227,6 @@
 
         <!-- CARDS DE MÉTRICAS CLICÁVEIS (KPIs) -->
         <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            
             <div onclick="filterByMetric('central')" id="kpi-card-central" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-blue-500 hover:scale-[1.02] transition-all duration-200 group">
                 <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-blue-400">
                     <span>Central</span>
@@ -304,13 +296,9 @@
             <div class="overflow-x-auto relative">
                 <table class="custom-table" id="tblEstoque">
                     <thead>
-                        <tr id="theadEstoqueTr">
-                            <!-- Preenchido dinamicamente via JS -->
-                        </tr>
+                        <tr id="theadEstoqueTr"></tr>
                     </thead>
-                    <tbody id="tbodyEstoque">
-                        <!-- Preenchido via JS -->
-                    </tbody>
+                    <tbody id="tbodyEstoque"></tbody>
                 </table>
             </div>
         </section>
@@ -383,16 +371,14 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody id="tbodyHistorico">
-                        <!-- Preenchido via JS -->
-                    </tbody>
+                    <tbody id="tbodyHistorico"></tbody>
                 </table>
             </div>
         </section>
 
     </main>
 
-    <!-- CONTAINER DINÂMICO PARA O MENU ESTILO EXCEL -->
+    <!-- MENU ESTILO EXCEL -->
     <div id="excelFilterDropdown" class="excel-filter-menu" onclick="event.stopPropagation()">
         <div class="filter-option border-b border-slate-100" onclick="applySort('asc')">
             <i class="fa-solid fa-arrow-down-a-z text-blue-600"></i> Classificar de A a Z
@@ -410,9 +396,7 @@
                 <input type="checkbox" id="chkSelectAll" onchange="toggleSelectAllCheckboxes(this.checked)" checked>
                 <label for="chkSelectAll">(Selecionar Tudo)</label>
             </div>
-            <div id="excelCheckboxList" class="excel-filter-list">
-                <!-- Checkboxes gerados dinamicamente -->
-            </div>
+            <div id="excelCheckboxList" class="excel-filter-list"></div>
         </div>
 
         <div class="p-2 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 rounded-b-8 shadow-inner">
@@ -426,20 +410,18 @@
         Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
     </footer>
 
-    <!-- SCRIPT COMPLETO E INTEGRAÇÃO GOOGLE SHEETS -->
+    <!-- SCRIPT DE AUTENTICAÇÃO E SINCRONIZAÇÃO COM ABAS REAIS -->
     <script>
-        // SENHA DE ACESSO DEFINIDA
         const CORRECT_PASSWORD = "gF@2026*Estoque";
-
-        // CONFIGURAÇÕES DA PLANILHA GOOGLE SHEETS
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
-        const TAB_ESTOQUE = 'Estoque';
-        const TAB_HISTORICO = 'Historico';
+
+        // NOMES DAS ABAS EXATAMENTE COMO NA PLANILHA GOOGLE
+        const TAB_ESTOQUE_NAME = 'Geral';
+        const TAB_HISTORICO_NAME = 'Entradas-Saidas';
 
         let estoqueData = [];
         let historicoData = [];
 
-        // LÓGICA DE AUTENTICAÇÃO
         function checkAuth() {
             if (sessionStorage.getItem('gf_authenticated') === 'true') {
                 document.getElementById('loginScreen').classList.add('hidden');
@@ -486,11 +468,18 @@
             }
         }
 
-        // INTEGRAÇÃO DINÂMICA COM O GOOGLE SHEETS
+        function normalizeKey(str) {
+            if (!str) return '';
+            return str.toString()
+                      .toLowerCase()
+                      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                      .replace(/[^a-z0-9]/g, "");
+        }
+
         async function fetchGoogleSheet(tabName) {
             const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
             const response = await fetch(url);
-            if (!response.ok) throw new Error('Falha ao conectar com o Google Sheets.');
+            if (!response.ok) throw new Error(`Falha ao carregar aba ${tabName}`);
             const csvText = await response.text();
             return parseCSV(csvText);
         }
@@ -499,16 +488,17 @@
             const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             if (lines.length <= 1) return [];
 
-            const headers = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim().toLowerCase());
+            const rawHeaders = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim());
+            const normalizedHeaders = rawHeaders.map(h => normalizeKey(h));
             const result = [];
 
             for (let i = 1; i < lines.length; i++) {
                 const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/^"(.*)"$/, '$1').trim());
                 const obj = {};
-                headers.forEach((h, index) => {
+                normalizedHeaders.forEach((normKey, index) => {
                     let val = values[index] || '';
                     if (!isNaN(val) && val !== '') val = Number(val);
-                    obj[h] = val;
+                    obj[normKey] = val;
                 });
                 result.push(obj);
             }
@@ -517,50 +507,64 @@
 
         async function loadDataFromSheet() {
             try {
-                // 1. Busca os dados de Estoque
-                const rawEstoque = await fetchGoogleSheet(TAB_ESTOQUE);
-                estoqueData = rawEstoque.map(r => {
-                    const central = Number(r.central) || 0;
-                    const tecnico = Number(r.tecnico || r['técnico marcelo'] || r['tecnico marcelo']) || 0;
-                    const op = Number(r.op || r['estoque op.'] || r['estoque op']) || 0;
-                    const acervo = Number(r.acervo || r['acervo op.'] || r['acervo op']) || 0;
-                    const totalCalculado = central + tecnico + op + acervo;
+                // 1. Busca dados da aba "Geral" (Estoque)
+                const rawEstoque = await fetchGoogleSheet(TAB_ESTOQUE_NAME);
+                estoqueData = [];
 
-                    return {
-                        item: r.item || r.equipamento || '-',
+                rawEstoque.forEach(r => {
+                    const item = r['equipamento'] || r['item'] || r['descricao'] || r['nome'] || '';
+                    const itemLower = item.toString().toLowerCase().trim();
+
+                    if (!item || itemLower.includes('total') || itemLower === 'total geral' || itemLower === 'subtotal') {
+                        return;
+                    }
+
+                    const central = Number(r['central']) || 0;
+                    const tecnico = Number(r['tecnicomarcelo'] || r['tecnico'] || r['marcelo']) || 0;
+                    const op = Number(r['estoqueop'] || r['op'] || r['estoqueoperacional']) || 0;
+                    const acervo = Number(r['acervoop'] || r['acervo'] || r['acervooperacional']) || 0;
+                    
+                    const totalGeral = Number(r['totalgeral'] || r['total']) || (central + tecnico + op + acervo);
+
+                    estoqueData.push({
+                        item: item,
                         central,
                         tecnico,
                         op,
                         acervo,
-                        total: Number(r.total || r['total geral']) || totalCalculado
-                    };
+                        total: totalGeral
+                    });
                 });
 
-                // 2. Busca os dados de Histórico
+                // 2. Busca dados da aba "Entradas-Saidas" (Histórico)
+                let rawHistorico = [];
                 try {
-                    const rawHistorico = await fetchGoogleSheet(TAB_HISTORICO);
-                    historicoData = rawHistorico.map(r => ({
-                        data: r.data || '-',
-                        item: r.item || r.equipamento || '-',
-                        tipo: r.tipo || '-',
-                        qtd: Number(r.qtd) || 0,
-                        origem: r.origem || '-',
-                        destino: r.destino || '-',
-                        obs: r.obs || r.observações || r.observacoes || '-'
-                    }));
+                    rawHistorico = await fetchGoogleSheet(TAB_HISTORICO_NAME);
                 } catch (e) {
-                    console.warn('Aba de histórico não encontrada na planilha.');
+                    console.warn(`Aba ${TAB_HISTORICO_NAME} não encontrada.`);
                 }
 
-                // Atualiza contadores dos Cards de Métricas
-                updateKPICards();
+                historicoData = [];
+                rawHistorico.forEach(r => {
+                    const item = r['equipamento'] || r['item'] || '';
 
-                // Atualiza o processamento das tabelas
+                    historicoData.push({
+                        data: r['data'] || r['datahora'] || '-',
+                        item: item || '-',
+                        tipo: r['tipo'] || r['operacao'] || '-',
+                        qtd: Number(r['qtd'] || r['quantidade']) || 0,
+                        origem: r['origem'] || '-',
+                        destino: r['destino'] || '-',
+                        obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
+                    });
+                });
+
+                updateKPICards();
                 processData('estoque');
                 processData('historico');
 
             } catch (err) {
-                console.error('Erro de leitura do Google Sheets:', err);
+                console.error('Erro ao conectar com o Google Sheets:', err);
             }
         }
 
@@ -578,7 +582,6 @@
             document.getElementById('kpiTotal').innerText = totalFisico;
         }
 
-        // ESTADO DOS FILTROS E COLUNAS
         const tableState = {
             estoque: { filters: {}, sortCol: null, sortDir: null, metricFilter: null },
             historico: { filters: {}, sortCol: null, sortDir: null }
@@ -638,7 +641,7 @@
             tbody.innerHTML = '';
 
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">Nenhum registro encontrado no Histórico.</td></tr>`;
                 return;
             }
 
