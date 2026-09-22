@@ -70,7 +70,7 @@
             padding: 8px 12px;
             cursor: pointer;
             display: flex;
-            items-center: center;
+            align-items: center;
             gap: 8px;
             font-weight: 600;
             color: #334155;
@@ -104,7 +104,6 @@
             background-color: #e2e8f0;
         }
 
-        /* Botão de Trigger no Cabeçalho */
         .th-container {
             display: flex;
             align-items: center;
@@ -188,51 +187,57 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
 
-        <!-- CARDS DE MÉTRICAS (KPIs) -->
+        <!-- CARDS DE MÉTRICAS CLICÁVEIS (KPIs) -->
         <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div class="card-panel p-4 rounded-xl shadow-sm">
-                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400">
+            
+            <!-- CARD CENTRAL -->
+            <div onclick="filterByMetric('central')" id="kpi-card-central" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-blue-500 hover:scale-[1.02] transition-all duration-200 group">
+                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-blue-400">
                     <span>Central</span>
                     <i class="fa-solid fa-warehouse text-blue-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-white mt-2" id="kpiCentral">96</div>
-                <span class="text-[11px] text-slate-500">Galpão principal</span>
+                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para filtrar</span>
             </div>
 
-            <div class="card-panel p-4 rounded-xl shadow-sm">
-                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400">
+            <!-- CARD TÉCNICO MARCELO -->
+            <div onclick="filterByMetric('tecnico')" id="kpi-card-tecnico" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-amber-500 hover:scale-[1.02] transition-all duration-200 group">
+                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-amber-400">
                     <span>Técnico Marcelo</span>
                     <i class="fa-solid fa-user-gear text-amber-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-amber-400 mt-2" id="kpiTecnico">45</div>
-                <span class="text-[11px] text-slate-500">Material em campo</span>
+                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para filtrar</span>
             </div>
 
-            <div class="card-panel p-4 rounded-xl shadow-sm">
-                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400">
+            <!-- CARD ESTOQUE OPERACIONAL -->
+            <div onclick="filterByMetric('op')" id="kpi-card-op" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-emerald-500 hover:scale-[1.02] transition-all duration-200 group">
+                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-emerald-400">
                     <span>Estoque Op.</span>
                     <i class="fa-solid fa-truck-ramp-box text-emerald-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-emerald-400 mt-2" id="kpiOperacional">15</div>
-                <span class="text-[11px] text-slate-500">Pronta entrega</span>
+                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para filtrar</span>
             </div>
 
-            <div class="card-panel p-4 rounded-xl shadow-sm">
-                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400">
+            <!-- CARD ACERVO -->
+            <div onclick="filterByMetric('acervo')" id="kpi-card-acervo" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-purple-500 hover:scale-[1.02] transition-all duration-200 group">
+                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-purple-400">
                     <span>Acervo</span>
                     <i class="fa-solid fa-laptop text-purple-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-purple-400 mt-2" id="kpiAcervo">5</div>
-                <span class="text-[11px] text-slate-500">Patrimônio interno</span>
+                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para filtrar</span>
             </div>
 
-            <div class="col-span-2 sm:col-span-1 card-panel p-4 rounded-xl shadow-sm bg-gradient-to-br from-slate-900 to-blue-950 border-blue-900/50">
+            <!-- CARD TOTAL FÍSICO -->
+            <div onclick="filterByMetric('total')" id="kpi-card-total" class="col-span-2 sm:col-span-1 card-panel p-4 rounded-xl shadow-sm bg-gradient-to-br from-slate-900 to-blue-950 border-blue-900/50 cursor-pointer hover:border-blue-400 hover:scale-[1.02] transition-all duration-200 group">
                 <div class="flex items-center justify-between text-xs font-semibold uppercase text-blue-300">
                     <span>Total Físico</span>
                     <i class="fa-solid fa-cubes text-blue-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-blue-300 mt-2" id="kpiTotal">161</div>
-                <span class="text-[11px] text-blue-200/70">Itens monitorados</span>
+                <span class="text-[11px] text-blue-200/70">Exibir todos os itens</span>
             </div>
         </section>
 
@@ -243,7 +248,7 @@
                     <h2 class="text-base font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-list-check text-blue-500"></i> Disponibilidade por Equipamento
                     </h2>
-                    <p class="text-xs text-slate-400">Use os botões <i class="fa-solid fa-filter text-[10px]"></i> nos cabeçalhos para filtrar igual ao Excel</p>
+                    <p class="text-xs text-slate-400" id="activeFilterBadge">Mostrando todos os itens do estoque</p>
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <button onclick="clearAllFilters('estoque')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">
@@ -384,7 +389,6 @@
 
     <!-- CONTAINER DINÂMICO PARA O MENU ESTILO EXCEL -->
     <div id="excelFilterDropdown" class="excel-filter-menu" onclick="event.stopPropagation()">
-        <!-- Opções de Ordenação -->
         <div class="filter-option border-b border-slate-100" onclick="applySort('asc')">
             <i class="fa-solid fa-arrow-down-a-z text-blue-600"></i> Classificar de A a Z
         </div>
@@ -392,12 +396,10 @@
             <i class="fa-solid fa-arrow-up-z-a text-blue-600"></i> Classificar de Z a A
         </div>
 
-        <!-- Campo de Pesquisa do Filtro -->
         <div class="p-2 border-b border-slate-200">
             <input type="text" id="excelSearchBox" oninput="filterExcelCheckboxList()" placeholder="Pesquisar itens..." class="w-full bg-slate-100 border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500">
         </div>
 
-        <!-- Lista de Checkboxes -->
         <div class="p-2">
             <div class="excel-filter-item font-bold border-b border-slate-200 pb-1 mb-1">
                 <input type="checkbox" id="chkSelectAll" onchange="toggleSelectAllCheckboxes(this.checked)" checked>
@@ -408,7 +410,6 @@
             </div>
         </div>
 
-        <!-- Botões de Ação -->
         <div class="p-2 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 rounded-b-8 shadow-inner">
             <button onclick="confirmColumnFilter()" class="px-3 py-1 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 text-xs">OK</button>
             <button onclick="closeExcelFilterMenu()" class="px-3 py-1 bg-slate-200 text-slate-700 rounded font-semibold hover:bg-slate-300 text-xs">Cancelar</button>
@@ -484,7 +485,7 @@
 
         // Estado dos Filtros Avançados
         const tableState = {
-            estoque: { filters: {}, sortCol: null, sortDir: null },
+            estoque: { filters: {}, sortCol: null, sortDir: null, metricFilter: null },
             historico: { filters: {}, sortCol: null, sortDir: null }
         };
 
@@ -545,19 +546,24 @@
             });
         }
 
-        // Lógica de Processamento de Filtros e Ordenação
+        // Processamento Central de Filtros
         function processData(tableId) {
             const isEstoque = tableId === 'estoque';
             let dataset = isEstoque ? [...estoqueData] : [...historicoData];
             const state = tableState[tableId];
 
-            // 1. Pesquisa rápida por palavra-chave
+            // 1. Filtro por Card de Métrica (se ativado)
+            if (isEstoque && state.metricFilter) {
+                dataset = dataset.filter(row => row[state.metricFilter] > 0);
+            }
+
+            // 2. Pesquisa rápida
             const searchInput = document.getElementById(isEstoque ? 'searchEstoque' : 'searchHistorico').value.toLowerCase();
             if (searchInput) {
                 dataset = dataset.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(searchInput)));
             }
 
-            // 2. Filtros por Coluna (Estilo Excel)
+            // 3. Filtros por Coluna (Estilo Excel)
             Object.keys(state.filters).forEach(col => {
                 const allowedValues = state.filters[col];
                 if (allowedValues && allowedValues.length > 0) {
@@ -565,7 +571,7 @@
                 }
             });
 
-            // 3. Ordenação
+            // 4. Ordenação
             if (state.sortCol) {
                 const col = state.sortCol;
                 const dir = state.sortDir === 'asc' ? 1 : -1;
@@ -580,7 +586,6 @@
                 });
             }
 
-            // Atualiza botões de filtro ativos
             updateFilterButtonStates(tableId);
 
             if (isEstoque) renderEstoque(dataset);
@@ -590,8 +595,52 @@
         function filterEstoque() { processData('estoque'); }
         function filterHistorico() { processData('historico'); }
 
-        // --- MANIPULAÇÃO DO DROPDOWN ESTILO EXCEL ---
+        // FILTRO POR CARD DE MÉTRICAS (KPIs)
+        function filterByMetric(metricKey) {
+            switchTab('estoque');
+            const state = tableState.estoque;
 
+            // Altera ou desativa o filtro ao clicar novamente
+            if (state.metricFilter === metricKey || metricKey === 'total') {
+                state.metricFilter = null;
+            } else {
+                state.metricFilter = metricKey;
+            }
+
+            // Atualiza texto explicativo
+            const badge = document.getElementById('activeFilterBadge');
+            const metricNames = {
+                central: 'Central',
+                tecnico: 'Técnico Marcelo',
+                op: 'Estoque Operacional',
+                acervo: 'Acervo Operacional'
+            };
+
+            if (state.metricFilter) {
+                badge.innerHTML = `<span class="text-blue-400 font-bold">Filtro ativo:</span> Exibindo apenas itens com saldo na <strong class="text-white">${metricNames[state.metricFilter]}</strong>`;
+            } else {
+                badge.innerText = 'Mostrando todos os itens do estoque';
+            }
+
+            highlightActiveMetricCard(state.metricFilter);
+            processData('estoque');
+        }
+
+        function highlightActiveMetricCard(activeMetric) {
+            const cards = ['central', 'tecnico', 'op', 'acervo', 'total'];
+            cards.forEach(key => {
+                const card = document.getElementById(`kpi-card-${key}`);
+                if (!card) return;
+
+                if (activeMetric === key) {
+                    card.classList.add('border-blue-500', 'bg-slate-800/90', 'ring-2', 'ring-blue-500/50');
+                } else {
+                    card.classList.remove('border-blue-500', 'bg-slate-800/90', 'ring-2', 'ring-blue-500/50');
+                }
+            });
+        }
+
+        // DROPDOWN EXCEL
         function toggleFilterDropdown(event, tableId, colKey) {
             event.stopPropagation();
             currentActiveContext = { tableId, colKey };
@@ -600,12 +649,10 @@
             const btn = event.currentTarget;
             const rect = btn.getBoundingClientRect();
 
-            // Posiciona o menu abaixo do botão clicado
             dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
             dropdown.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 260)}px`;
             dropdown.style.display = 'block';
 
-            // Carrega valores únicos da coluna
             const isEstoque = tableId === 'estoque';
             const rawData = isEstoque ? estoqueData : historicoData;
             const uniqueValues = [...new Set(rawData.map(r => String(r[colKey])))].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
@@ -649,7 +696,7 @@
         function toggleSelectAllCheckboxes(checked) {
             const chks = document.querySelectorAll('.excel-chk-item');
             chks.forEach(c => {
-                if (c.offsetParent !== null) c.checked = checked; // Só altera os visíveis
+                if (c.offsetParent !== null) c.checked = checked;
             });
         }
 
@@ -685,6 +732,11 @@
             tableState[tableId].filters = {};
             tableState[tableId].sortCol = null;
             tableState[tableId].sortDir = null;
+            if (tableId === 'estoque') {
+                tableState.estoque.metricFilter = null;
+                highlightActiveMetricCard(null);
+                document.getElementById('activeFilterBadge').innerText = 'Mostrando todos os itens do estoque';
+            }
             document.getElementById(tableId === 'estoque' ? 'searchEstoque' : 'searchHistorico').value = '';
             processData(tableId);
         }
@@ -710,7 +762,6 @@
             });
         }
 
-        // Alternar Abas
         function switchTab(tab) {
             const secEstoque = document.getElementById('secEstoque');
             const secHistorico = document.getElementById('secHistorico');
@@ -730,7 +781,6 @@
             }
         }
 
-        // Sincronização Manual
         function syncData() {
             const btn = document.getElementById('btnSync');
             const icon = document.getElementById('iconSync');
