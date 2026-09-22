@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        /* ESTILOS FORÇADOS PARA GARANTIR ALTO CONTRASTE E VISIBILIDADE COMPLETA */
+        /* ESTILOS DE ALTO CONTRASTE COM TEXTO PRETO NA TABELA */
         body {
             background-color: #0b0f19 !important;
             color: #f1f5f9 !important;
@@ -21,43 +21,47 @@
             border: 1px solid #1f2937 !important;
         }
 
-        /* Tabela Ultra-Clean com Cores Garantidas */
+        /* TABELA COM FUNDO CLARO E TEXTO PRETO FORÇADO */
         table.custom-table {
-            background-color: #111827 !important;
+            background-color: #ffffff !important;
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse;
         }
 
+        /* Cabeçalho Escuro com Letras Brancas */
         table.custom-table th {
-            background-color: #1f2937 !important;
-            color: #9ca3af !important;
+            background-color: #1e293b !important;
+            color: #ffffff !important;
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            padding: 1rem;
-            border-bottom: 2px solid #374151 !important;
-        }
-
-        table.custom-table td {
             padding: 0.875rem 1rem;
-            border-bottom: 1px solid #1f2937 !important;
-            color: #d1d5db !important;
+            border: 1px solid #334155 !important;
         }
 
-        table.custom-table tr:hover td {
-            background-color: #1f2a3c !important;
-        }
-
-        /* Destaque para o nome do equipamento (Texto Branco com Peso) */
-        .equip-name {
-            color: #ffffff !important;
+        /* Células com Fundo Branco e Texto PRETO ABSOLUTO */
+        table.custom-table td {
+            background-color: #ffffff !important;
+            color: #000000 !important; /* PRETO ABSOLUTO */
             font-weight: 600 !important;
             font-size: 0.875rem !important;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0 !important;
         }
 
-        /* Personalização da barra de rolagem */
+        /* Efeito ao passar o mouse */
+        table.custom-table tr:hover td {
+            background-color: #f1f5f9 !important;
+        }
+
+        /* Texto das Células */
+        .text-black-bold {
+            color: #000000 !important;
+            font-weight: 700 !important;
+        }
+
+        /* Barra de rolagem */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #0b0f19; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
@@ -325,12 +329,12 @@
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="equip-name">${row.item}</td>
-                    <td class="text-center font-medium text-slate-300">${row.central || '-'}</td>
-                    <td class="text-center font-bold text-amber-400">${row.tecnico || '-'}</td>
-                    <td class="text-center font-bold text-emerald-400">${row.op || '-'}</td>
-                    <td class="text-center font-bold text-purple-400">${row.acervo || '-'}</td>
-                    <td class="text-center font-extrabold text-blue-400 text-base">${row.total}</td>
+                    <td class="text-black-bold">${row.item}</td>
+                    <td class="text-center text-black-bold">${row.central || '-'}</td>
+                    <td class="text-center text-black-bold">${row.tecnico || '-'}</td>
+                    <td class="text-center text-black-bold">${row.op || '-'}</td>
+                    <td class="text-center text-black-bold">${row.acervo || '-'}</td>
+                    <td class="text-center text-black-bold text-base" style="color: #2563eb !important;">${row.total}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -347,20 +351,20 @@
 
             data.forEach(row => {
                 const badgeClass = row.tipo === 'Entrada' 
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
-                    : 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                    : 'bg-rose-100 text-rose-800 border-rose-300';
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="text-slate-400 font-mono text-xs whitespace-nowrap">${row.data}</td>
-                    <td class="equip-name">${row.item}</td>
+                    <td class="text-black-bold font-mono text-xs whitespace-nowrap">${row.data}</td>
+                    <td class="text-black-bold">${row.item}</td>
                     <td class="text-center">
-                        <span class="px-2 py-0.5 text-xs rounded border ${badgeClass} font-semibold">${row.tipo}</span>
+                        <span class="px-2 py-0.5 text-xs rounded border ${badgeClass} font-bold">${row.tipo}</span>
                     </td>
-                    <td class="text-center font-bold text-white">${row.qtd}</td>
-                    <td class="text-slate-300">${row.origem}</td>
-                    <td class="text-slate-300">${row.destino}</td>
-                    <td class="text-slate-400 italic">${row.obs || '-'}</td>
+                    <td class="text-center text-black-bold">${row.qtd}</td>
+                    <td class="text-black-bold">${row.origem}</td>
+                    <td class="text-black-bold">${row.destino}</td>
+                    <td class="text-black-bold italic">${row.obs || '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
