@@ -181,8 +181,8 @@
         <span class="text-xs font-semibold">Dados sincronizados com sucesso!</span>
     </div>
 
-    <!-- CABEÇALHO -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
+    <!-- CABEÇALHO FIXO -->
+    <header id="mainHeader" class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
                 <div class="flex items-center gap-3">
@@ -410,12 +410,12 @@
         Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
     </footer>
 
-    <!-- SCRIPT DE AUTENTICAÇÃO E SINCRONIZAÇÃO COM ABAS REAIS -->
+    <!-- SCRIPT DE AUTENTICAÇÃO E SINCRONIZAÇÃO COM ROLAGEM AJUSTADA -->
     <script>
         const CORRECT_PASSWORD = "gF@2026*Estoque";
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
 
-        // NOMES DAS ABAS EXATAMENTE COMO NA PLANILHA GOOGLE
+        // NOMES DAS ABAS NA PLANILHA GOOGLE
         const TAB_ESTOQUE_NAME = 'Geral';
         const TAB_HISTORICO_NAME = 'Entradas-Saidas';
 
@@ -507,7 +507,6 @@
 
         async function loadDataFromSheet() {
             try {
-                // 1. Busca dados da aba "Geral" (Estoque)
                 const rawEstoque = await fetchGoogleSheet(TAB_ESTOQUE_NAME);
                 estoqueData = [];
 
@@ -536,7 +535,6 @@
                     });
                 });
 
-                // 2. Busca dados da aba "Entradas-Saidas" (Histórico)
                 let rawHistorico = [];
                 try {
                     rawHistorico = await fetchGoogleSheet(TAB_HISTORICO_NAME);
@@ -710,6 +708,7 @@
         function filterEstoque() { processData('estoque'); }
         function filterHistorico() { processData('historico'); }
 
+        // FILTRO POR CARD DE MÉTRICAS COM ROLAGEM AJUSTADA AO TOPO DA TABELA
         function filterByMetric(metricKey) {
             switchTab('estoque');
             const state = tableState.estoque;
@@ -737,10 +736,18 @@
             highlightActiveMetricCard(state.metricFilter);
             processData('estoque');
 
-            const tableSection = document.getElementById('secEstoque');
-            if (tableSection) {
+            // ROLAGEM SUAVE ATÉ O NOME DAS COLUNAS DA TABELA (LOGO ABAIXO DO CABEÇALHO FIXO)
+            const tableElement = document.getElementById('tblEstoque');
+            if (tableElement) {
                 setTimeout(() => {
-                    tableSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const headerHeight = document.getElementById('mainHeader')?.offsetHeight || 80;
+                    const elementPosition = tableElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16; // 16px de margem de respiro
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
                 }, 50);
             }
         }
