@@ -181,7 +181,7 @@
     <!-- TOAST DE NOTIFICAÇÃO DA SINCRONIZAÇÃO -->
     <div id="toastSync" class="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
         <i class="fa-solid fa-circle-check text-lg"></i>
-        <span class="text-xs font-semibold">Dados sincronizados com sucesso!</span>
+        <span class="text-xs font-semibold">Dados sincronizados com o Google Sheets!</span>
     </div>
 
     <!-- CABEÇALHO -->
@@ -204,7 +204,7 @@
             <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
                 <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-400 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Atualizado: <strong id="lastUpdateText" class="text-slate-200">22/09/2026 16:49</strong></span>
+                    <span>Atualizado: <strong id="lastUpdateText" class="text-slate-200">Em tempo real</strong></span>
                 </div>
 
                 <button onclick="syncData()" id="btnSync" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm">
@@ -240,7 +240,7 @@
                     <span>Central</span>
                     <i class="fa-solid fa-warehouse text-blue-400"></i>
                 </div>
-                <div class="text-2xl font-bold text-white mt-2" id="kpiCentral">96</div>
+                <div class="text-2xl font-bold text-white mt-2" id="kpiCentral">0</div>
                 <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
@@ -249,7 +249,7 @@
                     <span>Técnico Marcelo</span>
                     <i class="fa-solid fa-user-gear text-amber-400"></i>
                 </div>
-                <div class="text-2xl font-bold text-amber-400 mt-2" id="kpiTecnico">45</div>
+                <div class="text-2xl font-bold text-amber-400 mt-2" id="kpiTecnico">0</div>
                 <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
@@ -258,7 +258,7 @@
                     <span>Estoque Op.</span>
                     <i class="fa-solid fa-truck-ramp-box text-emerald-400"></i>
                 </div>
-                <div class="text-2xl font-bold text-emerald-400 mt-2" id="kpiOperacional">15</div>
+                <div class="text-2xl font-bold text-emerald-400 mt-2" id="kpiOperacional">0</div>
                 <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
@@ -267,7 +267,7 @@
                     <span>Acervo</span>
                     <i class="fa-solid fa-laptop text-purple-400"></i>
                 </div>
-                <div class="text-2xl font-bold text-purple-400 mt-2" id="kpiAcervo">5</div>
+                <div class="text-2xl font-bold text-purple-400 mt-2" id="kpiAcervo">0</div>
                 <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
@@ -276,7 +276,7 @@
                     <span>Total Físico</span>
                     <i class="fa-solid fa-cubes text-blue-400"></i>
                 </div>
-                <div class="text-2xl font-bold text-blue-300 mt-2" id="kpiTotal">161</div>
+                <div class="text-2xl font-bold text-blue-300 mt-2" id="kpiTotal">0</div>
                 <span class="text-[11px] text-blue-200/70">Exibir todas as colunas</span>
             </div>
         </section>
@@ -426,10 +426,18 @@
         Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
     </footer>
 
-    <!-- SCRIPT COMPLETO -->
+    <!-- SCRIPT COMPLETO E INTEGRAÇÃO GOOGLE SHEETS -->
     <script>
         // SENHA DE ACESSO DEFINIDA
         const CORRECT_PASSWORD = "gF@2026*Estoque";
+
+        // CONFIGURAÇÕES DA PLANILHA GOOGLE SHEETS
+        const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
+        const TAB_ESTOQUE = 'Estoque';
+        const TAB_HISTORICO = 'Historico';
+
+        let estoqueData = [];
+        let historicoData = [];
 
         // LÓGICA DE AUTENTICAÇÃO
         function checkAuth() {
@@ -478,67 +486,99 @@
             }
         }
 
-        // BASE DE DADOS
-        const estoqueData = [
-            { item: "Mikrotik Hap", central: 0, tecnico: 17, op: 5, acervo: 0, total: 22 },
-            { item: "Mikrotik LTE6", central: 0, tecnico: 0, op: 0, acervo: 1, total: 1 },
-            { item: "Antena Elsys", central: 0, tecnico: 2, op: 1, acervo: 0, total: 3 },
-            { item: "Roteador Intelbras 5G", central: 0, tecnico: 8, op: 8, acervo: 0, total: 16 },
-            { item: "Suporte Monitor", central: 0, tecnico: 0, op: 1, acervo: 0, total: 1 },
-            { item: "Monitor Mnbox", central: 8, tecnico: 0, op: 0, acervo: 1, total: 9 },
-            { item: "HD 4TB", central: 0, tecnico: 2, op: 0, acervo: 0, total: 2 },
-            { item: "Notebook Dell i5 11th Gen", central: 0, tecnico: 0, op: 0, acervo: 1, total: 1 },
-            { item: "Celular Realme Note 50", central: 0, tecnico: 0, op: 0, acervo: 1, total: 1 },
-            { item: "Nobreak 1200VA", central: 0, tecnico: 1, op: 0, acervo: 0, total: 1 },
-            { item: "Régua Intelbras", central: 0, tecnico: 0, op: 0, acervo: 1, total: 1 },
-            { item: "Antena Hikvision", central: 3, tecnico: 0, op: 0, acervo: 0, total: 3 },
-            { item: "Switch Intelbras 8 Portas (SF 1008 F)", central: 6, tecnico: 0, op: 0, acervo: 0, total: 6 },
-            { item: "Switch Intelbras 8P PoE (SF 1108 F-P)", central: 1, tecnico: 0, op: 0, acervo: 0, total: 1 },
-            { item: "Telefone IP Intelbras (TIP 125 I)", central: 2, tecnico: 0, op: 0, acervo: 0, total: 2 },
-            { item: "Terminal Interfonia IP (TDMI 400 IP)", central: 8, tecnico: 0, op: 0, acervo: 0, total: 8 },
-            { item: "Cabo HDMI High Speed (1m)", central: 3, tecnico: 0, op: 0, acervo: 0, total: 3 },
-            { item: "Câmera IP Dome Full HD (VIP 1230 D G2)", central: 10, tecnico: 2, op: 0, acervo: 0, total: 12 },
-            { item: "Câmera IP Bullet Full HD (VIP 1230 B G2)", central: 0, tecnico: 2, op: 0, acervo: 0, total: 2 },
-            { item: "Câmera IP Bullet Full HD (VIPC 1230 B)", central: 3, tecnico: 0, op: 0, acervo: 0, total: 3 },
-            { item: "Câmera Multi HD Bullet (VHL 1120 B G2)", central: 4, tecnico: 3, op: 0, acervo: 0, total: 7 },
-            { item: "Câmera Multi HD Dome (VHL 1120 D G2)", central: 0, tecnico: 2, op: 0, acervo: 0, total: 2 },
-            { item: "Fonte Chaveada 12.8V/5A (EFM 1205 G2)", central: 7, tecnico: 1, op: 0, acervo: 0, total: 8 },
-            { item: "Fonte Chaveada 12.8V/2A (EF 1202)", central: 1, tecnico: 2, op: 0, acervo: 0, total: 3 },
-            { item: "Mouse Óptico USB", central: 4, tecnico: 1, op: 0, acervo: 0, total: 5 },
-            { item: "Protetor Eletrônico / Filtro de Linha (EPE 205)", central: 3, tecnico: 1, op: 0, acervo: 0, total: 4 },
-            { item: "Gravador NVR 32 Canais (NVD 1432)", central: 1, tecnico: 0, op: 0, acervo: 0, total: 1 },
-            { item: "Caixa Cabo de Rede UTP CAT 5e (305m)", central: 1, tecnico: 0, op: 0, acervo: 0, total: 1 },
-            { item: "Caixa de Passagem VBOX 1100", central: 23, tecnico: 0, op: 0, acervo: 0, total: 23 },
-            { item: "Rolo Cabo Coaxial / Par Trançado (100m)", central: 2, tecnico: 1, op: 0, acervo: 0, total: 3 },
-            { item: "Bandeja para Rack 19\"", central: 6, tecnico: 0, op: 0, acervo: 0, total: 6 }
-        ];
+        // INTEGRAÇÃO DINÂMICA COM O GOOGLE SHEETS
+        async function fetchGoogleSheet(tabName) {
+            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Falha ao conectar com o Google Sheets.');
+            const csvText = await response.text();
+            return parseCSV(csvText);
+        }
 
-        const historicoData = [
-            { data: "23/09/2026", item: "HD 4TB", tipo: "Entrada", qtd: 2, origem: "Fornecedor Voice", destino: "Técnico Marcelo", obs: "SERA RETIRADO EM 23/09/2026" },
-            { data: "21/09/2026", item: "Mikrotik Hap", tipo: "Entrada", qtd: 7, origem: "Cliente", destino: "Técnico Marcelo", obs: "RETIRADA COLDS OSU" },
-            { data: "21/09/2026", item: "Antena Elsys", tipo: "Entrada", qtd: 1, origem: "Cliente", destino: "Técnico Marcelo", obs: "RETIRADA COLDS OSU" },
-            { data: "21/09/2026", item: "Roteador Intelbras 5G", tipo: "Entrada", qtd: 6, origem: "Cliente", destino: "Técnico Marcelo", obs: "RETIRADA COLDS OSU" },
-            { data: "21/09/2026", item: "Rolo Cabo Coaxial 100m", tipo: "Saída", qtd: 1, origem: "Central", destino: "Técnico Marcelo", obs: "INSTALAÇÃO OSA" },
-            { data: "21/09/2026", item: "Câmera Multi HD Dome", tipo: "Saída", qtd: 2, origem: "Central", destino: "Técnico Marcelo", obs: "INSTALAÇÃO OSA" },
-            { data: "21/09/2026", item: "Câmera Multi HD Bullet", tipo: "Saída", qtd: 2, origem: "Central", destino: "Técnico Marcelo", obs: "INSTALAÇÃO OSA" },
-            { data: "21/09/2026", item: "Fonte Chaveada 12V 2A", tipo: "Saída", qtd: 1, origem: "Central", destino: "Técnico Marcelo", obs: "INSTALAÇÃO OSA" },
-            { data: "18/09/2026", item: "Fonte Chaveada 12V 5A", tipo: "Saída", qtd: 1, origem: "Técnico Marcelo", destino: "Cliente", obs: "Instalação Cold Pac" },
-            { data: "18/09/2026", item: "Nobreak 1200VA", tipo: "Saída", qtd: 1, origem: "Técnico Marcelo", destino: "Cliente", obs: "Substituição Cold da COS" },
-            { data: "18/09/2026", item: "Nobreak 1200VA", tipo: "Entrada", qtd: 2, origem: "Fornecedor Voice", destino: "Técnico Marcelo", obs: "Acervo técnico" },
-            { data: "15/09/2026", item: "Nobreak 1200VA", tipo: "Saída", qtd: 1, origem: "Técnico Marcelo", destino: "Cliente", obs: "Troca de nobreak ADS" },
-            { data: "15/09/2026", item: "Câmera Multi HD Dome", tipo: "Saída", qtd: 1, origem: "Técnico Marcelo", destino: "Cliente", obs: "Troca de camera ROM" },
-            { data: "15/09/2026", item: "Monitor Mnbox", tipo: "Saída", qtd: 1, origem: "Técnico Marcelo", destino: "Cliente", obs: "Troca de monitor ROM" },
-            { data: "15/09/2026", item: "Monitor Mnbox", tipo: "Saída", qtd: 1, origem: "Central", destino: "Técnico Marcelo", obs: "Atendimentos 15/09" },
-            { data: "14/09/2026", item: "Antena Hikvision", tipo: "Saída", qtd: 1, origem: "Técnico Marcelo", destino: "Cliente", obs: "Instalação na JUK" },
-            { data: "10/09/2026", item: "DVR INTELBRAS 4 Ch", tipo: "Saída", qtd: 1, origem: "Técnico Marcelo", destino: "Cliente", obs: "Instalação GRV Projeto KVS" },
-            { data: "09/09/2026", item: "Câmera IP Bullet Full HD", tipo: "Saída", qtd: 2, origem: "Central", destino: "Técnico Marcelo", obs: "Acervo para o técnico" },
-            { data: "03/09/2026", item: "Antena Elsys", tipo: "Saída", qtd: 2, origem: "Estoque Operacional", destino: "Técnico Marcelo", obs: "Instalação MKC e Reserva técnica" },
-            { data: "02/09/2026", item: "Caixa de Passagem VBOX 1100", tipo: "Entrada", qtd: 23, origem: "Levantamento", destino: "Central", obs: "Levantamento Ian" },
-            { data: "02/09/2026", item: "Câmera IP Dome Full HD", tipo: "Entrada", qtd: 12, origem: "Levantamento", destino: "Central", obs: "Levantamento Ian" },
-            { data: "03/08/2026", item: "Mikrotik Hap", tipo: "Saída", qtd: 7, origem: "Estoque Operacional", destino: "Técnico Marcelo", obs: "Substituição INT e Instalação OSA" },
-            { data: "30/07/2026", item: "Mikrotik Hap", tipo: "Entrada", qtd: 9, origem: "Central", destino: "Estoque Operacional", obs: "Alocação inicial" }
-        ];
+        function parseCSV(text) {
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length <= 1) return [];
 
+            const headers = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim().toLowerCase());
+            const result = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/^"(.*)"$/, '$1').trim());
+                const obj = {};
+                headers.forEach((h, index) => {
+                    let val = values[index] || '';
+                    if (!isNaN(val) && val !== '') val = Number(val);
+                    obj[h] = val;
+                });
+                result.push(obj);
+            }
+            return result;
+        }
+
+        async function loadDataFromSheet() {
+            try {
+                // 1. Busca os dados de Estoque
+                const rawEstoque = await fetchGoogleSheet(TAB_ESTOQUE);
+                estoqueData = rawEstoque.map(r => {
+                    const central = Number(r.central) || 0;
+                    const tecnico = Number(r.tecnico || r['técnico marcelo'] || r['tecnico marcelo']) || 0;
+                    const op = Number(r.op || r['estoque op.'] || r['estoque op']) || 0;
+                    const acervo = Number(r.acervo || r['acervo op.'] || r['acervo op']) || 0;
+                    const totalCalculado = central + tecnico + op + acervo;
+
+                    return {
+                        item: r.item || r.equipamento || '-',
+                        central,
+                        tecnico,
+                        op,
+                        acervo,
+                        total: Number(r.total || r['total geral']) || totalCalculado
+                    };
+                });
+
+                // 2. Busca os dados de Histórico
+                try {
+                    const rawHistorico = await fetchGoogleSheet(TAB_HISTORICO);
+                    historicoData = rawHistorico.map(r => ({
+                        data: r.data || '-',
+                        item: r.item || r.equipamento || '-',
+                        tipo: r.tipo || '-',
+                        qtd: Number(r.qtd) || 0,
+                        origem: r.origem || '-',
+                        destino: r.destino || '-',
+                        obs: r.obs || r.observações || r.observacoes || '-'
+                    }));
+                } catch (e) {
+                    console.warn('Aba de histórico não encontrada na planilha.');
+                }
+
+                // Atualiza contadores dos Cards de Métricas
+                updateKPICards();
+
+                // Atualiza o processamento das tabelas
+                processData('estoque');
+                processData('historico');
+
+            } catch (err) {
+                console.error('Erro de leitura do Google Sheets:', err);
+            }
+        }
+
+        function updateKPICards() {
+            const totalCentral = estoqueData.reduce((acc, curr) => acc + curr.central, 0);
+            const totalTecnico = estoqueData.reduce((acc, curr) => acc + curr.tecnico, 0);
+            const totalOp = estoqueData.reduce((acc, curr) => acc + curr.op, 0);
+            const totalAcervo = estoqueData.reduce((acc, curr) => acc + curr.acervo, 0);
+            const totalFisico = estoqueData.reduce((acc, curr) => acc + curr.total, 0);
+
+            document.getElementById('kpiCentral').innerText = totalCentral;
+            document.getElementById('kpiTecnico').innerText = totalTecnico;
+            document.getElementById('kpiOperacional').innerText = totalOp;
+            document.getElementById('kpiAcervo').innerText = totalAcervo;
+            document.getElementById('kpiTotal').innerText = totalFisico;
+        }
+
+        // ESTADO DOS FILTROS E COLUNAS
         const tableState = {
             estoque: { filters: {}, sortCol: null, sortDir: null, metricFilter: null },
             historico: { filters: {}, sortCol: null, sortDir: null }
@@ -864,12 +904,8 @@
 
             icon.classList.add('fa-spin');
             btn.disabled = true;
-            btn.classList.add('opacity-75');
 
-            setTimeout(() => {
-                processData('estoque');
-                processData('historico');
-
+            loadDataFromSheet().then(() => {
                 const now = new Date();
                 const dia = String(now.getDate()).padStart(2, '0');
                 const mes = String(now.getMonth() + 1).padStart(2, '0');
@@ -881,20 +917,17 @@
 
                 icon.classList.remove('fa-spin');
                 btn.disabled = false;
-                btn.classList.remove('opacity-75');
 
                 toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
                 setTimeout(() => {
                     toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
                 }, 3000);
-
-            }, 600);
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
-            processData('estoque');
-            processData('historico');
+            loadDataFromSheet();
         });
     </script>
 </body>
