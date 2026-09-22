@@ -197,7 +197,7 @@
                     <i class="fa-solid fa-warehouse text-blue-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-white mt-2" id="kpiCentral">96</div>
-                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para filtrar</span>
+                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
             <!-- CARD TÉCNICO MARCELO -->
@@ -207,7 +207,7 @@
                     <i class="fa-solid fa-user-gear text-amber-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-amber-400 mt-2" id="kpiTecnico">45</div>
-                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para filtrar</span>
+                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
             <!-- CARD ESTOQUE OPERACIONAL -->
@@ -217,7 +217,7 @@
                     <i class="fa-solid fa-truck-ramp-box text-emerald-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-emerald-400 mt-2" id="kpiOperacional">15</div>
-                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para filtrar</span>
+                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
             <!-- CARD ACERVO -->
@@ -227,7 +227,7 @@
                     <i class="fa-solid fa-laptop text-purple-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-purple-400 mt-2" id="kpiAcervo">5</div>
-                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para filtrar</span>
+                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
             </div>
 
             <!-- CARD TOTAL FÍSICO -->
@@ -237,7 +237,7 @@
                     <i class="fa-solid fa-cubes text-blue-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-blue-300 mt-2" id="kpiTotal">161</div>
-                <span class="text-[11px] text-blue-200/70">Exibir todos os itens</span>
+                <span class="text-[11px] text-blue-200/70">Exibir todas as colunas</span>
             </div>
         </section>
 
@@ -248,7 +248,7 @@
                     <h2 class="text-base font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-list-check text-blue-500"></i> Disponibilidade por Equipamento
                     </h2>
-                    <p class="text-xs text-slate-400" id="activeFilterBadge">Mostrando todos os itens do estoque</p>
+                    <p class="text-xs text-slate-400" id="activeFilterBadge">Mostrando todas as localizações</p>
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <button onclick="clearAllFilters('estoque')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">
@@ -264,43 +264,8 @@
             <div class="overflow-x-auto relative">
                 <table class="custom-table" id="tblEstoque">
                     <thead>
-                        <tr>
-                            <th>
-                                <div class="th-container">
-                                    <span>Equipamento</span>
-                                    <button class="filter-btn" id="fbtn-estoque-item" onclick="toggleFilterDropdown(event, 'estoque', 'item')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th class="text-center">
-                                <div class="th-container justify-center">
-                                    <span>Central</span>
-                                    <button class="filter-btn" id="fbtn-estoque-central" onclick="toggleFilterDropdown(event, 'estoque', 'central')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th class="text-center">
-                                <div class="th-container justify-center">
-                                    <span>Técnico Marcelo</span>
-                                    <button class="filter-btn" id="fbtn-estoque-tecnico" onclick="toggleFilterDropdown(event, 'estoque', 'tecnico')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th class="text-center">
-                                <div class="th-container justify-center">
-                                    <span>Estoque Op.</span>
-                                    <button class="filter-btn" id="fbtn-estoque-op" onclick="toggleFilterDropdown(event, 'estoque', 'op')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th class="text-center">
-                                <div class="th-container justify-center">
-                                    <span>Acervo Op.</span>
-                                    <button class="filter-btn" id="fbtn-estoque-acervo" onclick="toggleFilterDropdown(event, 'estoque', 'acervo')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th class="text-center">
-                                <div class="th-container justify-center">
-                                    <span>Total Geral</span>
-                                    <button class="filter-btn" id="fbtn-estoque-total" onclick="toggleFilterDropdown(event, 'estoque', 'total')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
+                        <tr id="theadEstoqueTr">
+                            <!-- Preenchido dinamicamente via JS -->
                         </tr>
                     </thead>
                     <tbody id="tbodyEstoque">
@@ -491,26 +456,54 @@
 
         let currentActiveContext = { tableId: null, colKey: null };
 
-        // Renderização da Tabela Estoque
+        // Definindo Colunas da Tabela de Estoque
+        const estoqueColsDef = [
+            { key: 'item', label: 'Equipamento', align: 'text-left', class: 'font-bold text-black' },
+            { key: 'central', label: 'Central', align: 'text-center', class: 'text-center font-bold text-black' },
+            { key: 'tecnico', label: 'Técnico Marcelo', align: 'text-center', class: 'text-center font-bold text-black' },
+            { key: 'op', label: 'Estoque Op.', align: 'text-center', class: 'text-center font-bold text-black' },
+            { key: 'acervo', label: 'Acervo Op.', align: 'text-center', class: 'text-center font-bold text-black' },
+            { key: 'total', label: 'Total Geral', align: 'text-center', class: 'text-center font-bold text-blue-600 text-base' }
+        ];
+
+        // Renderização Dinâmica de Colunas e Dados do Estoque
         function renderEstoque(data) {
+            const theadTr = document.getElementById('theadEstoqueTr');
             const tbody = document.getElementById('tbodyEstoque');
+            const metricFilter = tableState.estoque.metricFilter;
+
+            // Filtra colunas exibidas: se houver card selecionado, exibe apenas Equipamento, a coluna da Métrica e Total Geral
+            const activeCols = estoqueColsDef.filter(col => {
+                if (col.key === 'item' || col.key === 'total') return true;
+                if (!metricFilter) return true; 
+                return col.key === metricFilter; 
+            });
+
+            // Reconstrói o Cabeçalho (THEAD)
+            theadTr.innerHTML = activeCols.map(col => `
+                <th class="${col.align}">
+                    <div class="th-container ${col.align === 'text-center' ? 'justify-center' : ''}">
+                        <span>${col.label}</span>
+                        <button class="filter-btn" id="fbtn-estoque-${col.key}" onclick="toggleFilterDropdown(event, 'estoque', '${col.key}')"><i class="fa-solid fa-filter"></i></button>
+                    </div>
+                </th>
+            `).join('');
+
+            // Reconstrói o Corpo (TBODY)
             tbody.innerHTML = '';
             
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">Nenhum equipamento encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${activeCols.length}" class="p-6 text-center text-slate-500">Nenhum equipamento encontrado.</td></tr>`;
                 return;
             }
 
             data.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="font-bold text-black">${row.item}</td>
-                    <td class="text-center font-bold text-black">${row.central || '-'}</td>
-                    <td class="text-center font-bold text-black">${row.tecnico || '-'}</td>
-                    <td class="text-center font-bold text-black">${row.op || '-'}</td>
-                    <td class="text-center font-bold text-black">${row.acervo || '-'}</td>
-                    <td class="text-center font-bold text-blue-600 text-base">${row.total}</td>
-                `;
+                tr.innerHTML = activeCols.map(col => {
+                    let val = row[col.key];
+                    if (val === 0 || val === null || val === undefined) val = '-';
+                    return `<td class="${col.class}">${val}</td>`;
+                }).join('');
                 tbody.appendChild(tr);
             });
         }
@@ -552,7 +545,7 @@
             let dataset = isEstoque ? [...estoqueData] : [...historicoData];
             const state = tableState[tableId];
 
-            // 1. Filtro por Card de Métrica (se ativado)
+            // 1. Filtro por Card de Métrica
             if (isEstoque && state.metricFilter) {
                 dataset = dataset.filter(row => row[state.metricFilter] > 0);
             }
@@ -586,10 +579,10 @@
                 });
             }
 
-            updateFilterButtonStates(tableId);
-
             if (isEstoque) renderEstoque(dataset);
             else renderHistorico(dataset);
+
+            updateFilterButtonStates(tableId);
         }
 
         function filterEstoque() { processData('estoque'); }
@@ -600,14 +593,12 @@
             switchTab('estoque');
             const state = tableState.estoque;
 
-            // Altera ou desativa o filtro ao clicar novamente
             if (state.metricFilter === metricKey || metricKey === 'total') {
                 state.metricFilter = null;
             } else {
                 state.metricFilter = metricKey;
             }
 
-            // Atualiza texto explicativo
             const badge = document.getElementById('activeFilterBadge');
             const metricNames = {
                 central: 'Central',
@@ -617,9 +608,9 @@
             };
 
             if (state.metricFilter) {
-                badge.innerHTML = `<span class="text-blue-400 font-bold">Filtro ativo:</span> Exibindo apenas itens com saldo na <strong class="text-white">${metricNames[state.metricFilter]}</strong>`;
+                badge.innerHTML = `<span class="text-blue-400 font-bold">Filtro ativo:</span> Exibindo apenas a coluna da <strong class="text-white">${metricNames[state.metricFilter]}</strong>`;
             } else {
-                badge.innerText = 'Mostrando todos os itens do estoque';
+                badge.innerText = 'Mostrando todas as localizações';
             }
 
             highlightActiveMetricCard(state.metricFilter);
@@ -735,7 +726,7 @@
             if (tableId === 'estoque') {
                 tableState.estoque.metricFilter = null;
                 highlightActiveMetricCard(null);
-                document.getElementById('activeFilterBadge').innerText = 'Mostrando todos os itens do estoque';
+                document.getElementById('activeFilterBadge').innerText = 'Mostrando todas as localizações';
             }
             document.getElementById(tableId === 'estoque' ? 'searchEstoque' : 'searchHistorico').value = '';
             processData(tableId);
