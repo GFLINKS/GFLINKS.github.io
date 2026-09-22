@@ -410,12 +410,12 @@
         Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
     </footer>
 
-    <!-- SCRIPT DE AUTENTICAÇÃO E SINCRONIZAÇÃO COM ROLAGEM AJUSTADA -->
+    <!-- SCRIPT COMPLETO -->
     <script>
         const CORRECT_PASSWORD = "gF@2026*Estoque";
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
 
-        // NOMES DAS ABAS NA PLANILHA GOOGLE
+        // NOMES DAS ABAS
         const TAB_ESTOQUE_NAME = 'Geral';
         const TAB_HISTORICO_NAME = 'Entradas-Saidas';
 
@@ -468,6 +468,44 @@
             }
         }
 
+        // CONVERSÃO DE FORMATO DE DATA PARA BR (DD/MM/AAAA)
+        function formatDateBR(dateVal) {
+            if (!dateVal || dateVal === '-') return '-';
+            let str = dateVal.toString().trim();
+            if (str.includes('T')) str = str.split('T')[0];
+
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                if (parts.length === 3) {
+                    let p1 = parseInt(parts[0], 10);
+                    let p2 = parseInt(parts[1], 10);
+                    let p3 = parts[2].trim();
+
+                    // Caso YYYY/MM/DD
+                    if (parts[0].length === 4) {
+                        return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+                    }
+
+                    // Caso M/D/YYYY ou MM/DD/YYYY vindo do Google Sheets (US format)
+                    if (p1 <= 12 && p2 <= 31) {
+                        return `${String(p2).padStart(2, '0')}/${String(p1).padStart(2, '0')}/${p3}`;
+                    } else if (p1 > 12) {
+                        return `${String(p1).padStart(2, '0')}/${String(p2).padStart(2, '0')}/${p3}`;
+                    }
+                }
+            }
+
+            // Caso YYYY-MM-DD
+            if (str.includes('-')) {
+                const parts = str.split('-');
+                if (parts.length === 3 && parts[0].length === 4) {
+                    return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+                }
+            }
+
+            return str;
+        }
+
         function normalizeKey(str) {
             if (!str) return '';
             return str.toString()
@@ -507,6 +545,7 @@
 
         async function loadDataFromSheet() {
             try {
+                // 1. Aba "Geral" (Estoque)
                 const rawEstoque = await fetchGoogleSheet(TAB_ESTOQUE_NAME);
                 estoqueData = [];
 
@@ -535,6 +574,7 @@
                     });
                 });
 
+                // 2. Aba "Entradas-Saidas" (Histórico)
                 let rawHistorico = [];
                 try {
                     rawHistorico = await fetchGoogleSheet(TAB_HISTORICO_NAME);
@@ -547,7 +587,7 @@
                     const item = r['equipamento'] || r['item'] || '';
 
                     historicoData.push({
-                        data: r['data'] || r['datahora'] || '-',
+                        data: formatDateBR(r['data'] || r['datahora'] || '-'),
                         item: item || '-',
                         tipo: r['tipo'] || r['operacao'] || '-',
                         qtd: Number(r['qtd'] || r['quantidade']) || 0,
@@ -708,7 +748,6 @@
         function filterEstoque() { processData('estoque'); }
         function filterHistorico() { processData('historico'); }
 
-        // FILTRO POR CARD DE MÉTRICAS COM ROLAGEM AJUSTADA AO TOPO DA TABELA
         function filterByMetric(metricKey) {
             switchTab('estoque');
             const state = tableState.estoque;
@@ -736,13 +775,12 @@
             highlightActiveMetricCard(state.metricFilter);
             processData('estoque');
 
-            // ROLAGEM SUAVE ATÉ O NOME DAS COLUNAS DA TABELA (LOGO ABAIXO DO CABEÇALHO FIXO)
             const tableElement = document.getElementById('tblEstoque');
             if (tableElement) {
                 setTimeout(() => {
                     const headerHeight = document.getElementById('mainHeader')?.offsetHeight || 80;
                     const elementPosition = tableElement.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16; // 16px de margem de respiro
+                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16;
 
                     window.scrollTo({
                         top: offsetPosition,
