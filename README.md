@@ -41,7 +41,7 @@
 
         table.custom-table td {
             background-color: #ffffff !important;
-            color: #000000 !important; /* PRETO ABSOLUTO */
+            color: #000000 !important;
             font-weight: 600 !important;
             font-size: 0.875rem !important;
             padding: 0.65rem 0.85rem;
@@ -52,7 +52,6 @@
             background-color: #f1f5f9 !important;
         }
 
-        /* MENU DE FILTRO ESTILO EXCEL */
         .excel-filter-menu {
             position: absolute;
             z-index: 100;
@@ -175,10 +174,114 @@
         </div>
     </div>
 
-    <!-- TOAST DE NOTIFICAÇÃO DA SINCRONIZAÇÃO -->
+    <!-- MODAL DE EDIÇÃO DE ESTOQUE -->
+    <div id="modalEditEstoque" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-blue-500"></i> Editar Quantidades
+                </h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="saveEstoqueEdit(event)" class="space-y-4">
+                <input type="hidden" id="editRowIndex">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Equipamento</label>
+                    <input type="text" id="editItemName" readonly class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-300 font-bold cursor-not-allowed">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Central</label>
+                        <input type="number" id="editCentral" min="0" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Técnico Marcelo</label>
+                        <input type="number" id="editTecnico" min="0" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Estoque Op.</label>
+                        <input type="number" id="editOp" min="0" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Acervo Op.</label>
+                        <input type="number" id="editAcervo" min="0" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-300">Cancelar</button>
+                    <button type="submit" id="btnSaveEdit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg text-white flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE NOVA MOVIMENTAÇÃO (HISTÓRICO) -->
+    <div id="modalMovimentacao" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-right-left text-emerald-500"></i> Registrar Nova Movimentação
+                </h3>
+                <button onclick="closeMovimentacaoModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="saveMovimentacao(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Equipamento</label>
+                    <select id="movEquipamento" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <option value="">Selecione um equipamento...</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tipo de Operação</label>
+                        <select id="movTipo" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <option value="Entrada">Entrada</option>
+                            <option value="Saída">Saída</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Quantidade</label>
+                        <input type="number" id="movQtd" min="1" value="1" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Origem</label>
+                        <input type="text" id="movOrigem" placeholder="Ex: Central / Fornecedor" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Destino</label>
+                        <input type="text" id="movDestino" placeholder="Ex: Técnico Marcelo / Cliente" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Observações / Projeto</label>
+                    <input type="text" id="movObs" placeholder="Ex: Instalação Cliente X" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                    <button type="button" onclick="closeMovimentacaoModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-300">Cancelar</button>
+                    <button type="submit" id="btnSaveMov" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded-lg text-white flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Registrar Movimentação
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
     <div id="toastSync" class="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
         <i class="fa-solid fa-circle-check text-lg"></i>
-        <span class="text-xs font-semibold">Dados sincronizados com sucesso!</span>
+        <span id="toastMsg" class="text-xs font-semibold">Dados atualizados com sucesso!</span>
     </div>
 
     <!-- CABEÇALHO FIXO -->
@@ -196,6 +299,11 @@
             </div>
 
             <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
+                <button onclick="openMovimentacaoModal()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Nova Movimentação</span>
+                </button>
+
                 <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-400 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Atualizado: <strong id="lastUpdateText" class="text-slate-200">Em tempo real</strong></span>
@@ -410,14 +518,12 @@
         Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
     </footer>
 
-    <!-- SCRIPT COMPLETO -->
+    <!-- SCRIPT DE INTEGRAÇÃO COM APPS SCRIPT -->
     <script>
         const CORRECT_PASSWORD = "gF@2026*Estoque";
-        const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
-
-        // NOMES DAS ABAS
-        const TAB_ESTOQUE_NAME = 'Geral';
-        const TAB_HISTORICO_NAME = 'Entradas-Saidas';
+        
+        // URL DO SEU GOOGLE APPS SCRIPT CONFIGURADA
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzRNt2CGnDQ0I7t0VdSywro-_AoXckF0FaP1xgS9BsWCvcYKRa-bT8CgjdyX_A3cKMnvA/exec';
 
         let estoqueData = [];
         let historicoData = [];
@@ -468,7 +574,6 @@
             }
         }
 
-        // CONVERSÃO DE FORMATO DE DATA PARA BR (DD/MM/AAAA)
         function formatDateBR(dateVal) {
             if (!dateVal || dateVal === '-') return '-';
             let str = dateVal.toString().trim();
@@ -481,128 +586,53 @@
                     let p2 = parseInt(parts[1], 10);
                     let p3 = parts[2].trim();
 
-                    // Caso YYYY/MM/DD
-                    if (parts[0].length === 4) {
-                        return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
-                    }
-
-                    // Caso M/D/YYYY ou MM/DD/YYYY vindo do Google Sheets (US format)
-                    if (p1 <= 12 && p2 <= 31) {
-                        return `${String(p2).padStart(2, '0')}/${String(p1).padStart(2, '0')}/${p3}`;
-                    } else if (p1 > 12) {
-                        return `${String(p1).padStart(2, '0')}/${String(p2).padStart(2, '0')}/${p3}`;
-                    }
+                    if (parts[0].length === 4) return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+                    if (p1 <= 12 && p2 <= 31) return `${String(p2).padStart(2, '0')}/${String(p1).padStart(2, '0')}/${p3}`;
+                    else if (p1 > 12) return `${String(p1).padStart(2, '0')}/${String(p2).padStart(2, '0')}/${p3}`;
                 }
             }
 
-            // Caso YYYY-MM-DD
             if (str.includes('-')) {
                 const parts = str.split('-');
-                if (parts.length === 3 && parts[0].length === 4) {
-                    return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
-                }
+                if (parts.length === 3 && parts[0].length === 4) return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
             }
 
             return str;
         }
 
-        function normalizeKey(str) {
-            if (!str) return '';
-            return str.toString()
-                      .toLowerCase()
-                      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                      .replace(/[^a-z0-9]/g, "");
-        }
-
-        async function fetchGoogleSheet(tabName) {
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Falha ao carregar aba ${tabName}`);
-            const csvText = await response.text();
-            return parseCSV(csvText);
-        }
-
-        function parseCSV(text) {
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            if (lines.length <= 1) return [];
-
-            const rawHeaders = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim());
-            const normalizedHeaders = rawHeaders.map(h => normalizeKey(h));
-            const result = [];
-
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/^"(.*)"$/, '$1').trim());
-                const obj = {};
-                normalizedHeaders.forEach((normKey, index) => {
-                    let val = values[index] || '';
-                    if (!isNaN(val) && val !== '') val = Number(val);
-                    obj[normKey] = val;
-                });
-                result.push(obj);
-            }
-            return result;
-        }
-
         async function loadDataFromSheet() {
             try {
-                // 1. Aba "Geral" (Estoque)
-                const rawEstoque = await fetchGoogleSheet(TAB_ESTOQUE_NAME);
-                estoqueData = [];
+                const res = await fetch(`${WEB_APP_URL}?action=getData`);
+                const data = await res.json();
 
-                rawEstoque.forEach(r => {
-                    const item = r['equipamento'] || r['item'] || r['descricao'] || r['nome'] || '';
-                    const itemLower = item.toString().toLowerCase().trim();
+                if (data && data.estoque) {
+                    estoqueData = data.estoque.map(r => ({
+                        _rowIndex: r._rowIndex,
+                        item: r['equipamento'] || r['item'] || r['descricao'] || '-',
+                        central: Number(r['central']) || 0,
+                        tecnico: Number(r['tecnicomarcelo'] || r['tecnico']) || 0,
+                        op: Number(r['estoqueop'] || r['op']) || 0,
+                        acervo: Number(r['acervoop'] || r['acervo']) || 0,
+                        total: Number(r['totalgeral'] || r['total']) || ((Number(r['central'])||0) + (Number(r['tecnicomarcelo'])||0) + (Number(r['estoqueop'])||0) + (Number(r['acervoop'])||0))
+                    }));
 
-                    if (!item || itemLower.includes('total') || itemLower === 'total geral' || itemLower === 'subtotal') {
-                        return;
-                    }
-
-                    const central = Number(r['central']) || 0;
-                    const tecnico = Number(r['tecnicomarcelo'] || r['tecnico'] || r['marcelo']) || 0;
-                    const op = Number(r['estoqueop'] || r['op'] || r['estoqueoperacional']) || 0;
-                    const acervo = Number(r['acervoop'] || r['acervo'] || r['acervooperacional']) || 0;
-                    
-                    const totalGeral = Number(r['totalgeral'] || r['total']) || (central + tecnico + op + acervo);
-
-                    estoqueData.push({
-                        item: item,
-                        central,
-                        tecnico,
-                        op,
-                        acervo,
-                        total: totalGeral
-                    });
-                });
-
-                // 2. Aba "Entradas-Saidas" (Histórico)
-                let rawHistorico = [];
-                try {
-                    rawHistorico = await fetchGoogleSheet(TAB_HISTORICO_NAME);
-                } catch (e) {
-                    console.warn(`Aba ${TAB_HISTORICO_NAME} não encontrada.`);
-                }
-
-                historicoData = [];
-                rawHistorico.forEach(r => {
-                    const item = r['equipamento'] || r['item'] || '';
-
-                    historicoData.push({
-                        data: formatDateBR(r['data'] || r['datahora'] || '-'),
-                        item: item || '-',
-                        tipo: r['tipo'] || r['operacao'] || '-',
-                        qtd: Number(r['qtd'] || r['quantidade']) || 0,
+                    historicoData = (data.historico || []).map(r => ({
+                        data: formatDateBR(r['data'] || '-'),
+                        item: r['equipamento'] || r['item'] || '-',
+                        tipo: r['tipo'] || '-',
+                        qtd: Number(r['qtd']) || 0,
                         origem: r['origem'] || '-',
                         destino: r['destino'] || '-',
-                        obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
-                    });
-                });
+                        obs: r['observacoes'] || r['obs'] || '-'
+                    }));
 
-                updateKPICards();
-                processData('estoque');
-                processData('historico');
-
+                    updateKPICards();
+                    processData('estoque');
+                    processData('historico');
+                    populateMovimentacaoOptions();
+                }
             } catch (err) {
-                console.error('Erro ao conectar com o Google Sheets:', err);
+                console.error('Erro ao conectar com o Google Apps Script:', err);
             }
         }
 
@@ -620,6 +650,122 @@
             document.getElementById('kpiTotal').innerText = totalFisico;
         }
 
+        function openEditModal(rowIndex) {
+            const item = estoqueData.find(i => i._rowIndex === rowIndex);
+            if (!item) return;
+
+            document.getElementById('editRowIndex').value = item._rowIndex;
+            document.getElementById('editItemName').value = item.item;
+            document.getElementById('editCentral').value = item.central;
+            document.getElementById('editTecnico').value = item.tecnico;
+            document.getElementById('editOp').value = item.op;
+            document.getElementById('editAcervo').value = item.acervo;
+
+            document.getElementById('modalEditEstoque').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('modalEditEstoque').classList.add('hidden');
+        }
+
+        async function saveEstoqueEdit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveEdit');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Salvando...`;
+
+            const payload = {
+                rowIndex: parseInt(document.getElementById('editRowIndex').value, 10),
+                central: parseInt(document.getElementById('editCentral').value, 10),
+                tecnico: parseInt(document.getElementById('editTecnico').value, 10),
+                op: parseInt(document.getElementById('editOp').value, 10),
+                acervo: parseInt(document.getElementById('editAcervo').value, 10)
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'updateEstoque', payload })
+                });
+
+                showToast('Saldo atualizado na planilha!');
+                closeEditModal();
+                await loadDataFromSheet();
+            } catch (err) {
+                alert('Erro ao salvar alterações no estoque.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salvar Alterações`;
+            }
+        }
+
+        function openMovimentacaoModal() {
+            populateMovimentacaoOptions();
+            document.getElementById('modalMovimentacao').classList.remove('hidden');
+        }
+
+        function closeMovimentacaoModal() {
+            document.getElementById('modalMovimentacao').classList.add('hidden');
+        }
+
+        function populateMovimentacaoOptions() {
+            const select = document.getElementById('movEquipamento');
+            select.innerHTML = '<option value="">Selecione um equipamento...</option>';
+            estoqueData.forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.item;
+                opt.textContent = e.item;
+                select.appendChild(opt);
+            });
+        }
+
+        async function saveMovimentacao(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveMov');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registrando...`;
+
+            const now = new Date();
+            const dia = String(now.getDate()).padStart(2, '0');
+            const mes = String(now.getMonth() + 1).padStart(2, '0');
+            const ano = now.getFullYear();
+
+            const payload = {
+                data: `${dia}/${mes}/${ano}`,
+                equipamento: document.getElementById('movEquipamento').value,
+                tipo: document.getElementById('movTipo').value,
+                qtd: parseInt(document.getElementById('movQtd').value, 10),
+                origem: document.getElementById('movOrigem').value,
+                destino: document.getElementById('movDestino').value,
+                obs: document.getElementById('movObs').value
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addHistorico', payload })
+                });
+
+                showToast('Movimentação registrada com sucesso!');
+                closeMovimentacaoModal();
+                await loadDataFromSheet();
+            } catch (err) {
+                alert('Erro ao registrar movimentação.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-plus"></i> Registrar Movimentação`;
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastSync');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
         const tableState = {
             estoque: { filters: {}, sortCol: null, sortDir: null, metricFilter: null },
             historico: { filters: {}, sortCol: null, sortDir: null }
@@ -633,7 +779,8 @@
             { key: 'tecnico', label: 'Técnico Marcelo', align: 'text-center', class: 'text-center font-bold text-black' },
             { key: 'op', label: 'Estoque Op.', align: 'text-center', class: 'text-center font-bold text-black' },
             { key: 'acervo', label: 'Acervo Op.', align: 'text-center', class: 'text-center font-bold text-black' },
-            { key: 'total', label: 'Total Geral', align: 'text-center', class: 'text-center font-bold text-blue-600 text-base' }
+            { key: 'total', label: 'Total Geral', align: 'text-center', class: 'text-center font-bold text-blue-600 text-base' },
+            { key: 'actions', label: 'Ações', align: 'text-center', class: 'text-center font-bold' }
         ];
 
         function renderEstoque(data) {
@@ -642,7 +789,7 @@
             const metricFilter = tableState.estoque.metricFilter;
 
             const activeCols = estoqueColsDef.filter(col => {
-                if (col.key === 'item' || col.key === 'total') return true;
+                if (col.key === 'item' || col.key === 'total' || col.key === 'actions') return true;
                 if (!metricFilter) return true; 
                 return col.key === metricFilter; 
             });
@@ -651,7 +798,7 @@
                 <th class="${col.align}">
                     <div class="th-container ${col.align === 'text-center' ? 'justify-center' : ''}">
                         <span>${col.label}</span>
-                        <button class="filter-btn" id="fbtn-estoque-${col.key}" onclick="toggleFilterDropdown(event, 'estoque', '${col.key}')"><i class="fa-solid fa-filter"></i></button>
+                        ${col.key !== 'actions' ? `<button class="filter-btn" id="fbtn-estoque-${col.key}" onclick="toggleFilterDropdown(event, 'estoque', '${col.key}')"><i class="fa-solid fa-filter"></i></button>` : ''}
                     </div>
                 </th>
             `).join('');
@@ -666,6 +813,13 @@
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = activeCols.map(col => {
+                    if (col.key === 'actions') {
+                        return `<td class="text-center">
+                            <button onclick="openEditModal(${row._rowIndex})" title="Editar quantidades" class="px-2.5 py-1 bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white rounded text-xs transition border border-slate-700">
+                                <i class="fa-solid fa-pen-to-square mr-1"></i> Editar
+                            </button>
+                        </td>`;
+                    }
                     let val = row[col.key];
                     if (val === 0 || val === null || val === undefined) val = '-';
                     return `<td class="${col.class}">${val}</td>`;
@@ -948,7 +1102,6 @@
             const btn = document.getElementById('btnSync');
             const icon = document.getElementById('iconSync');
             const lastUpdateText = document.getElementById('lastUpdateText');
-            const toast = document.getElementById('toastSync');
 
             icon.classList.add('fa-spin');
             btn.disabled = true;
@@ -965,11 +1118,7 @@
 
                 icon.classList.remove('fa-spin');
                 btn.disabled = false;
-
-                toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
-                }, 3000);
+                showToast('Dados sincronizados!');
             });
         }
 
