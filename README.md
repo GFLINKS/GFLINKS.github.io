@@ -255,11 +255,15 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Origem</label>
-                        <input type="text" id="movOrigem" placeholder="Ex: Central / Fornecedor" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <select id="movOrigem" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <option value="">Selecione a origem...</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Destino</label>
-                        <input type="text" id="movDestino" placeholder="Ex: Técnico Marcelo / Cliente" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <select id="movDestino" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <option value="">Selecione o destino...</option>
+                        </select>
                     </div>
                 </div>
 
@@ -518,7 +522,7 @@
         Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
     </footer>
 
-    <!-- SCRIPT DE INTEGRAÇÃO HÍBRIDA (LEITURA CSV VIA GOOGLE SHEETS + ESCRITA VIA APPS SCRIPT) -->
+    <!-- SCRIPT DE INTEGRAÇÃO HÍBRIDA -->
     <script>
         const CORRECT_PASSWORD = "gF@2026*Estoque";
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
@@ -628,7 +632,7 @@
 
             for (let i = 1; i < lines.length; i++) {
                 const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/^"(.*)"$/, '$1').trim());
-                const obj = { _rowIndex: i + 1 }; // Linha exata na planilha
+                const obj = { _rowIndex: i + 1 };
                 normalizedHeaders.forEach((normKey, index) => {
                     let val = values[index] || '';
                     if (!isNaN(val) && val !== '') val = Number(val);
@@ -641,7 +645,6 @@
 
         async function loadDataFromSheet() {
             try {
-                // LEITURA 1: ESTOQUE (ABA GERAL)
                 const rawEstoque = await fetchGoogleSheetCSV(TAB_ESTOQUE_NAME);
                 estoqueData = [];
 
@@ -671,7 +674,6 @@
                     });
                 });
 
-                // LEITURA 2: HISTÓRICO (ABA ENTRADAS-SAIDAS)
                 let rawHistorico = [];
                 try {
                     rawHistorico = await fetchGoogleSheetCSV(TAB_HISTORICO_NAME);
@@ -718,7 +720,6 @@
             document.getElementById('kpiTotal').innerText = totalFisico;
         }
 
-        // SALVAR EDIÇÕES DE ESTOQUE VIA APPS SCRIPT
         function openEditModal(rowIndex) {
             const item = estoqueData.find(i => i._rowIndex === rowIndex);
             if (!item) return;
@@ -769,7 +770,6 @@
             }
         }
 
-        // REGISTRAR MOVIMENTAÇÕES VIA APPS SCRIPT
         function openMovimentacaoModal() {
             populateMovimentacaoOptions();
             document.getElementById('modalMovimentacao').classList.remove('hidden');
@@ -779,14 +779,40 @@
             document.getElementById('modalMovimentacao').classList.add('hidden');
         }
 
+        // PREENCHIMENTO DINÂMICO DE EQUIPAMENTOS, ORIGEM E DESTINO
         function populateMovimentacaoOptions() {
-            const select = document.getElementById('movEquipamento');
-            select.innerHTML = '<option value="">Selecione um equipamento...</option>';
+            // 1. Equipamentos
+            const selectEquip = document.getElementById('movEquipamento');
+            selectEquip.innerHTML = '<option value="">Selecione um equipamento...</option>';
             estoqueData.forEach(e => {
                 const opt = document.createElement('option');
                 opt.value = e.item;
                 opt.textContent = e.item;
-                select.appendChild(opt);
+                selectEquip.appendChild(opt);
+            });
+
+            // 2. Origem e Destino Padronizados (Combina locais padrão com histórico existente)
+            const defaultLocations = ["Central", "Técnico Marcelo", "Estoque Op.", "Acervo Op.", "Cliente", "Fornecedor"];
+
+            const origensUnicas = [...new Set([...defaultLocations, ...historicoData.map(h => h.origem)])].filter(v => v && v !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            const destinosUnicos = [...new Set([...defaultLocations, ...historicoData.map(h => h.destino)])].filter(v => v && v !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+            const selectOrigem = document.getElementById('movOrigem');
+            selectOrigem.innerHTML = '<option value="">Selecione a origem...</option>';
+            origensUnicas.forEach(loc => {
+                const opt = document.createElement('option');
+                opt.value = loc;
+                opt.textContent = loc;
+                selectOrigem.appendChild(opt);
+            });
+
+            const selectDestino = document.getElementById('movDestino');
+            selectDestino.innerHTML = '<option value="">Selecione o destino...</option>';
+            destinosUnicos.forEach(loc => {
+                const opt = document.createElement('option');
+                opt.value = loc;
+                opt.textContent = loc;
+                selectDestino.appendChild(opt);
             });
         }
 
