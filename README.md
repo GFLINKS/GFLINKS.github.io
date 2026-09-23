@@ -526,7 +526,7 @@
     <script>
         const CORRECT_PASSWORD = "gF@2026*Estoque";
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzRNt2CGnDQ0I7t0VdSywro-_AoXckF0FaP1xgS9BsWCvcYKRa-bT8CgjdyX_A3cKMnvA/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwz6R2-bOIcDliyuPDDNjInlYDNB6aL_uUdSGMTbfLubJhb1YCmvlUf2PeeNZdfhItW1g/exec';
 
         const TAB_ESTOQUE_NAME = 'Geral';
         const TAB_HISTORICO_NAME = 'Entradas-Saidas';
@@ -688,8 +688,8 @@
                     historicoData.push({
                         data: formatDateBR(r['data'] || r['datahora'] || '-'),
                         item: item || '-',
-                        tipo: r['tipo'] || r['operacao'] || '-',
-                        qtd: Number(r['qtd'] || r['quantidade']) || 0,
+                        tipo: r['entradasaida'] || r['tipo'] || r['operacao'] || '-',
+                        qtd: Number(r['quantidade'] || r['qtd']) || 0,
                         origem: r['origem'] || '-',
                         destino: r['destino'] || '-',
                         obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
@@ -755,13 +755,14 @@
             try {
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'updateEstoque', payload })
                 });
 
                 showToast('Saldo atualizado na planilha!');
                 closeEditModal();
-                await loadDataFromSheet();
+                setTimeout(() => { loadDataFromSheet(); }, 1200);
             } catch (err) {
                 alert('Erro ao salvar alterações no estoque.');
             } finally {
@@ -779,9 +780,7 @@
             document.getElementById('modalMovimentacao').classList.add('hidden');
         }
 
-        // PREENCHIMENTO DINÂMICO DE EQUIPAMENTOS, ORIGEM E DESTINO
         function populateMovimentacaoOptions() {
-            // 1. Equipamentos
             const selectEquip = document.getElementById('movEquipamento');
             selectEquip.innerHTML = '<option value="">Selecione um equipamento...</option>';
             estoqueData.forEach(e => {
@@ -791,8 +790,7 @@
                 selectEquip.appendChild(opt);
             });
 
-            // 2. Origem e Destino Padronizados (Combina locais padrão com histórico existente)
-            const defaultLocations = ["Central", "Técnico Marcelo", "Estoque Op.", "Acervo Op.", "Cliente", "Fornecedor"];
+            const defaultLocations = ["Central", "Técnico Marcelo", "Estoque Op.", "Acervo Op.", "Cliente", "Fornecedor", "Levantamento"];
 
             const origensUnicas = [...new Set([...defaultLocations, ...historicoData.map(h => h.origem)])].filter(v => v && v !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR'));
             const destinosUnicos = [...new Set([...defaultLocations, ...historicoData.map(h => h.destino)])].filter(v => v && v !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR'));
@@ -840,13 +838,14 @@
             try {
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'addHistorico', payload })
                 });
 
                 showToast('Movimentação registrada com sucesso!');
                 closeMovimentacaoModal();
-                await loadDataFromSheet();
+                setTimeout(() => { loadDataFromSheet(); }, 1200);
             } catch (err) {
                 alert('Erro ao registrar movimentação.');
             } finally {
