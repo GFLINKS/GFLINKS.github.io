@@ -238,7 +238,12 @@
                     </select>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <!-- LINHA COM DATA, TIPO DE OPERAÇÃO E QUANTIDADE -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Data</label>
+                        <input type="date" id="movData" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Tipo de Operação</label>
                         <select id="movTipo" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
@@ -773,6 +778,14 @@
 
         function openMovimentacaoModal() {
             populateMovimentacaoOptions();
+            
+            // PREENCHE A DATA ATUAL NO FORMATO DO INPUT DATE (YYYY-MM-DD)
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('movData').value = `${yyyy}-${mm}-${dd}`;
+
             document.getElementById('modalMovimentacao').classList.remove('hidden');
         }
 
@@ -820,13 +833,19 @@
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registrando...`;
 
-            const now = new Date();
-            const dia = String(now.getDate()).padStart(2, '0');
-            const mes = String(now.getMonth() + 1).padStart(2, '0');
-            const ano = now.getFullYear();
+            // CONVERTE DATA DE YYYY-MM-DD PARA DD/MM/YYYY
+            const rawDate = document.getElementById('movData').value;
+            let formattedDate = '';
+            if (rawDate && rawDate.includes('-')) {
+                const parts = rawDate.split('-');
+                formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            } else {
+                const now = new Date();
+                formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            }
 
             const payload = {
-                data: `${dia}/${mes}/${ano}`,
+                data: formattedDate,
                 equipamento: document.getElementById('movEquipamento').value,
                 tipo: document.getElementById('movTipo').value,
                 qtd: parseInt(document.getElementById('movQtd').value, 10),
