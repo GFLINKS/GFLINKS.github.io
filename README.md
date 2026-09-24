@@ -647,9 +647,9 @@
                       .replace(/[^a-z0-9]/g, "");
         }
 
-        // UTILIZA A EXPORTAÇÃO CSV DIRETA DO GOOGLE SHEETS PARA EVITAR PERDA DE FORMATO DE DATAS
+        // UTILIZA gviz/tq PARA IDENTIFICAR A ABA CORRETAMENTE PELO NOME
         async function fetchGoogleSheetCSV(tabName) {
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(tabName)}`;
+            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Falha ao carregar aba ${tabName}`);
             const csvText = await response.text();
@@ -679,68 +679,26 @@
 
         async function loadDataFromSheet() {
             try {
-                const rawEstoque = await fetchGoogleSheetCSV(TAB_ESTOQUE_NAME);
-                estoqueData = [];
+                let loadedViaWebApp = false;
 
-                rawEstoque.forEach(r => {
-                    const item = r['equipamento'] || r['item'] || r['descricao'] || r['nome'] || '';
-                    const itemLower = item.toString().toLowerCase().trim();
-
-                    if (!item || itemLower.includes('total') || itemLower === 'total geral' || itemLower === 'subtotal') {
-                        return;
-                    }
-
-                    const central = Number(r['central']) || 0;
-                    const tecnico = Number(r['tecnicomarcelo'] || r['tecnico'] || r['marcelo']) || 0;
-                    const op = Number(r['estoqueop'] || r['op'] || r['estoqueoperacional']) || 0;
-                    const acervo = Number(r['acervoop'] || r['acervo'] || r['acervooperacional']) || 0;
-                    
-                    const totalGeral = Number(r['totalgeral'] || r['total']) || (central + tecnico + op + acervo);
-
-                    estoqueData.push({
-                        _rowIndex: r._rowIndex,
-                        item: item,
-                        central,
-                        tecnico,
-                        op,
-                        acervo,
-                        total: totalGeral
-                    });
-                });
-
-                let rawHistorico = [];
+                // TENTATIVA 1: Busca via WebApp JSON (Direct Apps Script - Dados fiéis sem perdas de tipo)
                 try {
-                    rawHistorico = await fetchGoogleSheetCSV(TAB_HISTORICO_NAME);
+                    const webAppResponse = await fetch(WEB_APP_URL);
+                    if (webAppResponse.ok) {
+                        const json = await webAppResponse.json();
+                        if (json && Array.isArray(json.estoque) && Array.isArray(json.historico)) {
+                            parseWebAppData(json);
+                            loadedViaWebApp = true;
+                        }
+                    }
                 } catch (e) {
-                    console.warn(`Aba ${TAB_HISTORICO_NAME} não encontrada.`);
+                    console.warn('Busca via WebApp GET indisponível, utilizando fallback CSV gviz...');
                 }
 
-                historicoData = [];
-                rawHistorico.forEach(r => {
-                    const item = r['equipamento'] || r['item'] || '';
-                    const rawDate = r['data'] || r['datahora'] || '';
-                    const parsedDate = parseDateString(rawDate);
-
-                    historicoData.push({
-                        _rowIndex: r._rowIndex,
-                        data: parsedDate.formatted,
-                        _timestamp: parsedDate.timestamp,
-                        item: item || '-',
-                        tipo: r['entradasaida'] || r['tipo'] || r['operacao'] || '-',
-                        qtd: Number(r['quantidade'] || r['qtd']) || 0,
-                        origem: r['origem'] || '-',
-                        destino: r['destino'] || '-',
-                        obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
-                    });
-                });
-
-                // ORDENAÇÃO AUTOMÁTICA: Registros com datas mais recentes fiquem sempre no topo
-                historicoData.sort((a, b) => {
-                    if (b._timestamp !== a._timestamp) {
-                        return b._timestamp - a._timestamp;
-                    }
-                    return b._rowIndex - a._rowIndex; // Desempate pela ordem de inserção
-                });
+                // TENTATIVA 2: Fallback via gviz CSV
+                if (!loadedViaWebApp) {
+                    await parseCSVData();
+                }
 
                 updateKPICards();
                 processData('estoque');
@@ -750,6 +708,127 @@
             } catch (err) {
                 console.error('Erro ao conectar com o Google Sheets:', err);
             }
+        }
+
+        function parseWebAppData(json) {
+            estoqueData = [];
+            json.estoque.forEach(r => {
+                const item = r['equipamento'] || r['item'] || r['descricao'] || r['nome'] || '';
+                const itemLower = item.toString().toLowerCase().trim();
+                if (!item || itemLower.includes('total') || itemLower === 'subtotal') return;
+
+                const central = Number(r['central']) || 0;
+                const tecnico = Number(r['tecnicomarcelo'] || r['tecnico'] || r['marcelo']) || 0;
+                const op = Number(r['estoqueop'] || r['op'] || r['estoqueoperacional']) || 0;
+                const acervo = Number(r['acervoop'] || r['acervo'] || r['acervooperacional']) || 0;
+                const totalGeral = Number(r['totalgeral'] || r['total']) || (central + tecnico + op + acervo);
+
+                estoqueData.push({
+                    _rowIndex: r._rowIndex,
+                    item: item,
+                    central, tecnico, op, acervo,
+                    total: totalGeral
+                });
+            });
+
+            historicoData = [];
+            json.historico.forEach(r => {
+                const item = r['equipamento'] || r['item'] || '';
+                const itemLower = item.toString().toLowerCase().trim();
+                if (!item || itemLower.includes('total') || itemLower === 'subtotal') return;
+
+                const tipo = r['entradasaida'] || r['tipo'] || r['operacao'] || '-';
+                const qtd = Number(r['quantidade'] || r['qtd']) || 0;
+
+                // FILTRO ESTRITO: se não tem tipo de operação válido ('Entrada'/'Saída'), não pertence ao histórico
+                if (tipo !== 'Entrada' && tipo !== 'Saída') return;
+
+                const rawDate = r['data'] || r['datahora'] || '';
+                const parsedDate = parseDateString(rawDate);
+
+                historicoData.push({
+                    _rowIndex: r._rowIndex,
+                    data: parsedDate.formatted,
+                    _timestamp: parsedDate.timestamp,
+                    item: item || '-',
+                    tipo: tipo,
+                    qtd: qtd,
+                    origem: r['origem'] || '-',
+                    destino: r['destino'] || '-',
+                    obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
+                });
+            });
+
+            historicoData.sort((a, b) => {
+                if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
+                return b._rowIndex - a._rowIndex;
+            });
+        }
+
+        async function parseCSVData() {
+            const rawEstoque = await fetchGoogleSheetCSV(TAB_ESTOQUE_NAME);
+            estoqueData = [];
+
+            rawEstoque.forEach(r => {
+                const item = r['equipamento'] || r['item'] || r['descricao'] || r['nome'] || '';
+                const itemLower = item.toString().toLowerCase().trim();
+
+                if (!item || itemLower.includes('total') || itemLower === 'subtotal') return;
+
+                const central = Number(r['central']) || 0;
+                const tecnico = Number(r['tecnicomarcelo'] || r['tecnico'] || r['marcelo']) || 0;
+                const op = Number(r['estoqueop'] || r['op'] || r['estoqueoperacional']) || 0;
+                const acervo = Number(r['acervoop'] || r['acervo'] || r['acervooperacional']) || 0;
+                const totalGeral = Number(r['totalgeral'] || r['total']) || (central + tecnico + op + acervo);
+
+                estoqueData.push({
+                    _rowIndex: r._rowIndex,
+                    item: item,
+                    central, tecnico, op, acervo,
+                    total: totalGeral
+                });
+            });
+
+            let rawHistorico = [];
+            try {
+                rawHistorico = await fetchGoogleSheetCSV(TAB_HISTORICO_NAME);
+            } catch (e) {
+                console.warn(`Aba ${TAB_HISTORICO_NAME} não encontrada.`);
+            }
+
+            historicoData = [];
+            rawHistorico.forEach(r => {
+                const item = r['equipamento'] || r['item'] || '';
+                const itemLower = item.toString().toLowerCase().trim();
+
+                if (!item || itemLower.includes('total') || itemLower === 'subtotal') return;
+
+                const tipo = r['entradasaida'] || r['tipo'] || r['operacao'] || '-';
+                const qtd = Number(r['quantidade'] || r['qtd']) || 0;
+
+                // FILTRO ESTRITO: se não tem tipo de operação válido ('Entrada'/'Saída'), não pertence ao histórico
+                if (tipo !== 'Entrada' && tipo !== 'Saída') return;
+
+                const rawDate = r['data'] || r['datahora'] || '';
+                const parsedDate = parseDateString(rawDate);
+
+                historicoData.push({
+                    _rowIndex: r._rowIndex,
+                    data: parsedDate.formatted,
+                    _timestamp: parsedDate.timestamp,
+                    item: item || '-',
+                    tipo: tipo,
+                    qtd: qtd,
+                    origem: r['origem'] || '-',
+                    destino: r['destino'] || '-',
+                    obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
+                });
+            });
+
+            historicoData.sort((a, b) => {
+                if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
+                return b._rowIndex - a._rowIndex;
+            });
         }
 
         function updateKPICards() {
@@ -1034,7 +1113,6 @@
                 }
             });
 
-            // APLICA ORDENAÇÃO MANUAL SE O USUÁRIO SELECIONOU UMA COLUNA
             if (state.sortCol) {
                 const col = state.sortCol;
                 const dir = state.sortDir === 'asc' ? 1 : -1;
@@ -1048,7 +1126,6 @@
                     return String(valA).localeCompare(String(valB), 'pt-BR', { numeric: true }) * dir;
                 });
             } else if (!isEstoque) {
-                // SE NÃO HOUVER FILTRO MANUAL DE COLUNA, GARANTE A DATA DECRESCENTE
                 dataset.sort((a, b) => {
                     if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
                     return b._rowIndex - a._rowIndex;
