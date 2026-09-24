@@ -166,52 +166,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDIÇÃO DE ESTOQUE -->
-    <div id="modalEditEstoque" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Editar Quantidades do Item
-                </h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <form onsubmit="saveEstoqueEdit(event)" class="space-y-4">
-                <input type="hidden" id="editRowIndex">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Equipamento</label>
-                    <input type="text" id="editItemName" readonly class="w-full bg-slate-100 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-700 font-bold cursor-not-allowed">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Central</label>
-                        <input type="number" id="editCentral" min="0" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Técnico Marcelo</label>
-                        <input type="number" id="editTecnico" min="0" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Estoque Op.</label>
-                        <input type="number" id="editOp" min="0" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Acervo Op.</label>
-                        <input type="number" id="editAcervo" min="0" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold rounded-lg text-slate-700 transition">Cancelar</button>
-                    <button type="submit" id="btnSaveEdit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-lg text-white transition shadow flex items-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> Salvar na Planilha
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- MODAL DE NOVA MOVIMENTAÇÃO (HISTÓRICO) -->
     <div id="modalMovimentacao" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
@@ -859,57 +813,6 @@
             document.getElementById('kpiTotal').innerText = totalFisico;
         }
 
-        function openEditModal(rowIndex) {
-            const item = estoqueData.find(i => i._rowIndex === rowIndex);
-            if (!item) return;
-
-            document.getElementById('editRowIndex').value = item._rowIndex;
-            document.getElementById('editItemName').value = item.item;
-            document.getElementById('editCentral').value = item.central;
-            document.getElementById('editTecnico').value = item.tecnico;
-            document.getElementById('editOp').value = item.op;
-            document.getElementById('editAcervo').value = item.acervo;
-
-            document.getElementById('modalEditEstoque').classList.remove('hidden');
-        }
-
-        function closeEditModal() {
-            document.getElementById('modalEditEstoque').classList.add('hidden');
-        }
-
-        async function saveEstoqueEdit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSaveEdit');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Salvando...`;
-
-            const payload = {
-                rowIndex: parseInt(document.getElementById('editRowIndex').value, 10),
-                central: parseInt(document.getElementById('editCentral').value, 10),
-                tecnico: parseInt(document.getElementById('editTecnico').value, 10),
-                op: parseInt(document.getElementById('editOp').value, 10),
-                acervo: parseInt(document.getElementById('editAcervo').value, 10)
-            };
-
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'updateEstoque', payload })
-                });
-
-                showToast('Saldo atualizado na planilha!');
-                closeEditModal();
-                setTimeout(() => { loadDataFromSheet(); }, 1200);
-            } catch (err) {
-                alert('Erro ao salvar alterações no estoque.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salvar na Planilha`;
-            }
-        }
-
         function openMovimentacaoModal() {
             populateMovimentacaoOptions();
             
@@ -1021,14 +924,14 @@
 
         let currentActiveContext = { tableId: null, colKey: null };
 
+        // REMOVIDA A COLUNA DE AÇÕES
         const estoqueColsDef = [
             { key: 'item', label: 'Equipamento', align: 'text-left', class: 'font-bold text-slate-900' },
             { key: 'central', label: 'Central', align: 'text-center', class: 'text-center font-bold text-slate-800' },
             { key: 'tecnico', label: 'Técnico Marcelo', align: 'text-center', class: 'text-center font-bold text-amber-700' },
             { key: 'op', label: 'Estoque Op.', align: 'text-center', class: 'text-center font-bold text-emerald-700' },
             { key: 'acervo', label: 'Acervo Op.', align: 'text-center', class: 'text-center font-bold text-purple-700' },
-            { key: 'total', label: 'Total Geral', align: 'text-center', class: 'text-center font-bold text-indigo-600 text-base' },
-            { key: 'actions', label: 'Ações', align: 'text-center', class: 'text-center font-bold' }
+            { key: 'total', label: 'Total Geral', align: 'text-center', class: 'text-center font-bold text-indigo-600 text-base' }
         ];
 
         function renderEstoque(data) {
@@ -1037,7 +940,7 @@
             const metricFilter = tableState.estoque.metricFilter;
 
             const activeCols = estoqueColsDef.filter(col => {
-                if (col.key === 'item' || col.key === 'total' || col.key === 'actions') return true;
+                if (col.key === 'item' || col.key === 'total') return true;
                 if (!metricFilter) return true; 
                 return col.key === metricFilter; 
             });
@@ -1046,7 +949,7 @@
                 <th class="${col.align}">
                     <div class="th-container ${col.align === 'text-center' ? 'justify-center' : ''}">
                         <span>${col.label}</span>
-                        ${col.key !== 'actions' ? `<button class="filter-btn" id="fbtn-estoque-${col.key}" onclick="toggleFilterDropdown(event, 'estoque', '${col.key}')"><i class="fa-solid fa-filter"></i></button>` : ''}
+                        <button class="filter-btn" id="fbtn-estoque-${col.key}" onclick="toggleFilterDropdown(event, 'estoque', '${col.key}')"><i class="fa-solid fa-filter"></i></button>
                     </div>
                 </th>
             `).join('');
@@ -1061,13 +964,6 @@
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = activeCols.map(col => {
-                    if (col.key === 'actions') {
-                        return `<td class="text-center">
-                            <button onclick="openEditModal(${row._rowIndex})" title="Editar quantidades" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white rounded-lg text-xs font-semibold transition border border-indigo-200 shadow-sm">
-                                <i class="fa-solid fa-pen-to-square mr-1"></i> Editar
-                            </button>
-                        </td>`;
-                    }
                     let val = row[col.key];
                     if (val === 0 || val === null || val === undefined) val = '-';
                     return `<td class="${col.class}">${val}</td>`;
