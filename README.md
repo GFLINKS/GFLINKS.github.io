@@ -264,13 +264,16 @@
                     <span>Sincronizar Google Drive</span>
                 </button>
 
-                <!-- TAB SWITCHER ESTILO GF LINKS -->
+                <!-- TAB SWITCHER COM A NOVA ABA COMPRAS -->
                 <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
                     <button onclick="switchTab('estoque')" id="btnTabEstoque" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2">
                         <i class="fa-solid fa-cubes"></i> Estoque
                     </button>
                     <button onclick="switchTab('historico')" id="btnTabHistorico" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
                         <i class="fa-solid fa-clock-rotate-left"></i> Histórico
+                    </button>
+                    <button onclick="switchTab('compras')" id="btnTabCompras" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-cart-shopping"></i> Compras
                     </button>
                 </div>
 
@@ -451,6 +454,79 @@
                         </tr>
                     </thead>
                     <tbody id="tbodyHistorico" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ABA 3: HISTÓRICO DE COMPRAS (FORNECEDORES) -->
+        <section id="secCompras" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-cart-shopping text-indigo-600 text-base"></i> Histórico de Compras (Fornecedores)
+                    </h2>
+                    <p class="text-xs text-slate-500">Exibindo automaticamente movimentações com origem em Fornecedores</p>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="clearAllFilters('compras')" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold text-slate-700 rounded-lg transition">
+                        <i class="fa-solid fa-filter-circle-xmark text-rose-600 mr-1"></i> Limpar Filtros
+                    </button>
+                    <div class="relative w-full sm:w-64">
+                        <input type="text" id="searchCompras" onkeyup="filterCompras()" placeholder="Pesquisa rápida..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto relative">
+                <table class="custom-table" id="tblCompras">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="th-container">
+                                    <span>Data</span>
+                                    <button class="filter-btn" id="fbtn-compras-data" onclick="toggleFilterDropdown(event, 'compras', 'data')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Equipamento</span>
+                                    <button class="filter-btn" id="fbtn-compras-item" onclick="toggleFilterDropdown(event, 'compras', 'item')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th class="text-center">
+                                <div class="th-container justify-center">
+                                    <span>Tipo</span>
+                                    <button class="filter-btn" id="fbtn-compras-tipo" onclick="toggleFilterDropdown(event, 'compras', 'tipo')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th class="text-center">
+                                <div class="th-container justify-center">
+                                    <span>Qtd</span>
+                                    <button class="filter-btn" id="fbtn-compras-qtd" onclick="toggleFilterDropdown(event, 'compras', 'qtd')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Origem</span>
+                                    <button class="filter-btn" id="fbtn-compras-origem" onclick="toggleFilterDropdown(event, 'compras', 'origem')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Destino</span>
+                                    <button class="filter-btn" id="fbtn-compras-destino" onclick="toggleFilterDropdown(event, 'compras', 'destino')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-container">
+                                    <span>Observações / Projeto</span>
+                                    <button class="filter-btn" id="fbtn-compras-obs" onclick="toggleFilterDropdown(event, 'compras', 'obs')"><i class="fa-solid fa-filter"></i></button>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyCompras" class="divide-y divide-slate-100"></tbody>
                 </table>
             </div>
         </section>
@@ -662,6 +738,7 @@
                 updateKPICards();
                 processData('estoque');
                 processData('historico');
+                processData('compras');
                 populateMovimentacaoOptions();
                 
                 const badge = document.getElementById('dbStatusBadge');
@@ -919,12 +996,12 @@
 
         const tableState = {
             estoque: { filters: {}, sortCol: null, sortDir: null, metricFilter: null },
-            historico: { filters: {}, sortCol: null, sortDir: null }
+            historico: { filters: {}, sortCol: null, sortDir: null },
+            compras: { filters: {}, sortCol: null, sortDir: null }
         };
 
         let currentActiveContext = { tableId: null, colKey: null };
 
-        // REMOVIDA A COLUNA DE AÇÕES
         const estoqueColsDef = [
             { key: 'item', label: 'Equipamento', align: 'text-left', class: 'font-bold text-slate-900' },
             { key: 'central', label: 'Central', align: 'text-center', class: 'text-center font-bold text-slate-800' },
@@ -972,12 +1049,13 @@
             });
         }
 
-        function renderHistorico(data) {
-            const tbody = document.getElementById('tbodyHistorico');
+        function renderHistoricoTable(data, tbodyId = 'tbodyHistorico') {
+            const tbody = document.getElementById(tbodyId);
+            if (!tbody) return;
             tbody.innerHTML = '';
 
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Nenhum registro encontrado no Histórico.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
@@ -1003,15 +1081,25 @@
         }
 
         function processData(tableId) {
-            const isEstoque = tableId === 'estoque';
-            let dataset = isEstoque ? [...estoqueData] : [...historicoData];
+            let dataset;
+            if (tableId === 'estoque') {
+                dataset = [...estoqueData];
+            } else if (tableId === 'historico') {
+                dataset = [...historicoData];
+            } else if (tableId === 'compras') {
+                dataset = historicoData.filter(row => row.origem && row.origem.toString().toLowerCase().includes('fornecedor'));
+            }
+
             const state = tableState[tableId];
 
-            if (isEstoque && state.metricFilter) {
+            if (tableId === 'estoque' && state.metricFilter) {
                 dataset = dataset.filter(row => row[state.metricFilter] > 0);
             }
 
-            const searchInput = document.getElementById(isEstoque ? 'searchEstoque' : 'searchHistorico').value.toLowerCase();
+            const searchInputId = tableId === 'estoque' ? 'searchEstoque' : (tableId === 'historico' ? 'searchHistorico' : 'searchCompras');
+            const searchInputEl = document.getElementById(searchInputId);
+            const searchInput = searchInputEl ? searchInputEl.value.toLowerCase() : '';
+
             if (searchInput) {
                 dataset = dataset.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(searchInput)));
             }
@@ -1035,21 +1123,23 @@
                     }
                     return String(valA).localeCompare(String(valB), 'pt-BR', { numeric: true }) * dir;
                 });
-            } else if (!isEstoque) {
+            } else if (tableId !== 'estoque') {
                 dataset.sort((a, b) => {
                     if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
                     return b._rowIndex - a._rowIndex;
                 });
             }
 
-            if (isEstoque) renderEstoque(dataset);
-            else renderHistorico(dataset);
+            if (tableId === 'estoque') renderEstoque(dataset);
+            else if (tableId === 'historico') renderHistoricoTable(dataset, 'tbodyHistorico');
+            else if (tableId === 'compras') renderHistoricoTable(dataset, 'tbodyCompras');
 
             updateFilterButtonStates(tableId);
         }
 
         function filterEstoque() { processData('estoque'); }
         function filterHistorico() { processData('historico'); }
+        function filterCompras() { processData('compras'); }
 
         function filterByMetric(metricKey) {
             switchTab('estoque');
@@ -1119,8 +1209,15 @@
             dropdown.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 270)}px`;
             dropdown.style.display = 'block';
 
-            const isEstoque = tableId === 'estoque';
-            const rawData = isEstoque ? estoqueData : historicoData;
+            let rawData;
+            if (tableId === 'estoque') {
+                rawData = estoqueData;
+            } else if (tableId === 'historico') {
+                rawData = historicoData;
+            } else if (tableId === 'compras') {
+                rawData = historicoData.filter(row => row.origem && row.origem.toString().toLowerCase().includes('fornecedor'));
+            }
+
             const uniqueValues = [...new Set(rawData.map(r => String(r[colKey])))].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
 
             const selectedFilter = tableState[tableId].filters[colKey];
@@ -1202,15 +1299,18 @@
                 tableState.estoque.metricFilter = null;
                 highlightActiveMetricCard(null);
                 document.getElementById('activeFilterBadge').innerText = 'Mostrando todas as localizações';
+                document.getElementById('searchEstoque').value = '';
+            } else if (tableId === 'historico') {
+                document.getElementById('searchHistorico').value = '';
+            } else if (tableId === 'compras') {
+                document.getElementById('searchCompras').value = '';
             }
-            document.getElementById(tableId === 'estoque' ? 'searchEstoque' : 'searchHistorico').value = '';
             processData(tableId);
         }
 
         function updateFilterButtonStates(tableId) {
             const state = tableState[tableId];
-            const isEstoque = tableId === 'estoque';
-            const keys = isEstoque 
+            const keys = tableId === 'estoque' 
                 ? ['item', 'central', 'tecnico', 'op', 'acervo', 'total'] 
                 : ['data', 'item', 'tipo', 'qtd', 'origem', 'destino', 'obs'];
 
@@ -1231,19 +1331,32 @@
         function switchTab(tab) {
             const secEstoque = document.getElementById('secEstoque');
             const secHistorico = document.getElementById('secHistorico');
+            const secCompras = document.getElementById('secCompras');
+
             const btnEstoque = document.getElementById('btnTabEstoque');
             const btnHistorico = document.getElementById('btnTabHistorico');
+            const btnCompras = document.getElementById('btnTabCompras');
+
+            const activeClass = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2';
+            const inactiveClass = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
+
+            secEstoque.classList.add('hidden');
+            secHistorico.classList.add('hidden');
+            secCompras.classList.add('hidden');
+
+            btnEstoque.className = inactiveClass;
+            btnHistorico.className = inactiveClass;
+            btnCompras.className = inactiveClass;
 
             if (tab === 'estoque') {
                 secEstoque.classList.remove('hidden');
-                secHistorico.classList.add('hidden');
-                btnEstoque.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2';
-                btnHistorico.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
-            } else {
-                secEstoque.classList.add('hidden');
+                btnEstoque.className = activeClass;
+            } else if (tab === 'historico') {
                 secHistorico.classList.remove('hidden');
-                btnHistorico.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2';
-                btnEstoque.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
+                btnHistorico.className = activeClass;
+            } else if (tab === 'compras') {
+                secCompras.classList.remove('hidden');
+                btnCompras.className = activeClass;
             }
         }
 
