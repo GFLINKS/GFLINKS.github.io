@@ -370,7 +370,7 @@
 
                 <!-- PAINEL DE CARDS DE EQUIPAMENTOS (INICIALMENTE OCULTO) -->
                 <div id="secEquipCards" class="hidden transition-all duration-300 pt-2">
-                    <div id="gridEquipCards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    <div id="gridEquipCards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                         <!-- Gerado dinamicamente via JS -->
                     </div>
                 </div>
@@ -913,23 +913,46 @@
             document.getElementById('kpiTotal').innerText = totalFisico;
         }
 
-        /* RENDERING DOS CARDS INDIVIDUAIS POR EQUIPAMENTO */
+        /* FUNÇÃO PARA MAPEAR EMOJI CONFORME O NOME DO EQUIPAMENTO */
+        function getEquipIcon(name) {
+            const n = name.toLowerCase();
+            if (n.includes('dvr') || n.includes('gravador') || n.includes('nvr')) return '📹';
+            if (n.includes('câmera') || n.includes('camera')) return '📷';
+            if (n.includes('hd') || n.includes('disco')) return '💾';
+            if (n.includes('notebook') || n.includes('laptop')) return '💻';
+            if (n.includes('teclado')) return '⌨️';
+            if (n.includes('mouse')) return '🖱️';
+            if (n.includes('nobreak') || n.includes('fonte') || n.includes('bateria')) return '⚡';
+            if (n.includes('switch') || n.includes('roteador') || n.includes('mikrotik') || n.includes('hap') || n.includes('lte')) return '🌐';
+            if (n.includes('antena') || n.includes('elsys')) return '📡';
+            if (n.includes('cabo') || n.includes('regua') || n.includes('protetor')) return '🔌';
+            if (n.includes('caixa') || n.includes('rolo')) return '📦';
+            if (n.includes('telefone') || n.includes('terminal')) return '📞';
+            if (n.includes('bandeja')) return '📥';
+            return '⚙️';
+        }
+
+        /* RENDERING DOS CARDS INDIVIDUAIS POR EQUIPAMENTO (FONTE AJUSTADA + EMOJI) */
         function renderEquipmentCards() {
             const container = document.getElementById('gridEquipCards');
             if (!container) return;
             container.innerHTML = '';
 
             estoqueData.forEach(item => {
+                const icon = getEquipIcon(item.item);
                 const card = document.createElement('div');
-                card.className = "bg-white p-3 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 flex flex-col justify-between group";
+                card.className = "bg-white p-3 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 flex flex-col justify-between min-h-[90px] group";
                 card.onclick = () => filterByEquipment(item.item);
                 
                 card.innerHTML = `
-                    <div class="flex items-center justify-between pointer-events-none gap-2">
-                        <span class="text-xs font-bold text-slate-800 truncate" title="${item.item}">${item.item}</span>
-                        <span class="text-base font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${item.total}</span>
+                    <div class="flex items-start justify-between pointer-events-none gap-2">
+                        <div class="flex items-start gap-1.5 min-w-0 pr-1">
+                            <span class="text-sm shrink-0 leading-none mt-0.5">${icon}</span>
+                            <span class="text-[11px] font-bold text-slate-800 leading-snug break-words" title="${item.item}">${item.item}</span>
+                        </div>
+                        <span class="text-sm font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 shrink-0 self-start">${item.total}</span>
                     </div>
-                    <p class="text-[10px] font-bold text-indigo-500 mt-2 pointer-events-none flex items-center justify-between">
+                    <p class="text-[10px] font-bold text-indigo-500 mt-2 pointer-events-none flex items-center justify-between border-t border-slate-100 pt-1.5">
                         <span>Ver detalhes</span>
                         <i class="fa-solid fa-arrow-down text-[9px] group-hover:translate-y-0.5 transition-transform"></i>
                     </p>
@@ -955,7 +978,7 @@
         }
 
         function filterByEquipment(itemName) {
-            switchTab('estoque', false); // troca para a aba sem forçar scroll duplo
+            switchTab('estoque', false); // troca para a aba sem acionar scroll duplo
             
             // Limpa filtro de métrica se houver
             tableState.estoque.metricFilter = null;
