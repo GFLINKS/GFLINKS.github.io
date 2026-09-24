@@ -2,29 +2,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Estoque - Grupo Forte Protege</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Controle de Estoque & Operações - Grupo Forte Protege</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Ícones -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         body {
-            background-color: #0b0f19 !important;
-            color: #f1f5f9 !important;
+            background-color: #f8fafc;
+            color: #1e293b;
             font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
-        .card-panel {
-            background-color: #111827 !important;
-            border: 1px solid #1f2937 !important;
-        }
-
-        /* TABELA COM ALTO CONTRASTE - TEXTO PRETO */
+        /* Estilização da Tabela Estilo GF Links */
         table.custom-table {
-            background-color: #ffffff !important;
             width: 100%;
             border-collapse: collapse;
+            background-color: #ffffff;
         }
 
         table.custom-table th {
@@ -34,34 +29,34 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            padding: 0.75rem 0.5rem;
-            border: 1px solid #334155 !important;
+            padding: 0.75rem 0.75rem;
+            border-bottom: 1px solid #334155 !important;
             user-select: none;
         }
 
         table.custom-table td {
-            background-color: #ffffff !important;
-            color: #000000 !important;
+            color: #334155 !important;
             font-weight: 600 !important;
-            font-size: 0.875rem !important;
-            padding: 0.65rem 0.85rem;
-            border: 1px solid #e2e8f0 !important;
+            font-size: 0.8125rem !important;
+            padding: 0.75rem 0.85rem;
+            border-bottom: 1px solid #f1f5f9 !important;
         }
 
         table.custom-table tr:hover td {
-            background-color: #f1f5f9 !important;
+            background-color: #f8fafc !important;
         }
 
+        /* Menu de Filtro Suspenso Estilo Excel */
         .excel-filter-menu {
             position: absolute;
             z-index: 100;
             background-color: #ffffff;
-            color: #1e293b;
+            color: #334155;
             border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            width: 250px;
-            font-size: 0.8rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            width: 260px;
+            font-size: 0.75rem;
             display: none;
         }
 
@@ -77,14 +72,14 @@
 
         .excel-filter-menu .filter-option:hover {
             background-color: #f1f5f9;
-            color: #2563eb;
+            color: #4f46e5;
         }
 
         .excel-filter-list {
             max-height: 160px;
             overflow-y: auto;
             border: 1px solid #e2e8f0;
-            border-radius: 4px;
+            border-radius: 6px;
             background-color: #f8fafc;
             padding: 4px;
         }
@@ -93,9 +88,9 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 3px 6px;
+            padding: 4px 6px;
             cursor: pointer;
-            border-radius: 3px;
+            border-radius: 4px;
             font-weight: 500;
         }
 
@@ -107,21 +102,21 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 4px;
+            gap: 6px;
         }
 
         .filter-btn {
             background-color: #334155;
             color: #cbd5e1;
             border-radius: 4px;
-            padding: 2px 6px;
+            padding: 3px 6px;
             cursor: pointer;
             font-size: 0.65rem;
             transition: all 0.2s;
         }
 
         .filter-btn:hover {
-            background-color: #2563eb;
+            background-color: #4f46e5;
             color: #ffffff;
         }
 
@@ -132,88 +127,85 @@
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased relative" onclick="closeAllFilterMenus(event)">
+<body class="bg-slate-100 font-sans min-h-screen text-slate-800 relative" onclick="closeAllFilterMenus(event)">
 
-    <!-- TELA DE LOGIN OVERLAY -->
-    <div id="loginScreen" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-6">
-            <div class="flex justify-center mb-2">
-                <img src="logo.png" alt="Grupo Forte Protege" class="h-16 w-auto object-contain max-w-[200px]" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x60/111827/38bdf8?text=GF+PROTEGE'">
+    <!-- TELA DE LOGIN / BLOQUEIO POR SENHA FUNCIONAL -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-5 border border-slate-200">
+            <img src="logo.png" alt="Grupo Forte Protege" class="h-12 w-auto mx-auto object-contain" onerror="this.style.display='none'">
+            <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
+                <i class="fa-solid fa-boxes-stacked"></i>
             </div>
-
             <div>
-                <h2 class="text-xl font-bold text-white tracking-tight">Controle de Estoque</h2>
-                <p class="text-xs text-slate-400 mt-1">Informe a senha corporativa para acessar o painel</p>
+                <h2 class="text-xl font-bold text-slate-800">Acesso Restrito</h2>
+                <p class="text-xs text-slate-500 mt-1">Informe a senha corporativa para acessar o Painel de Estoque</p>
             </div>
-
             <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
                 <div>
-                    <label for="inputPassword" class="block text-xs font-semibold uppercase text-slate-400 mb-1">Senha de Acesso</label>
+                    <label for="inputPassword" class="block text-xs font-semibold uppercase text-slate-500 mb-1">Senha de Acesso</label>
                     <div class="relative">
-                        <input type="password" id="inputPassword" placeholder="••••••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition pr-10">
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300">
+                        <input type="password" id="inputPassword" placeholder="••••••••••••" class="w-full text-sm px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-semibold tracking-wider bg-slate-50 pr-10">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600">
                             <i id="eyeIcon" class="fa-solid fa-eye"></i>
                         </button>
                     </div>
-                    <p id="loginError" class="text-xs text-rose-500 mt-2 hidden font-semibold flex items-center gap-1">
+                    <p id="loginError" class="text-xs text-rose-600 font-semibold mt-2 hidden flex items-center gap-1">
                         <i class="fa-solid fa-circle-exclamation"></i> Senha incorreta. Tente novamente.
                     </p>
                 </div>
-
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i> Entrar no Sistema
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-key text-xs"></i> Acessar Painel
                 </button>
             </form>
-
-            <div class="text-[11px] text-slate-600 border-t border-slate-800/80 pt-4">
+            <div class="text-[11px] text-slate-400 border-t border-slate-100 pt-4 text-center">
                 Grupo Forte Protege &copy; 2026 — Acesso Seguro
             </div>
         </div>
     </div>
 
     <!-- MODAL DE EDIÇÃO DE ESTOQUE -->
-    <div id="modalEditEstoque" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-blue-500"></i> Editar Quantidades
+    <div id="modalEditEstoque" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Editar Quantidades do Item
                 </h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
             <form onsubmit="saveEstoqueEdit(event)" class="space-y-4">
                 <input type="hidden" id="editRowIndex">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Equipamento</label>
-                    <input type="text" id="editItemName" readonly class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-300 font-bold cursor-not-allowed">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Equipamento</label>
+                    <input type="text" id="editItemName" readonly class="w-full bg-slate-100 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-700 font-bold cursor-not-allowed">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Central</label>
-                        <input type="number" id="editCentral" min="0" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Central</label>
+                        <input type="number" id="editCentral" min="0" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Técnico Marcelo</label>
-                        <input type="number" id="editTecnico" min="0" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Técnico Marcelo</label>
+                        <input type="number" id="editTecnico" min="0" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Estoque Op.</label>
-                        <input type="number" id="editOp" min="0" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Estoque Op.</label>
+                        <input type="number" id="editOp" min="0" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Acervo Op.</label>
-                        <input type="number" id="editAcervo" min="0" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Acervo Op.</label>
+                        <input type="number" id="editAcervo" min="0" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-300">Cancelar</button>
-                    <button type="submit" id="btnSaveEdit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg text-white flex items-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold rounded-lg text-slate-700 transition">Cancelar</button>
+                    <button type="submit" id="btnSaveEdit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-lg text-white transition shadow flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar na Planilha
                     </button>
                 </div>
             </form>
@@ -221,64 +213,64 @@
     </div>
 
     <!-- MODAL DE NOVA MOVIMENTAÇÃO (HISTÓRICO) -->
-    <div id="modalMovimentacao" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-right-left text-emerald-500"></i> Registrar Nova Movimentação
+    <div id="modalMovimentacao" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-right-left text-emerald-600"></i> Registrar Nova Movimentação
                 </h3>
-                <button onclick="closeMovimentacaoModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeMovimentacaoModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
             <form onsubmit="saveMovimentacao(event)" class="space-y-3">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Equipamento</label>
-                    <select id="movEquipamento" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Equipamento</label>
+                    <select id="movEquipamento" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Selecione um equipamento...</option>
                     </select>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Data</label>
-                        <input type="date" id="movData" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Data</label>
+                        <input type="date" id="movData" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tipo de Operação</label>
-                        <select id="movTipo" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Tipo de Operação</label>
+                        <select id="movTipo" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <option value="Entrada">Entrada</option>
                             <option value="Saída">Saída</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Quantidade</label>
-                        <input type="number" id="movQtd" min="1" value="1" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Quantidade</label>
+                        <input type="number" id="movQtd" min="1" value="1" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Origem</label>
-                        <select id="movOrigem" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Origem</label>
+                        <select id="movOrigem" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <option value="">Selecione a origem...</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Destino</label>
-                        <select id="movDestino" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Destino</label>
+                        <select id="movDestino" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <option value="">Selecione o destino...</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Observações / Projeto</label>
-                    <input type="text" id="movObs" placeholder="Ex: Instalação Cliente X" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Observações / Projeto</label>
+                    <input type="text" id="movObs" placeholder="Ex: Instalação Cliente X" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
 
-                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                    <button type="button" onclick="closeMovimentacaoModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-300">Cancelar</button>
-                    <button type="submit" id="btnSaveMov" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded-lg text-white flex items-center gap-2">
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeMovimentacaoModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold rounded-lg text-slate-700 transition">Cancelar</button>
+                    <button type="submit" id="btnSaveMov" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded-lg text-white transition shadow flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> Registrar Movimentação
                     </button>
                 </div>
@@ -292,46 +284,43 @@
         <span id="toastMsg" class="text-xs font-semibold">Dados atualizados com sucesso!</span>
     </div>
 
-    <!-- CABEÇALHO FIXO -->
-    <header id="mainHeader" class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
+    <!-- CABEÇALHO FIXO ESTILO GF LINKS -->
+    <header id="mainHeader" class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-[1800px] mx-auto px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-4 w-full lg:w-auto justify-between lg:justify-start">
                 <div class="flex items-center gap-3">
-                    <img src="logo.png" alt="Grupo Forte Protege" class="h-10 w-auto object-contain max-w-[150px]" onerror="this.onerror=null; this.src='https://via.placeholder.com/150x40/111827/38bdf8?text=GF+PROTEGE'">
-                    <div class="h-7 w-px bg-slate-700 hidden sm:block"></div>
+                    <img src="logo.png" alt="Grupo Forte Protege" class="h-10 w-auto object-contain max-h-12" onerror="this.style.display='none'">
+                    <i class="fa-solid fa-boxes-stacked text-emerald-400 text-2xl"></i>
                     <div>
-                        <h1 class="text-lg font-bold text-white tracking-tight">Estoque & Operações</h1>
-                        <p class="text-[11px] text-slate-400 font-medium">TI • CFTV • Conectividade</p>
+                        <h1 class="text-xl font-bold tracking-wide">Estoque & Operações</h1>
+                        <p class="text-xs text-slate-400" id="dbStatusBadge">Status DB: Conectando...</p>
+                        <p class="text-[11px] text-slate-400 font-medium mt-0.5" id="lastUpdateText">Última atualização: Em tempo real</p>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
-                <button onclick="openMovimentacaoModal()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md">
-                    <i class="fa-solid fa-plus"></i>
+            <div class="flex items-center gap-3 flex-wrap justify-center lg:justify-end w-full lg:w-auto">
+                <button onclick="openMovimentacaoModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-plus text-sm"></i>
                     <span>Nova Movimentação</span>
                 </button>
 
-                <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-400 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Atualizado: <strong id="lastUpdateText" class="text-slate-200">Em tempo real</strong></span>
-                </div>
-
-                <button onclick="syncData()" id="btnSync" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm">
-                    <i id="iconSync" class="fa-solid fa-rotate text-blue-400"></i>
-                    <span>Sincronizar</span>
+                <button onclick="syncData()" id="btnSync" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i id="iconSync" class="fa-solid fa-rotate text-sm"></i>
+                    <span>Sincronizar Google Drive</span>
                 </button>
 
-                <div class="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800">
-                    <button onclick="switchTab('estoque')" id="btnTabEstoque" class="px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2">
-                        <i class="fa-solid fa-boxes-stacked"></i> Estoque
+                <!-- TAB SWITCHER ESTILO GF LINKS -->
+                <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button onclick="switchTab('estoque')" id="btnTabEstoque" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2">
+                        <i class="fa-solid fa-cubes"></i> Estoque
                     </button>
-                    <button onclick="switchTab('historico')" id="btnTabHistorico" class="px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
+                    <button onclick="switchTab('historico')" id="btnTabHistorico" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
                         <i class="fa-solid fa-clock-rotate-left"></i> Histórico
                     </button>
                 </div>
 
-                <button onclick="handleLogout()" title="Sair da sessão" class="px-2.5 py-1.5 bg-slate-800 hover:bg-rose-900/50 hover:text-rose-400 text-slate-400 rounded-lg text-xs font-semibold border border-slate-700 transition">
+                <button onclick="handleLogout()" class="bg-slate-700 hover:bg-rose-600 text-white text-xs font-semibold px-3 py-2.5 rounded-lg transition shadow flex items-center gap-1.5" title="Sair do Painel">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
@@ -339,72 +328,92 @@
     </header>
 
     <!-- CONTEÚDO PRINCIPAL -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+    <main class="max-w-[1800px] mx-auto px-6 py-6 space-y-6">
 
-        <!-- CARDS DE MÉTRICAS CLICÁVEIS (KPIs) -->
+        <!-- CARDS DE MÉTRICAS CLICÁVEIS (KPIS ESTILO GF LINKS) -->
         <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div onclick="filterByMetric('central')" id="kpi-card-central" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-blue-500 hover:scale-[1.02] transition-all duration-200 group">
-                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-blue-400">
-                    <span>Central</span>
-                    <i class="fa-solid fa-warehouse text-blue-400"></i>
+            <div onclick="filterByMetric('central')" id="kpi-card-central" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-sky-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                <div class="flex items-center justify-between pointer-events-none">
+                    <div>
+                        <p class="text-[11px] font-bold text-sky-600 uppercase tracking-wide">Central</p>
+                        <h3 class="text-2xl font-bold text-sky-600 mt-1" id="kpiCentral">0</h3>
+                    </div>
+                    <div class="bg-sky-100 p-3 rounded-lg text-sky-600 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-warehouse text-lg"></i>
+                    </div>
                 </div>
-                <div class="text-2xl font-bold text-white mt-2" id="kpiCentral">0</div>
-                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
+                <p class="text-xs font-bold text-sky-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
             </div>
 
-            <div onclick="filterByMetric('tecnico')" id="kpi-card-tecnico" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-amber-500 hover:scale-[1.02] transition-all duration-200 group">
-                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-amber-400">
-                    <span>Técnico Marcelo</span>
-                    <i class="fa-solid fa-user-gear text-amber-400"></i>
+            <div onclick="filterByMetric('tecnico')" id="kpi-card-tecnico" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                <div class="flex items-center justify-between pointer-events-none">
+                    <div>
+                        <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wide">Técnico Marcelo</p>
+                        <h3 class="text-2xl font-bold text-amber-600 mt-1" id="kpiTecnico">0</h3>
+                    </div>
+                    <div class="bg-amber-100 p-3 rounded-lg text-amber-600 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-user-gear text-lg"></i>
+                    </div>
                 </div>
-                <div class="text-2xl font-bold text-amber-400 mt-2" id="kpiTecnico">0</div>
-                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
+                <p class="text-xs font-bold text-amber-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
             </div>
 
-            <div onclick="filterByMetric('op')" id="kpi-card-op" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-emerald-500 hover:scale-[1.02] transition-all duration-200 group">
-                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-emerald-400">
-                    <span>Estoque Op.</span>
-                    <i class="fa-solid fa-truck-ramp-box text-emerald-400"></i>
+            <div onclick="filterByMetric('op')" id="kpi-card-op" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                <div class="flex items-center justify-between pointer-events-none">
+                    <div>
+                        <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-wide">Estoque Op.</p>
+                        <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="kpiOperacional">0</h3>
+                    </div>
+                    <div class="bg-emerald-100 p-3 rounded-lg text-emerald-600 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-truck-ramp-box text-lg"></i>
+                    </div>
                 </div>
-                <div class="text-2xl font-bold text-emerald-400 mt-2" id="kpiOperacional">0</div>
-                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
+                <p class="text-xs font-bold text-emerald-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
             </div>
 
-            <div onclick="filterByMetric('acervo')" id="kpi-card-acervo" class="card-panel p-4 rounded-xl shadow-sm cursor-pointer hover:border-purple-500 hover:scale-[1.02] transition-all duration-200 group">
-                <div class="flex items-center justify-between text-xs font-semibold uppercase text-slate-400 group-hover:text-purple-400">
-                    <span>Acervo</span>
-                    <i class="fa-solid fa-laptop text-purple-400"></i>
+            <div onclick="filterByMetric('acervo')" id="kpi-card-acervo" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-purple-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                <div class="flex items-center justify-between pointer-events-none">
+                    <div>
+                        <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Acervo Op.</p>
+                        <h3 class="text-2xl font-bold text-purple-600 mt-1" id="kpiAcervo">0</h3>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-laptop text-lg"></i>
+                    </div>
                 </div>
-                <div class="text-2xl font-bold text-purple-400 mt-2" id="kpiAcervo">0</div>
-                <span class="text-[11px] text-slate-500 group-hover:text-slate-400">Clique para isolar</span>
+                <p class="text-xs font-bold text-purple-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
             </div>
 
-            <div onclick="filterByMetric('total')" id="kpi-card-total" class="col-span-2 sm:col-span-1 card-panel p-4 rounded-xl shadow-sm bg-gradient-to-br from-slate-900 to-blue-950 border-blue-900/50 cursor-pointer hover:border-blue-400 hover:scale-[1.02] transition-all duration-200 group">
-                <div class="flex items-center justify-between text-xs font-semibold uppercase text-blue-300">
-                    <span>Total Físico</span>
-                    <i class="fa-solid fa-cubes text-blue-400"></i>
+            <div onclick="filterByMetric('total')" id="kpi-card-total" class="col-span-2 sm:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                <div class="flex items-center justify-between pointer-events-none">
+                    <div>
+                        <p class="text-[11px] font-bold text-indigo-600 uppercase tracking-wide">Total Físico</p>
+                        <h3 class="text-2xl font-bold text-indigo-600 mt-1" id="kpiTotal">0</h3>
+                    </div>
+                    <div class="bg-indigo-100 p-3 rounded-lg text-indigo-600 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-cubes text-lg"></i>
+                    </div>
                 </div>
-                <div class="text-2xl font-bold text-blue-300 mt-2" id="kpiTotal">0</div>
-                <span class="text-[11px] text-blue-200/70">Exibir todas as colunas</span>
+                <p class="text-xs font-bold text-indigo-600 mt-2 pointer-events-none">Exibir todas as colunas <i class="fa-solid fa-sliders text-[10px] ml-1"></i></p>
             </div>
         </section>
 
         <!-- ABA 1: SALDO DE ESTOQUE -->
-        <section id="secEstoque" class="card-panel rounded-xl shadow-lg overflow-hidden">
-            <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <section id="secEstoque" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
                 <div>
-                    <h2 class="text-base font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-blue-500"></i> Disponibilidade por Equipamento
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-indigo-600 text-base"></i> Disponibilidade por Equipamento
                     </h2>
-                    <p class="text-xs text-slate-400" id="activeFilterBadge">Mostrando todas as localizações</p>
+                    <p class="text-xs text-slate-500" id="activeFilterBadge">Mostrando todas as localizações</p>
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button onclick="clearAllFilters('estoque')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">
-                        <i class="fa-solid fa-filter-circle-xmark text-rose-400 mr-1"></i> Limpar Filtros
+                    <button onclick="clearAllFilters('estoque')" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold text-slate-700 rounded-lg transition">
+                        <i class="fa-solid fa-filter-circle-xmark text-rose-600 mr-1"></i> Limpar Filtros
                     </button>
                     <div class="relative w-full sm:w-64">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-sm"></i>
-                        <input type="text" id="searchEstoque" onkeyup="filterEstoque()" placeholder="Pesquisa rápida..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" id="searchEstoque" onkeyup="filterEstoque()" placeholder="Pesquisa rápida..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
                     </div>
                 </div>
             </div>
@@ -414,27 +423,27 @@
                     <thead>
                         <tr id="theadEstoqueTr"></tr>
                     </thead>
-                    <tbody id="tbodyEstoque"></tbody>
+                    <tbody id="tbodyEstoque" class="divide-y divide-slate-100"></tbody>
                 </table>
             </div>
         </section>
 
         <!-- ABA 2: HISTÓRICO DE MOVIMENTAÇÕES -->
-        <section id="secHistorico" class="card-panel rounded-xl shadow-lg overflow-hidden hidden">
-            <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <section id="secHistorico" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
                 <div>
-                    <h2 class="text-base font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-arrow-right-arrow-left text-blue-500"></i> Histórico de Entradas e Saídas
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-arrow-left text-indigo-600 text-base"></i> Histórico de Entradas e Saídas
                     </h2>
-                    <p class="text-xs text-slate-400">Exibindo automaticamente da movimentação mais recente para a mais antiga</p>
+                    <p class="text-xs text-slate-500">Exibindo automaticamente da movimentação mais recente para a mais antiga</p>
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button onclick="clearAllFilters('historico')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">
-                        <i class="fa-solid fa-filter-circle-xmark text-rose-400 mr-1"></i> Limpar Filtros
+                    <button onclick="clearAllFilters('historico')" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold text-slate-700 rounded-lg transition">
+                        <i class="fa-solid fa-filter-circle-xmark text-rose-600 mr-1"></i> Limpar Filtros
                     </button>
                     <div class="relative w-full sm:w-64">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-sm"></i>
-                        <input type="text" id="searchHistorico" onkeyup="filterHistorico()" placeholder="Pesquisa rápida..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" id="searchHistorico" onkeyup="filterHistorico()" placeholder="Pesquisa rápida..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
                     </div>
                 </div>
             </div>
@@ -487,46 +496,46 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody id="tbodyHistorico"></tbody>
+                    <tbody id="tbodyHistorico" class="divide-y divide-slate-100"></tbody>
                 </table>
             </div>
         </section>
 
     </main>
 
-    <!-- MENU ESTILO EXCEL -->
+    <!-- MENU ESTILO EXCEL FLUTUANTE -->
     <div id="excelFilterDropdown" class="excel-filter-menu" onclick="event.stopPropagation()">
         <div class="filter-option border-b border-slate-100" onclick="applySort('asc')">
-            <i class="fa-solid fa-arrow-down-a-z text-blue-600"></i> Classificar de A a Z
+            <i class="fa-solid fa-arrow-down-a-z text-indigo-600"></i> Classificar de A a Z
         </div>
         <div class="filter-option border-b border-slate-200" onclick="applySort('desc')">
-            <i class="fa-solid fa-arrow-up-z-a text-blue-600"></i> Classificar de Z a A
+            <i class="fa-solid fa-arrow-up-z-a text-indigo-600"></i> Classificar de Z a A
         </div>
 
         <div class="p-2 border-b border-slate-200">
-            <input type="text" id="excelSearchBox" oninput="filterExcelCheckboxList()" placeholder="Pesquisar itens..." class="w-full bg-slate-100 border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500">
+            <input type="text" id="excelSearchBox" oninput="filterExcelCheckboxList()" placeholder="Pesquisar itens..." class="w-full bg-slate-100 border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
         </div>
 
         <div class="p-2">
             <div class="excel-filter-item font-bold border-b border-slate-200 pb-1 mb-1">
-                <input type="checkbox" id="chkSelectAll" onchange="toggleSelectAllCheckboxes(this.checked)" checked>
+                <input type="checkbox" id="chkSelectAll" onchange="toggleSelectAllCheckboxes(this.checked)" checked class="rounded text-indigo-600 focus:ring-indigo-500">
                 <label for="chkSelectAll">(Selecionar Tudo)</label>
             </div>
             <div id="excelCheckboxList" class="excel-filter-list"></div>
         </div>
 
-        <div class="p-2 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 rounded-b-8 shadow-inner">
-            <button onclick="confirmColumnFilter()" class="px-3 py-1 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 text-xs">OK</button>
-            <button onclick="closeExcelFilterMenu()" class="px-3 py-1 bg-slate-200 text-slate-700 rounded font-semibold hover:bg-slate-300 text-xs">Cancelar</button>
+        <div class="p-2 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 rounded-b-xl">
+            <button onclick="confirmColumnFilter()" class="px-3 py-1 bg-indigo-600 text-white rounded font-semibold hover:bg-indigo-500 text-xs transition">OK</button>
+            <button onclick="closeExcelFilterMenu()" class="px-3 py-1 bg-slate-200 text-slate-700 rounded font-semibold hover:bg-slate-300 text-xs transition">Cancelar</button>
         </div>
     </div>
 
     <!-- RODAPÉ -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-12">
         Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
     </footer>
 
-    <!-- SCRIPT DE INTEGRAÇÃO HÍBRIDA -->
+    <!-- SCRIPT DE INTEGRAÇÃO FUNCIONAL COMPLETA -->
     <script>
         const CORRECT_PASSWORD = "gF@2026*Estoque";
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
@@ -584,7 +593,6 @@
             }
         }
 
-        // PARSER DE DATA AVANÇADO: Extrai texto e gera timestamp para ordenação exata
         function parseDateString(dateVal) {
             if (!dateVal || dateVal === '-' || dateVal.toString().trim() === '') {
                 return { formatted: '-', timestamp: 0 };
@@ -603,11 +611,11 @@
 
                     if (parts[0].length === 4) {
                         year = p1; month = p2; day = p3;
-                    } else if (p1 > 12) { // Formato DD/MM/YYYY
+                    } else if (p1 > 12) {
                         day = p1; month = p2; year = p3;
-                    } else if (p2 > 12) { // Formato MM/DD/YYYY
+                    } else if (p2 > 12) {
                         month = p1; day = p2; year = p3;
-                    } else { // Formato ambíguo (Padrão BR: DD/MM/YYYY)
+                    } else {
                         day = p1; month = p2; year = p3;
                     }
                 }
@@ -647,7 +655,6 @@
                       .replace(/[^a-z0-9]/g, "");
         }
 
-        // UTILIZA gviz/tq PARA IDENTIFICAR A ABA CORRETAMENTE PELO NOME
         async function fetchGoogleSheetCSV(tabName) {
             const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
             const response = await fetch(url);
@@ -681,7 +688,6 @@
             try {
                 let loadedViaWebApp = false;
 
-                // TENTATIVA 1: Busca via WebApp JSON (Direct Apps Script - Dados fiéis sem perdas de tipo)
                 try {
                     const webAppResponse = await fetch(WEB_APP_URL);
                     if (webAppResponse.ok) {
@@ -695,7 +701,6 @@
                     console.warn('Busca via WebApp GET indisponível, utilizando fallback CSV gviz...');
                 }
 
-                // TENTATIVA 2: Fallback via gviz CSV
                 if (!loadedViaWebApp) {
                     await parseCSVData();
                 }
@@ -704,9 +709,20 @@
                 processData('estoque');
                 processData('historico');
                 populateMovimentacaoOptions();
+                
+                const badge = document.getElementById('dbStatusBadge');
+                if (badge) {
+                    badge.innerText = `Status DB: Conectado (${estoqueData.length} itens)`;
+                    badge.className = "text-xs text-emerald-400 font-semibold";
+                }
 
             } catch (err) {
                 console.error('Erro ao conectar com o Google Sheets:', err);
+                const badge = document.getElementById('dbStatusBadge');
+                if (badge) {
+                    badge.innerText = "Status DB: Erro de Conexão";
+                    badge.className = "text-xs text-rose-400 font-semibold";
+                }
             }
         }
 
@@ -740,7 +756,6 @@
                 const tipo = r['entradasaida'] || r['tipo'] || r['operacao'] || '-';
                 const qtd = Number(r['quantidade'] || r['qtd']) || 0;
 
-                // FILTRO ESTRITO: se não tem tipo de operação válido ('Entrada'/'Saída'), não pertence ao histórico
                 if (tipo !== 'Entrada' && tipo !== 'Saída') return;
 
                 const rawDate = r['data'] || r['datahora'] || '';
@@ -806,7 +821,6 @@
                 const tipo = r['entradasaida'] || r['tipo'] || r['operacao'] || '-';
                 const qtd = Number(r['quantidade'] || r['qtd']) || 0;
 
-                // FILTRO ESTRITO: se não tem tipo de operação válido ('Entrada'/'Saída'), não pertence ao histórico
                 if (tipo !== 'Entrada' && tipo !== 'Saída') return;
 
                 const rawDate = r['data'] || r['datahora'] || '';
@@ -892,7 +906,7 @@
                 alert('Erro ao salvar alterações no estoque.');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salvar Alterações`;
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salvar na Planilha`;
             }
         }
 
@@ -1008,12 +1022,12 @@
         let currentActiveContext = { tableId: null, colKey: null };
 
         const estoqueColsDef = [
-            { key: 'item', label: 'Equipamento', align: 'text-left', class: 'font-bold text-black' },
-            { key: 'central', label: 'Central', align: 'text-center', class: 'text-center font-bold text-black' },
-            { key: 'tecnico', label: 'Técnico Marcelo', align: 'text-center', class: 'text-center font-bold text-black' },
-            { key: 'op', label: 'Estoque Op.', align: 'text-center', class: 'text-center font-bold text-black' },
-            { key: 'acervo', label: 'Acervo Op.', align: 'text-center', class: 'text-center font-bold text-black' },
-            { key: 'total', label: 'Total Geral', align: 'text-center', class: 'text-center font-bold text-blue-600 text-base' },
+            { key: 'item', label: 'Equipamento', align: 'text-left', class: 'font-bold text-slate-900' },
+            { key: 'central', label: 'Central', align: 'text-center', class: 'text-center font-bold text-slate-800' },
+            { key: 'tecnico', label: 'Técnico Marcelo', align: 'text-center', class: 'text-center font-bold text-amber-700' },
+            { key: 'op', label: 'Estoque Op.', align: 'text-center', class: 'text-center font-bold text-emerald-700' },
+            { key: 'acervo', label: 'Acervo Op.', align: 'text-center', class: 'text-center font-bold text-purple-700' },
+            { key: 'total', label: 'Total Geral', align: 'text-center', class: 'text-center font-bold text-indigo-600 text-base' },
             { key: 'actions', label: 'Ações', align: 'text-center', class: 'text-center font-bold' }
         ];
 
@@ -1040,7 +1054,7 @@
             tbody.innerHTML = '';
             
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${activeCols.length}" class="p-6 text-center text-slate-500">Nenhum equipamento encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${activeCols.length}" class="p-6 text-center text-slate-400">Nenhum equipamento encontrado.</td></tr>`;
                 return;
             }
 
@@ -1049,7 +1063,7 @@
                 tr.innerHTML = activeCols.map(col => {
                     if (col.key === 'actions') {
                         return `<td class="text-center">
-                            <button onclick="openEditModal(${row._rowIndex})" title="Editar quantidades" class="px-2.5 py-1 bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white rounded text-xs transition border border-slate-700">
+                            <button onclick="openEditModal(${row._rowIndex})" title="Editar quantidades" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white rounded-lg text-xs font-semibold transition border border-indigo-200 shadow-sm">
                                 <i class="fa-solid fa-pen-to-square mr-1"></i> Editar
                             </button>
                         </td>`;
@@ -1067,7 +1081,7 @@
             tbody.innerHTML = '';
 
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">Nenhum registro encontrado no Histórico.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Nenhum registro encontrado no Histórico.</td></tr>`;
                 return;
             }
 
@@ -1078,15 +1092,15 @@
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="font-bold text-black font-mono text-xs whitespace-nowrap">${row.data}</td>
-                    <td class="font-bold text-black">${row.item}</td>
+                    <td class="font-bold text-slate-900 font-mono text-xs whitespace-nowrap">${row.data}</td>
+                    <td class="font-bold text-slate-800">${row.item}</td>
                     <td class="text-center">
-                        <span class="px-2 py-0.5 text-xs rounded border ${badgeClass} font-bold">${row.tipo}</span>
+                        <span class="px-2.5 py-0.5 text-xs rounded-full border ${badgeClass} font-bold">${row.tipo}</span>
                     </td>
-                    <td class="text-center font-bold text-black">${row.qtd}</td>
-                    <td class="font-bold text-black">${row.origem}</td>
-                    <td class="font-bold text-black">${row.destino}</td>
-                    <td class="font-bold text-black italic">${row.obs || '-'}</td>
+                    <td class="text-center font-bold text-slate-800">${row.qtd}</td>
+                    <td class="font-semibold text-slate-700">${row.origem}</td>
+                    <td class="font-semibold text-slate-700">${row.destino}</td>
+                    <td class="font-medium text-slate-600 italic">${row.obs || '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1160,7 +1174,7 @@
             };
 
             if (state.metricFilter) {
-                badge.innerHTML = `<span class="text-blue-400 font-bold">Filtro ativo:</span> Exibindo apenas a coluna da <strong class="text-white">${metricNames[state.metricFilter]}</strong>`;
+                badge.innerHTML = `<span class="text-indigo-600 font-bold">Filtro ativo:</span> Exibindo apenas a coluna da <strong class="text-slate-800">${metricNames[state.metricFilter]}</strong>`;
             } else {
                 badge.innerText = 'Mostrando todas as localizações';
             }
@@ -1190,9 +1204,9 @@
                 if (!card) return;
 
                 if (activeMetric === key) {
-                    card.classList.add('border-blue-500', 'bg-slate-800/90', 'ring-2', 'ring-blue-500/50');
+                    card.classList.add('ring-2', 'ring-indigo-500', 'shadow-md');
                 } else {
-                    card.classList.remove('border-blue-500', 'bg-slate-800/90', 'ring-2', 'ring-blue-500/50');
+                    card.classList.remove('ring-2', 'ring-indigo-500', 'shadow-md');
                 }
             });
         }
@@ -1206,7 +1220,7 @@
             const rect = btn.getBoundingClientRect();
 
             dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
-            dropdown.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 260)}px`;
+            dropdown.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 270)}px`;
             dropdown.style.display = 'block';
 
             const isEstoque = tableId === 'estoque';
@@ -1225,7 +1239,7 @@
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'excel-filter-item';
                 itemDiv.innerHTML = `
-                    <input type="checkbox" value="${val}" class="excel-chk-item" ${isChecked ? 'checked' : ''} onchange="updateSelectAllState()">
+                    <input type="checkbox" value="${val}" class="excel-chk-item rounded text-indigo-600 focus:ring-indigo-500" ${isChecked ? 'checked' : ''} onchange="updateSelectAllState()">
                     <span class="truncate">${val === '' ? '(Vazio)' : val}</span>
                 `;
                 checkboxContainer.appendChild(itemDiv);
@@ -1327,13 +1341,13 @@
             if (tab === 'estoque') {
                 secEstoque.classList.remove('hidden');
                 secHistorico.classList.add('hidden');
-                btnEstoque.className = 'px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2';
-                btnHistorico.className = 'px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
+                btnEstoque.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2';
+                btnHistorico.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
             } else {
                 secEstoque.classList.add('hidden');
                 secHistorico.classList.remove('hidden');
-                btnHistorico.className = 'px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 bg-blue-600 text-white shadow-md flex items-center gap-2';
-                btnEstoque.className = 'px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
+                btnHistorico.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2';
+                btnEstoque.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
             }
         }
 
@@ -1353,11 +1367,11 @@
                 const horas = String(now.getHours()).padStart(2, '0');
                 const minutos = String(now.getMinutes()).padStart(2, '0');
 
-                lastUpdateText.innerText = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+                lastUpdateText.innerText = `Última atualização: ${dia}/${mes}/${ano} às ${horas}:${minutos}`;
 
                 icon.classList.remove('fa-spin');
                 btn.disabled = false;
-                showToast('Dados sincronizados!');
+                showToast('Dados sincronizados com sucesso!');
             });
         }
 
