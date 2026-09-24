@@ -998,7 +998,6 @@
             document.getElementById('modalMovimentacao').classList.add('hidden');
         }
 
-        /* POVOAMENTO DAS OPÇÕES DO MODAL (PADRONIZADO COM NOMES OFICIAIS SEM APELIDOS RESUMIDOS) */
         function populateMovimentacaoOptions() {
             const selectEquip = document.getElementById('movEquipamento');
             selectEquip.innerHTML = '<option value="">Selecione um equipamento...</option>';
@@ -1009,10 +1008,8 @@
                 selectEquip.appendChild(opt);
             });
 
-            // Nomes oficiais e padronizados para garantir a soma correta nas fórmulas do Google Sheets
             const defaultLocations = ["Central", "Técnico Marcelo", "Estoque Operacional", "Acervo Operacional", "Cliente", "Fornecedor", "Levantamento"];
 
-            // Converte apelidos curtos antigos para o nome oficial correto
             const normalizeLocName = (loc) => {
                 if (!loc) return '';
                 const str = loc.toString().trim();
@@ -1048,6 +1045,7 @@
             });
         }
 
+        /* SALVA A MOVIMENTAÇÃO E REQUISITA SINCRONIZAÇÃO AUTOMÁTICA IMEDIATAMENTE */
         async function saveMovimentacao(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSaveMov');
@@ -1082,9 +1080,13 @@
                     body: JSON.stringify({ action: 'addHistorico', payload })
                 });
 
-                showToast('Movimentação registrada com sucesso!');
                 closeMovimentacaoModal();
-                setTimeout(() => { loadDataFromSheet(); }, 1200);
+                
+                // Aguarda 1 segundo para a planilha do Google processar as fórmulas e efetua a sincronização automática imediata
+                setTimeout(async () => {
+                    await syncData();
+                }, 1000);
+
             } catch (err) {
                 alert('Erro ao registrar movimentação.');
             } finally {
@@ -1487,28 +1489,30 @@
             }
         }
 
-        function syncData() {
+        async function syncData() {
             const btn = document.getElementById('btnSync');
             const icon = document.getElementById('iconSync');
             const lastUpdateText = document.getElementById('lastUpdateText');
 
-            icon.classList.add('fa-spin');
-            btn.disabled = true;
+            if (icon) icon.classList.add('fa-spin');
+            if (btn) btn.disabled = true;
 
-            loadDataFromSheet().then(() => {
-                const now = new Date();
-                const dia = String(now.getDate()).padStart(2, '0');
-                const mes = String(now.getMonth() + 1).padStart(2, '0');
-                const ano = now.getFullYear();
-                const horas = String(now.getHours()).padStart(2, '0');
-                const minutos = String(now.getMinutes()).padStart(2, '0');
+            await loadDataFromSheet();
 
+            const now = new Date();
+            const dia = String(now.getDate()).padStart(2, '0');
+            const mes = String(now.getMonth() + 1).padStart(2, '0');
+            const ano = now.getFullYear();
+            const horas = String(now.getHours()).padStart(2, '0');
+            const minutos = String(now.getMinutes()).padStart(2, '0');
+
+            if (lastUpdateText) {
                 lastUpdateText.innerText = `Última atualização: ${dia}/${mes}/${ano} às ${horas}:${minutos}`;
+            }
 
-                icon.classList.remove('fa-spin');
-                btn.disabled = false;
-                showToast('Dados sincronizados com sucesso!');
-            });
+            if (icon) icon.classList.remove('fa-spin');
+            if (btn) btn.disabled = false;
+            showToast('Dados sincronizados com sucesso!');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
