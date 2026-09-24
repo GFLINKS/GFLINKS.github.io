@@ -913,7 +913,7 @@
             document.getElementById('kpiTotal').innerText = totalFisico;
         }
 
-        /* RENDERING DOS CARDS INDIVIDUAIS POR EQUIPAMENTO (SEM EMOJIS, CLEAN & COMPACTO) */
+        /* RENDERING DOS CARDS INDIVIDUAIS POR EQUIPAMENTO */
         function renderEquipmentCards() {
             const container = document.getElementById('gridEquipCards');
             if (!container) return;
@@ -955,22 +955,18 @@
         }
 
         function filterByEquipment(itemName) {
-            switchTab('estoque', false); // troca para a aba sem acionar scroll duplo
+            switchTab('estoque', false);
             
-            // Limpa filtro de métrica se houver
             tableState.estoque.metricFilter = null;
             highlightActiveMetricCard(null);
 
-            // Aplica nome no input de pesquisa
             const searchInput = document.getElementById('searchEstoque');
             searchInput.value = itemName;
             filterEstoque();
 
-            // Atualiza o texto informativo de filtro ativo
             const badge = document.getElementById('activeFilterBadge');
             badge.innerHTML = `<span class="text-indigo-600 font-bold">Filtro ativo:</span> Exibindo apenas o equipamento <strong class="text-slate-800 font-bold">${itemName}</strong>`;
 
-            // Rolagem suave até a tabela
             const tableElement = document.getElementById('tblEstoque');
             if (tableElement) {
                 setTimeout(() => {
@@ -1002,6 +998,7 @@
             document.getElementById('modalMovimentacao').classList.add('hidden');
         }
 
+        /* POVOAMENTO DAS OPÇÕES DO MODAL (PADRONIZADO COM NOMES OFICIAIS SEM APELIDOS RESUMIDOS) */
         function populateMovimentacaoOptions() {
             const selectEquip = document.getElementById('movEquipamento');
             selectEquip.innerHTML = '<option value="">Selecione um equipamento...</option>';
@@ -1012,10 +1009,25 @@
                 selectEquip.appendChild(opt);
             });
 
-            const defaultLocations = ["Central", "Técnico Marcelo", "Estoque Op.", "Acervo Op.", "Cliente", "Fornecedor", "Levantamento"];
+            // Nomes oficiais e padronizados para garantir a soma correta nas fórmulas do Google Sheets
+            const defaultLocations = ["Central", "Técnico Marcelo", "Estoque Operacional", "Acervo Operacional", "Cliente", "Fornecedor", "Levantamento"];
 
-            const origensUnicas = [...new Set([...defaultLocations, ...historicoData.map(h => h.origem)])].filter(v => v && v !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR'));
-            const destinosUnicos = [...new Set([...defaultLocations, ...historicoData.map(h => h.destino)])].filter(v => v && v !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            // Converte apelidos curtos antigos para o nome oficial correto
+            const normalizeLocName = (loc) => {
+                if (!loc) return '';
+                const str = loc.toString().trim();
+                if (str === 'Estoque Op.') return 'Estoque Operacional';
+                if (str === 'Acervo Op.') return 'Acervo Operacional';
+                return str;
+            };
+
+            const origensUnicas = [...new Set([...defaultLocations, ...historicoData.map(h => normalizeLocName(h.origem))])]
+                .filter(v => v && v !== '-')
+                .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+            const destinosUnicos = [...new Set([...defaultLocations, ...historicoData.map(h => normalizeLocName(h.destino))])]
+                .filter(v => v && v !== '-')
+                .sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
             const selectOrigem = document.getElementById('movOrigem');
             selectOrigem.innerHTML = '<option value="">Selecione a origem...</option>';
@@ -1238,7 +1250,7 @@
         function filterCompras() { processData('compras'); }
 
         function filterByMetric(metricKey) {
-            switchTab('estoque', false); // troca para aba sem acionar scroll duplo
+            switchTab('estoque', false);
             const state = tableState.estoque;
 
             if (state.metricFilter === metricKey || metricKey === 'total') {
