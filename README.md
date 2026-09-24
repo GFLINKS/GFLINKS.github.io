@@ -264,7 +264,7 @@
                     <span>Sincronizar Google Drive</span>
                 </button>
 
-                <!-- TAB SWITCHER COM A NOVA ABA COMPRAS -->
+                <!-- TAB SWITCHER COM A ABA COMPRAS -->
                 <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
                     <button onclick="switchTab('estoque')" id="btnTabEstoque" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2">
                         <i class="fa-solid fa-cubes"></i> Estoque
@@ -287,71 +287,93 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="max-w-[1800px] mx-auto px-6 py-6 space-y-6">
 
-        <!-- CARDS DE MÉTRICAS CLICÁVEIS (KPIS ESTILO GF LINKS) -->
-        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div onclick="filterByMetric('central')" id="kpi-card-central" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-sky-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                <div class="flex items-center justify-between pointer-events-none">
-                    <div>
-                        <p class="text-[11px] font-bold text-sky-600 uppercase tracking-wide">Central</p>
-                        <h3 class="text-2xl font-bold text-sky-600 mt-1" id="kpiCentral">0</h3>
+        <!-- CARDS DE MÉTRICAS PRINCIPAIS (KPIS) -->
+        <section class="space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div onclick="filterByMetric('central')" id="kpi-card-central" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-sky-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                    <div class="flex items-center justify-between pointer-events-none">
+                        <div>
+                            <p class="text-[11px] font-bold text-sky-600 uppercase tracking-wide">Central</p>
+                            <h3 class="text-2xl font-bold text-sky-600 mt-1" id="kpiCentral">0</h3>
+                        </div>
+                        <div class="bg-sky-100 p-3 rounded-lg text-sky-600 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-warehouse text-lg"></i>
+                        </div>
                     </div>
-                    <div class="bg-sky-100 p-3 rounded-lg text-sky-600 group-hover:scale-110 transition">
-                        <i class="fa-solid fa-warehouse text-lg"></i>
-                    </div>
+                    <p class="text-xs font-bold text-sky-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
                 </div>
-                <p class="text-xs font-bold text-sky-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
+
+                <div onclick="filterByMetric('tecnico')" id="kpi-card-tecnico" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                    <div class="flex items-center justify-between pointer-events-none">
+                        <div>
+                            <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wide">Técnico Marcelo</p>
+                            <h3 class="text-2xl font-bold text-amber-600 mt-1" id="kpiTecnico">0</h3>
+                        </div>
+                        <div class="bg-amber-100 p-3 rounded-lg text-amber-600 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-user-gear text-lg"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs font-bold text-amber-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
+                </div>
+
+                <div onclick="filterByMetric('op')" id="kpi-card-op" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                    <div class="flex items-center justify-between pointer-events-none">
+                        <div>
+                            <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-wide">Estoque Op.</p>
+                            <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="kpiOperacional">0</h3>
+                        </div>
+                        <div class="bg-emerald-100 p-3 rounded-lg text-emerald-600 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-truck-ramp-box text-lg"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs font-bold text-emerald-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
+                </div>
+
+                <div onclick="filterByMetric('acervo')" id="kpi-card-acervo" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-purple-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                    <div class="flex items-center justify-between pointer-events-none">
+                        <div>
+                            <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Acervo Op.</p>
+                            <h3 class="text-2xl font-bold text-purple-600 mt-1" id="kpiAcervo">0</h3>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-laptop text-lg"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs font-bold text-purple-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
+                </div>
+
+                <div onclick="filterByMetric('total')" id="kpi-card-total" class="col-span-2 sm:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
+                    <div class="flex items-center justify-between pointer-events-none">
+                        <div>
+                            <p class="text-[11px] font-bold text-indigo-600 uppercase tracking-wide">Total Físico</p>
+                            <h3 class="text-2xl font-bold text-indigo-600 mt-1" id="kpiTotal">0</h3>
+                        </div>
+                        <div class="bg-indigo-100 p-3 rounded-lg text-indigo-600 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-cubes text-lg"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs font-bold text-indigo-600 mt-2 pointer-events-none">Exibir todas as colunas <i class="fa-solid fa-sliders text-[10px] ml-1"></i></p>
+                </div>
             </div>
 
-            <div onclick="filterByMetric('tecnico')" id="kpi-card-tecnico" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                <div class="flex items-center justify-between pointer-events-none">
-                    <div>
-                        <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wide">Técnico Marcelo</p>
-                        <h3 class="text-2xl font-bold text-amber-600 mt-1" id="kpiTecnico">0</h3>
-                    </div>
-                    <div class="bg-amber-100 p-3 rounded-lg text-amber-600 group-hover:scale-110 transition">
-                        <i class="fa-solid fa-user-gear text-lg"></i>
-                    </div>
+            <!-- BOTÃO LISTAR EQUIPAMENTOS & CARDS OCULTOS POR EQUIPAMENTO -->
+            <div class="flex flex-col gap-3">
+                <div class="flex justify-between items-center bg-slate-200/60 px-4 py-2.5 rounded-xl border border-slate-300/70">
+                    <span class="text-xs font-bold text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-list-ol text-indigo-600"></i> Resumo Individual de Equipamentos
+                    </span>
+                    <button onclick="toggleEquipCards()" id="btnToggleEquip" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+                        <i id="iconToggleEquip" class="fa-solid fa-layer-group"></i> 
+                        <span id="textToggleEquip">Listar Equipamentos</span>
+                    </button>
                 </div>
-                <p class="text-xs font-bold text-amber-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
-            </div>
 
-            <div onclick="filterByMetric('op')" id="kpi-card-op" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                <div class="flex items-center justify-between pointer-events-none">
-                    <div>
-                        <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-wide">Estoque Op.</p>
-                        <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="kpiOperacional">0</h3>
-                    </div>
-                    <div class="bg-emerald-100 p-3 rounded-lg text-emerald-600 group-hover:scale-110 transition">
-                        <i class="fa-solid fa-truck-ramp-box text-lg"></i>
+                <!-- PAINEL DE CARDS DE EQUIPAMENTOS (INICIALMENTE OCULTO) -->
+                <div id="secEquipCards" class="hidden transition-all duration-300 pt-2">
+                    <div id="gridEquipCards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        <!-- Gerado dinamicamente via JS -->
                     </div>
                 </div>
-                <p class="text-xs font-bold text-emerald-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
-            </div>
-
-            <div onclick="filterByMetric('acervo')" id="kpi-card-acervo" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-purple-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                <div class="flex items-center justify-between pointer-events-none">
-                    <div>
-                        <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Acervo Op.</p>
-                        <h3 class="text-2xl font-bold text-purple-600 mt-1" id="kpiAcervo">0</h3>
-                    </div>
-                    <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
-                        <i class="fa-solid fa-laptop text-lg"></i>
-                    </div>
-                </div>
-                <p class="text-xs font-bold text-purple-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
-            </div>
-
-            <div onclick="filterByMetric('total')" id="kpi-card-total" class="col-span-2 sm:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                <div class="flex items-center justify-between pointer-events-none">
-                    <div>
-                        <p class="text-[11px] font-bold text-indigo-600 uppercase tracking-wide">Total Físico</p>
-                        <h3 class="text-2xl font-bold text-indigo-600 mt-1" id="kpiTotal">0</h3>
-                    </div>
-                    <div class="bg-indigo-100 p-3 rounded-lg text-indigo-600 group-hover:scale-110 transition">
-                        <i class="fa-solid fa-cubes text-lg"></i>
-                    </div>
-                </div>
-                <p class="text-xs font-bold text-indigo-600 mt-2 pointer-events-none">Exibir todas as colunas <i class="fa-solid fa-sliders text-[10px] ml-1"></i></p>
             </div>
         </section>
 
@@ -736,6 +758,7 @@
                 }
 
                 updateKPICards();
+                renderEquipmentCards();
                 processData('estoque');
                 processData('historico');
                 processData('compras');
@@ -888,6 +911,79 @@
             document.getElementById('kpiOperacional').innerText = totalOp;
             document.getElementById('kpiAcervo').innerText = totalAcervo;
             document.getElementById('kpiTotal').innerText = totalFisico;
+        }
+
+        /* RENDERING DOS CARDS INDIVIDUAIS POR EQUIPAMENTO */
+        function renderEquipmentCards() {
+            const container = document.getElementById('gridEquipCards');
+            if (!container) return;
+            container.innerHTML = '';
+
+            estoqueData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-3 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 flex flex-col justify-between group";
+                card.onclick = () => filterByEquipment(item.item);
+                
+                card.innerHTML = `
+                    <div class="flex items-center justify-between pointer-events-none gap-2">
+                        <span class="text-xs font-bold text-slate-800 truncate" title="${item.item}">${item.item}</span>
+                        <span class="text-base font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${item.total}</span>
+                    </div>
+                    <p class="text-[10px] font-bold text-indigo-500 mt-2 pointer-events-none flex items-center justify-between">
+                        <span>Ver detalhes</span>
+                        <i class="fa-solid fa-arrow-down text-[9px] group-hover:translate-y-0.5 transition-transform"></i>
+                    </p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleEquipCards() {
+            const sec = document.getElementById('secEquipCards');
+            const btnText = document.getElementById('textToggleEquip');
+            const icon = document.getElementById('iconToggleEquip');
+
+            if (sec.classList.contains('hidden')) {
+                sec.classList.remove('hidden');
+                btnText.innerText = "Ocultar Equipamentos";
+                icon.className = "fa-solid fa-eye-slash";
+            } else {
+                sec.classList.add('hidden');
+                btnText.innerText = "Listar Equipamentos";
+                icon.className = "fa-solid fa-layer-group";
+            }
+        }
+
+        function filterByEquipment(itemName) {
+            switchTab('estoque');
+            
+            // Limpa filtro de métrica se houver
+            tableState.estoque.metricFilter = null;
+            highlightActiveMetricCard(null);
+
+            // Aplica nome no input de pesquisa
+            const searchInput = document.getElementById('searchEstoque');
+            searchInput.value = itemName;
+            filterEstoque();
+
+            // Atualiza o texto informativo de filtro ativo
+            const badge = document.getElementById('activeFilterBadge');
+            badge.innerHTML = `<span class="text-indigo-600 font-bold">Filtro ativo:</span> Exibindo apenas o equipamento <strong class="text-slate-800 font-bold">${itemName}</strong>`;
+
+            // Rolagem suave até a tabela
+            const tableElement = document.getElementById('tblEstoque');
+            if (tableElement) {
+                setTimeout(() => {
+                    const headerHeight = document.getElementById('mainHeader')?.offsetHeight || 80;
+                    const elementPosition = tableElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }, 50);
+            }
         }
 
         function openMovimentacaoModal() {
