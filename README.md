@@ -238,7 +238,6 @@
                     </select>
                 </div>
 
-                <!-- LINHA COM DATA, TIPO DE OPERAÇÃO E QUANTIDADE -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Data</label>
@@ -427,7 +426,7 @@
                     <h2 class="text-base font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-arrow-left text-blue-500"></i> Histórico de Entradas e Saídas
                     </h2>
-                    <p class="text-xs text-slate-400">Filtre por datas, origem, destino ou projetos diretamente nas colunas</p>
+                    <p class="text-xs text-slate-400">Exibindo automaticamente da movimentação mais recente para a mais antiga</p>
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <button onclick="clearAllFilters('historico')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">
@@ -585,30 +584,59 @@
             }
         }
 
-        function formatDateBR(dateVal) {
-            if (!dateVal || dateVal === '-') return '-';
+        // PARSER DE DATA AVANÇADO: Extrai texto e gera timestamp para ordenação exata
+        function parseDateString(dateVal) {
+            if (!dateVal || dateVal === '-' || dateVal.toString().trim() === '') {
+                return { formatted: '-', timestamp: 0 };
+            }
             let str = dateVal.toString().trim();
             if (str.includes('T')) str = str.split('T')[0];
+
+            let day, month, year;
 
             if (str.includes('/')) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
                     let p1 = parseInt(parts[0], 10);
                     let p2 = parseInt(parts[1], 10);
-                    let p3 = parts[2].trim();
+                    let p3 = parseInt(parts[2].trim(), 10);
 
-                    if (parts[0].length === 4) return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
-                    if (p1 <= 12 && p2 <= 31) return `${String(p2).padStart(2, '0')}/${String(p1).padStart(2, '0')}/${p3}`;
-                    else if (p1 > 12) return `${String(p1).padStart(2, '0')}/${String(p2).padStart(2, '0')}/${p3}`;
+                    if (parts[0].length === 4) {
+                        year = p1; month = p2; day = p3;
+                    } else if (p1 > 12) { // Formato DD/MM/YYYY
+                        day = p1; month = p2; year = p3;
+                    } else if (p2 > 12) { // Formato MM/DD/YYYY
+                        month = p1; day = p2; year = p3;
+                    } else { // Formato ambíguo (Padrão BR: DD/MM/YYYY)
+                        day = p1; month = p2; year = p3;
+                    }
+                }
+            } else if (str.includes('-')) {
+                const parts = str.split('-');
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) {
+                        year = parseInt(parts[0], 10);
+                        month = parseInt(parts[1], 10);
+                        day = parseInt(parts[2], 10);
+                    } else {
+                        day = parseInt(parts[0], 10);
+                        month = parseInt(parts[1], 10);
+                        year = parseInt(parts[2], 10);
+                    }
                 }
             }
 
-            if (str.includes('-')) {
-                const parts = str.split('-');
-                if (parts.length === 3 && parts[0].length === 4) return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+            if (day && month && year && !isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                const dt = new Date(year, month - 1, day);
+                const dd = String(day).padStart(2, '0');
+                const mm = String(month).padStart(2, '0');
+                return {
+                    formatted: `${dd}/${mm}/${year}`,
+                    timestamp: dt.getTime()
+                };
             }
 
-            return str;
+            return { formatted: str, timestamp: 0 };
         }
 
         function normalizeKey(str) {
@@ -619,8 +647,9 @@
                       .replace(/[^a-z0-9]/g, "");
         }
 
+        // UTILIZA A EXPORTAÇÃO CSV DIRETA DO GOOGLE SHEETS PARA EVITAR PERDA DE FORMATO DE DATAS
         async function fetchGoogleSheetCSV(tabName) {
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(tabName)}`;
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Falha ao carregar aba ${tabName}`);
             const csvText = await response.text();
@@ -689,9 +718,13 @@
                 historicoData = [];
                 rawHistorico.forEach(r => {
                     const item = r['equipamento'] || r['item'] || '';
+                    const rawDate = r['data'] || r['datahora'] || '';
+                    const parsedDate = parseDateString(rawDate);
 
                     historicoData.push({
-                        data: formatDateBR(r['data'] || r['datahora'] || '-'),
+                        _rowIndex: r._rowIndex,
+                        data: parsedDate.formatted,
+                        _timestamp: parsedDate.timestamp,
                         item: item || '-',
                         tipo: r['entradasaida'] || r['tipo'] || r['operacao'] || '-',
                         qtd: Number(r['quantidade'] || r['qtd']) || 0,
@@ -699,6 +732,14 @@
                         destino: r['destino'] || '-',
                         obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
                     });
+                });
+
+                // ORDENAÇÃO AUTOMÁTICA: Registros com datas mais recentes fiquem sempre no topo
+                historicoData.sort((a, b) => {
+                    if (b._timestamp !== a._timestamp) {
+                        return b._timestamp - a._timestamp;
+                    }
+                    return b._rowIndex - a._rowIndex; // Desempate pela ordem de inserção
                 });
 
                 updateKPICards();
@@ -779,7 +820,6 @@
         function openMovimentacaoModal() {
             populateMovimentacaoOptions();
             
-            // PREENCHE A DATA ATUAL NO FORMATO DO INPUT DATE (YYYY-MM-DD)
             const today = new Date();
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -833,7 +873,6 @@
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registrando...`;
 
-            // CONVERTE DATA DE YYYY-MM-DD PARA DD/MM/YYYY
             const rawDate = document.getElementById('movData').value;
             let formattedDate = '';
             if (rawDate && rawDate.includes('-')) {
@@ -995,17 +1034,24 @@
                 }
             });
 
+            // APLICA ORDENAÇÃO MANUAL SE O USUÁRIO SELECIONOU UMA COLUNA
             if (state.sortCol) {
                 const col = state.sortCol;
                 const dir = state.sortDir === 'asc' ? 1 : -1;
                 dataset.sort((a, b) => {
-                    let valA = a[col];
-                    let valB = b[col];
+                    let valA = col === 'data' ? a._timestamp : a[col];
+                    let valB = col === 'data' ? b._timestamp : b[col];
 
                     if (typeof valA === 'number' && typeof valB === 'number') {
                         return (valA - valB) * dir;
                     }
                     return String(valA).localeCompare(String(valB), 'pt-BR', { numeric: true }) * dir;
+                });
+            } else if (!isEstoque) {
+                // SE NÃO HOUVER FILTRO MANUAL DE COLUNA, GARANTE A DATA DECRESCENTE
+                dataset.sort((a, b) => {
+                    if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
+                    return b._rowIndex - a._rowIndex;
                 });
             }
 
