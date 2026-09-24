@@ -955,7 +955,7 @@
         }
 
         function filterByEquipment(itemName) {
-            switchTab('estoque');
+            switchTab('estoque', false); // troca para a aba sem forçar scroll duplo
             
             // Limpa filtro de métrica se houver
             tableState.estoque.metricFilter = null;
@@ -1238,7 +1238,7 @@
         function filterCompras() { processData('compras'); }
 
         function filterByMetric(metricKey) {
-            switchTab('estoque');
+            switchTab('estoque', false); // troca para aba sem acionar scroll duplo
             const state = tableState.estoque;
 
             if (state.metricFilter === metricKey || metricKey === 'total') {
@@ -1424,7 +1424,8 @@
             });
         }
 
-        function switchTab(tab) {
+        /* TROCA DE ABAS COM ROLAGEM SUAVE (SMOOTH SCROLL) */
+        function switchTab(tab, autoScroll = true) {
             const secEstoque = document.getElementById('secEstoque');
             const secHistorico = document.getElementById('secHistorico');
             const secCompras = document.getElementById('secCompras');
@@ -1444,15 +1445,33 @@
             btnHistorico.className = inactiveClass;
             btnCompras.className = inactiveClass;
 
+            let targetSec = null;
+
             if (tab === 'estoque') {
                 secEstoque.classList.remove('hidden');
                 btnEstoque.className = activeClass;
+                targetSec = secEstoque;
             } else if (tab === 'historico') {
                 secHistorico.classList.remove('hidden');
                 btnHistorico.className = activeClass;
+                targetSec = secHistorico;
             } else if (tab === 'compras') {
                 secCompras.classList.remove('hidden');
                 btnCompras.className = activeClass;
+                targetSec = secCompras;
+            }
+
+            if (autoScroll && targetSec) {
+                setTimeout(() => {
+                    const headerHeight = document.getElementById('mainHeader')?.offsetHeight || 80;
+                    const elementPosition = targetSec.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }, 50);
             }
         }
 
