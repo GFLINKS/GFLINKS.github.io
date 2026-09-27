@@ -553,21 +553,54 @@
             </div>
         </section>
 
-        <!-- ABA 4: GALERIA DE FOTOS (COM MINIATURAS DAS IMAGENS) -->
+        <!-- ABA 4: GALERIA E LISTAGEM EM TABELA COM MINIATURAS (NOVA IMPLEMENTAÇÃO ISOLADA) -->
         <section id="secGaleria" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
             <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-images text-indigo-600 text-base"></i> Galeria de Fotos
-                </h2>
+                <div>
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-images text-indigo-600 text-base"></i> Galeria de Fotos
+                    </h2>
+                    <p class="text-xs text-slate-500">Ordenadas automaticamente da foto mais recente para a mais antiga</p>
+                </div>
+                <button onclick="loadDrivePhotosTable()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-rotate"></i> Atualizar Lista
+                </button>
             </div>
 
-            <div class="p-4">
-                <div class="w-full h-[680px] border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
-                    <iframe 
-                        src="https://drive.google.com/embeddedfolderview?id=1iTO0H5I-GuakcgA0EkHTC3s38kaWJrHb#grid" 
-                        class="w-full h-full border-0">
-                    </iframe>
+            <div class="p-4 space-y-6">
+                
+                <!-- VISUALIZADOR DA FOTO SELECIONADA (PREVIEW EXPANSÍVEL) -->
+                <div id="photoPreviewContainer" class="hidden bg-slate-900 rounded-2xl p-4 text-center border border-slate-800 transition-all shadow-xl">
+                    <div class="flex justify-between items-center mb-3 text-white px-2">
+                        <span id="previewTitle" class="text-xs font-bold tracking-wide truncate text-indigo-300"></span>
+                        <button onclick="closePhotoPreview()" class="text-slate-400 hover:text-white text-xs font-bold bg-slate-800 px-2.5 py-1 rounded-lg transition">
+                            <i class="fa-solid fa-xmark mr-1"></i> Fechar Foto
+                        </button>
+                    </div>
+                    <div class="max-h-[500px] flex justify-center items-center overflow-hidden rounded-xl bg-black/50 p-2">
+                        <img id="previewImage" src="" alt="Foto Selecionada" class="max-h-[480px] w-auto object-contain rounded-lg shadow-md">
+                    </div>
                 </div>
+
+                <!-- TABELA EM LISTA COM MINIATURAS -->
+                <div class="overflow-x-auto relative rounded-xl border border-slate-200">
+                    <table class="custom-table" id="tblGaleria">
+                        <thead>
+                            <tr>
+                                <th class="w-16 text-center">Miniatura</th>
+                                <th class="w-40">Data de Envio</th>
+                                <th>Nome do Arquivo / Legenda</th>
+                                <th class="text-center w-32">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyGaleria" class="divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="4" class="p-6 text-center text-slate-400">Clique em "Atualizar Lista" ou acesse a aba Galeria para carregar as fotos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </section>
 
@@ -609,13 +642,19 @@
     <script>
         const CORRECT_PASSWORD = "gF@2026*Estoque";
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
+        
+        // URL do WebApp do Estoque / Histórico (Intacto)
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyEu5tLX0yoLdXoSYP731k5DjLECNzjSy4ZaTNLtXdj4gdopRhdbXjV2uxKytlepI-4fg/exec';
+
+        // URL do NOVO WebApp Exclusivo para a Galeria
+        const GALLERY_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwBGt9Lr4D4KLHQRDztWYFo4tKeqaaTEttsb58JFP6Nlv4kWuqCRqKJ4aRYpApU80ZnWA/exec';
 
         const TAB_ESTOQUE_NAME = 'Geral';
         const TAB_HISTORICO_NAME = 'Entradas-Saidas';
 
         let estoqueData = [];
         let historicoData = [];
+        let currentGalleryPhotos = [];
 
         function checkAuth() {
             if (sessionStorage.getItem('gf_authenticated') === 'true') {
@@ -1496,6 +1535,9 @@
                 if (secGaleria) secGaleria.classList.remove('hidden');
                 if (btnGaleria) btnGaleria.className = activeClass;
                 targetSec = secGaleria;
+                if (currentGalleryPhotos.length === 0) {
+                    loadDrivePhotosTable();
+                }
             }
 
             if (autoScroll && targetSec) {
@@ -1510,6 +1552,77 @@
                     });
                 }, 50);
             }
+        }
+
+        /* FUNÇÕES EXCLUSIVAS DA GALERIA EM TABELA */
+        async function loadDrivePhotosTable() {
+            const tbody = document.getElementById('tbodyGaleria');
+            if (!tbody) return;
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="p-6 text-center text-slate-500 font-semibold">
+                        <i class="fa-solid fa-spinner fa-spin mr-2 text-indigo-600"></i> Buscando fotos atualizadas no Google Drive...
+                    </td>
+                </tr>`;
+
+            try {
+                const response = await fetch(GALLERY_WEB_APP_URL);
+                currentGalleryPhotos = await response.json();
+
+                if (!currentGalleryPhotos || currentGalleryPhotos.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma foto encontrada na pasta.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                currentGalleryPhotos.forEach((photo, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-indigo-50/50 cursor-pointer transition-colors";
+                    tr.onclick = () => selectPhotoForPreview(index);
+
+                    tr.innerHTML = `
+                        <td class="text-center p-2">
+                            <img src="${photo.url}" alt="Miniatura" class="w-10 h-10 object-cover rounded-lg border border-slate-200 shadow-sm mx-auto">
+                        </td>
+                        <td class="font-bold text-slate-700 font-mono text-xs whitespace-nowrap">
+                            ${photo.dateFormatted}
+                        </td>
+                        <td class="font-semibold text-slate-900 text-xs">
+                            ${photo.name}
+                        </td>
+                        <td class="text-center p-2">
+                            <button onclick="event.stopPropagation(); selectPhotoForPreview(${index})" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white text-xs font-bold rounded-lg border border-indigo-200 transition">
+                                <i class="fa-solid fa-eye mr-1"></i> Visualizar
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar fotos:', error);
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-rose-500 font-semibold">Erro ao carregar fotos da galeria. Verifique a nova URL do Apps Script.</td></tr>`;
+            }
+        }
+
+        function selectPhotoForPreview(index) {
+            const photo = currentGalleryPhotos[index];
+            if (!photo) return;
+
+            const container = document.getElementById('photoPreviewContainer');
+            const img = document.getElementById('previewImage');
+            const title = document.getElementById('previewTitle');
+
+            title.innerText = `${photo.dateFormatted} — ${photo.name}`;
+            img.src = photo.url;
+            container.classList.remove('hidden');
+
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function closePhotoPreview() {
+            document.getElementById('photoPreviewContainer').classList.add('hidden');
         }
 
         async function syncData() {
