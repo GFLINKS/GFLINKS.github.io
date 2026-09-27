@@ -132,7 +132,7 @@
 </head>
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800 relative" onclick="closeAllFilterMenus(event)">
 
-    <!-- TELA DE LOGIN / BLOQUEIO POR SENHA FUNCIONAL -->
+    <!-- TELA DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-5 border border-slate-200">
             <img src="logo.png" alt="Grupo Forte Protege" class="h-12 w-auto mx-auto object-contain" onerror="this.style.display='none'">
@@ -166,7 +166,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE NOVA MOVIMENTAÇÃO (HISTÓRICO) -->
+    <!-- MODAL DE NOVA MOVIMENTAÇÃO -->
     <div id="modalMovimentacao" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -222,16 +222,46 @@
                     <input type="text" id="movObs" placeholder="Ex: Instalação Cliente X" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
 
-                <!-- UPLOAD DE FOTO/COMPROVANTE NO GOOGLE DRIVE -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Comprovante / Foto (Opcional)</label>
-                    <input type="file" id="movFoto" accept="image/*" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                </div>
-
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="closeMovimentacaoModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold rounded-lg text-slate-700 transition">Cancelar</button>
                     <button type="submit" id="btnSaveMov" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded-lg text-white transition shadow flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> Registrar Movimentação
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE UPLOAD DE FOTOS PARA A GALERIA -->
+    <div id="modalUploadFoto" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full space-y-4 border border-slate-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i> Enviar Foto para Galeria
+                </h3>
+                <button onclick="closeUploadFotoModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="saveFoto(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Data da Foto</label>
+                    <input type="date" id="fotoData" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Legenda / Descrição</label>
+                    <input type="text" id="fotoLegenda" required placeholder="Ex: Foto do lote recebido na central" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Arquivo da Imagem</label>
+                    <input type="file" id="fotoArquivo" accept="image/*" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeUploadFotoModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold rounded-lg text-slate-700 transition">Cancelar</button>
+                    <button type="submit" id="btnSaveFoto" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-lg text-white transition shadow flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Enviar Foto
                     </button>
                 </div>
             </form>
@@ -244,7 +274,7 @@
         <span id="toastMsg" class="text-xs font-semibold">Dados atualizados com sucesso!</span>
     </div>
 
-    <!-- CABEÇALHO FIXO ESTILO GF LINKS -->
+    <!-- CABEÇALHO COM A ABA GALERIA -->
     <header id="mainHeader" class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
         <div class="max-w-[1800px] mx-auto px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
             <div class="flex items-center space-x-4 w-full lg:w-auto justify-between lg:justify-start">
@@ -270,7 +300,7 @@
                     <span>Sincronizar Google Drive</span>
                 </button>
 
-                <!-- TAB SWITCHER COM A ABA COMPRAS -->
+                <!-- TAB SWITCHER NO CABEÇALHO -->
                 <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
                     <button onclick="switchTab('estoque')" id="btnTabEstoque" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2">
                         <i class="fa-solid fa-cubes"></i> Estoque
@@ -280,6 +310,9 @@
                     </button>
                     <button onclick="switchTab('compras')" id="btnTabCompras" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
                         <i class="fa-solid fa-cart-shopping"></i> Compras
+                    </button>
+                    <button onclick="switchTab('galeria')" id="btnTabGaleria" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-images"></i> Galeria
                     </button>
                 </div>
 
@@ -293,7 +326,7 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="max-w-[1800px] mx-auto px-6 py-6 space-y-6">
 
-        <!-- CARDS DE MÉTRICAS PRINCIPAIS (KPIS) -->
+        <!-- CARDS KPIS -->
         <section class="space-y-4">
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div onclick="filterByMetric('central')" id="kpi-card-central" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-sky-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
@@ -362,7 +395,7 @@
                 </div>
             </div>
 
-            <!-- BOTÃO LISTAR EQUIPAMENTOS & CARDS OCULTOS POR EQUIPAMENTO -->
+            <!-- BOTÃO LISTAR EQUIPAMENTOS -->
             <div class="flex flex-col gap-3">
                 <div class="flex justify-between items-center bg-slate-200/60 px-4 py-2.5 rounded-xl border border-slate-300/70">
                     <span class="text-xs font-bold text-slate-700 flex items-center gap-2">
@@ -374,11 +407,8 @@
                     </button>
                 </div>
 
-                <!-- PAINEL DE CARDS DE EQUIPAMENTOS (INICIALMENTE OCULTO) -->
                 <div id="secEquipCards" class="hidden transition-all duration-300 pt-2">
-                    <div id="gridEquipCards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        <!-- Gerado dinamicamente via JS -->
-                    </div>
+                    <div id="gridEquipCards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
                 </div>
             </div>
         </section>
@@ -473,9 +503,6 @@
                                     <button class="filter-btn" id="fbtn-historico-destino" onclick="toggleFilterDropdown(event, 'historico', 'destino')"><i class="fa-solid fa-filter"></i></button>
                                 </div>
                             </th>
-                            <th class="text-center">
-                                <span>Foto</span>
-                            </th>
                             <th>
                                 <div class="th-container">
                                     <span>Observações / Projeto</span>
@@ -489,7 +516,7 @@
             </div>
         </section>
 
-        <!-- ABA 3: HISTÓRICO DE COMPRAS (FORNECEDORES) -->
+        <!-- ABA 3: HISTÓRICO DE COMPRAS -->
         <section id="secCompras" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
             <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
                 <div>
@@ -549,9 +576,6 @@
                                     <button class="filter-btn" id="fbtn-compras-destino" onclick="toggleFilterDropdown(event, 'compras', 'destino')"><i class="fa-solid fa-filter"></i></button>
                                 </div>
                             </th>
-                            <th class="text-center">
-                                <span>Foto</span>
-                            </th>
                             <th>
                                 <div class="th-container">
                                     <span>Observações / Projeto</span>
@@ -565,9 +589,32 @@
             </div>
         </section>
 
+        <!-- ABA 4: GALERIA DE FOTOS (EXCLUSIVA NO PAINEL, SEM SALVAR NA PLANILHA) -->
+        <section id="secGaleria" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-images text-indigo-600 text-base"></i> Galeria de Fotos
+                    </h2>
+                    <p class="text-xs text-slate-500">Imagens carregadas da pasta do Google Drive com data e legenda</p>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="openUploadFotoModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Subir Foto com Legenda
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <div id="gridGaleria" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Cards de fotos gerados dinamicamente do Drive -->
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- MENU ESTILO EXCEL FLUTUANTE -->
+    <!-- MENU EXCEL FLUTUANTE -->
     <div id="excelFilterDropdown" class="excel-filter-menu" onclick="event.stopPropagation()">
         <div class="filter-option border-b border-slate-100" onclick="applySort('asc')">
             <i class="fa-solid fa-arrow-down-a-z text-indigo-600"></i> Classificar de A a Z
@@ -603,7 +650,7 @@
     <script>
         const CORRECT_PASSWORD = "gF@2026*Estoque";
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxwm6L5UVYohE3vva5E1HmoMwEzxqjUcY8V28x4b6c2VgpvloEamA22vFkGFvWOEud3zA/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyP7DP8-LfqJ7NxwgBI31bArrZIIPjTwQjqD8MKs0jQX1aAVWlU-LsfoMhgN_GgNuIEVw/exec';
         const DRIVE_FOLDER_ID = '1cTyaZjq_nOVjAbGdWgKT6aIGkFMTMRxI';
 
         const TAB_ESTOQUE_NAME = 'Geral';
@@ -611,6 +658,7 @@
 
         let estoqueData = [];
         let historicoData = [];
+        let fotosData = [];
 
         function checkAuth() {
             if (sessionStorage.getItem('gf_authenticated') === 'true') {
@@ -720,12 +768,34 @@
                       .replace(/[^a-z0-9]/g, "");
         }
 
-        function fileToBase64(file) {
+        function compressImageAndGetBase64(file, maxWidth = 1200, quality = 0.75) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result.split(',')[1]);
-                reader.onerror = error => reject(error);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                        resolve(compressedDataUrl.split(',')[1]);
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
             });
         }
 
@@ -784,6 +854,7 @@
                 processData('estoque');
                 processData('historico');
                 processData('compras');
+                renderGaleriaGrid();
                 populateMovimentacaoOptions();
                 
                 const badge = document.getElementById('dbStatusBadge');
@@ -846,7 +917,6 @@
                     qtd: qtd,
                     origem: r['origem'] || '-',
                     destino: r['destino'] || '-',
-                    foto: r['foto'] || r['comprovante'] || r['url'] || r['anexo'] || '',
                     obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
                 });
             });
@@ -855,6 +925,12 @@
                 if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
                 return b._rowIndex - a._rowIndex;
             });
+
+            fotosData = [];
+            if (Array.isArray(json.fotos)) {
+                fotosData = json.fotos;
+                fotosData.sort((a, b) => b._timestamp - a._timestamp);
+            }
         }
 
         async function parseCSVData() {
@@ -912,7 +988,6 @@
                     qtd: qtd,
                     origem: r['origem'] || '-',
                     destino: r['destino'] || '-',
-                    foto: r['foto'] || r['comprovante'] || r['url'] || r['anexo'] || '',
                     obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
                 });
             });
@@ -937,7 +1012,6 @@
             document.getElementById('kpiTotal').innerText = totalFisico;
         }
 
-        /* RENDERING DOS CARDS INDIVIDUAIS POR EQUIPAMENTO */
         function renderEquipmentCards() {
             const container = document.getElementById('gridEquipCards');
             if (!container) return;
@@ -960,6 +1034,124 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        /* CARREGAMENTO DA ABA GALERIA */
+        function getDriveThumbnail(url) {
+            if (!url) return '';
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://lh3.googleusercontent.com/d/${match[1]}=s400`;
+            }
+            return url;
+        }
+
+        function renderGaleriaGrid() {
+            const container = document.getElementById('gridGaleria');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (fotosData.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">Nenhuma foto enviada ainda. Clique em "Subir Foto com Legenda" para enviar a primeira imagem!</div>`;
+                return;
+            }
+
+            fotosData.forEach(item => {
+                const thumbUrl = getDriveThumbnail(item.foto);
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition group";
+                
+                card.innerHTML = `
+                    <div class="relative h-48 bg-slate-100 flex items-center justify-center overflow-hidden border-b border-slate-100">
+                        <img src="${thumbUrl}" alt="${item.legenda}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null; this.src='https://placehold.co/400x300?text=Foto+Google+Drive';">
+                        <span class="absolute top-2 right-2 bg-slate-900/80 text-white text-[10px] font-mono px-2 py-0.5 rounded-full backdrop-blur-sm shadow">${item.data}</span>
+                    </div>
+                    <div class="p-3.5 flex flex-col justify-between flex-grow space-y-2">
+                        <p class="text-xs font-semibold text-slate-700 leading-snug line-clamp-2">${item.legenda}</p>
+                        <a href="${item.foto}" target="_blank" class="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 text-xs font-bold py-1.5 px-3 rounded-lg transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Abrir no Drive
+                        </a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openUploadFotoModal() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('fotoData').value = `${yyyy}-${mm}-${dd}`;
+            document.getElementById('fotoLegenda').value = '';
+            document.getElementById('fotoArquivo').value = '';
+
+            document.getElementById('modalUploadFoto').classList.remove('hidden');
+        }
+
+        function closeUploadFotoModal() {
+            document.getElementById('modalUploadFoto').classList.add('hidden');
+        }
+
+        async function saveFoto(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveFoto');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Compactando...`;
+
+            const rawDate = document.getElementById('fotoData').value;
+            let formattedDate = '';
+            if (rawDate && rawDate.includes('-')) {
+                const parts = rawDate.split('-');
+                formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            } else {
+                const now = new Date();
+                formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            }
+
+            const fotoInput = document.getElementById('fotoArquivo');
+            let fotoBase64 = null;
+
+            if (fotoInput && fotoInput.files.length > 0) {
+                const file = fotoInput.files[0];
+                try {
+                    fotoBase64 = await compressImageAndGetBase64(file);
+                } catch (err) {
+                    console.error('Erro ao comprimir foto:', err);
+                }
+            }
+
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Enviando ao Drive...`;
+
+            const payload = {
+                data: formattedDate,
+                legenda: document.getElementById('fotoLegenda').value,
+                folderId: DRIVE_FOLDER_ID,
+                fotoBase64,
+                fotoType: 'image/jpeg'
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'addFoto', payload })
+                });
+
+                closeUploadFotoModal();
+                showToast('Foto enviada com sucesso para a Galeria!');
+                
+                setTimeout(async () => {
+                    await syncData();
+                }, 1500);
+
+            } catch (err) {
+                alert('Erro ao enviar foto.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Enviar Foto`;
+            }
         }
 
         function toggleEquipCards() {
@@ -1014,7 +1206,6 @@
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
             document.getElementById('movData').value = `${yyyy}-${mm}-${dd}`;
-            document.getElementById('movFoto').value = '';
 
             document.getElementById('modalMovimentacao').classList.remove('hidden');
         }
@@ -1070,7 +1261,6 @@
             });
         }
 
-        /* SALVA A MOVIMENTAÇÃO COM FOTO/BASE64 E RENOVA A BASE DE DADOS */
         async function saveMovimentacao(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSaveMov');
@@ -1087,22 +1277,6 @@
                 formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
             }
 
-            const fotoInput = document.getElementById('movFoto');
-            let fotoBase64 = null;
-            let fotoName = null;
-            let fotoType = null;
-
-            if (fotoInput && fotoInput.files.length > 0) {
-                const file = fotoInput.files[0];
-                try {
-                    fotoBase64 = await fileToBase64(file);
-                    fotoName = file.name;
-                    fotoType = file.type;
-                } catch (err) {
-                    console.error('Erro ao processar imagem:', err);
-                }
-            }
-
             const payload = {
                 data: formattedDate,
                 equipamento: document.getElementById('movEquipamento').value,
@@ -1110,11 +1284,7 @@
                 qtd: parseInt(document.getElementById('movQtd').value, 10),
                 origem: document.getElementById('movOrigem').value,
                 destino: document.getElementById('movDestino').value,
-                obs: document.getElementById('movObs').value,
-                folderId: DRIVE_FOLDER_ID,
-                fotoBase64,
-                fotoName,
-                fotoType
+                obs: document.getElementById('movObs').value
             };
 
             try {
@@ -1209,7 +1379,7 @@
             tbody.innerHTML = '';
 
             if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
@@ -1217,10 +1387,6 @@
                 const badgeClass = row.tipo === 'Entrada' 
                     ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
                     : 'bg-rose-100 text-rose-800 border-rose-300';
-                
-                const fotoBtn = (row.foto && row.foto.startsWith('http')) 
-                    ? `<a href="${row.foto}" target="_blank" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded text-xs font-bold border border-indigo-200 inline-flex items-center gap-1"><i class="fa-solid fa-image"></i> Ver Foto</a>` 
-                    : `<span class="text-slate-300">-</span>`;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -1232,7 +1398,6 @@
                     <td class="text-center font-bold text-slate-800">${row.qtd}</td>
                     <td class="font-semibold text-slate-700">${row.origem}</td>
                     <td class="font-semibold text-slate-700">${row.destino}</td>
-                    <td class="text-center whitespace-nowrap">${fotoBtn}</td>
                     <td class="font-medium text-slate-600 italic">${row.obs || '-'}</td>
                 `;
                 tbody.appendChild(tr);
@@ -1487,15 +1652,17 @@
             });
         }
 
-        /* TROCA DE ABAS COM ROLAGEM SUAVE (SMOOTH SCROLL) */
+        /* GERENCIAMENTO DE ABAS (ESTOQUE, HISTÓRICO, COMPRAS, GALERIA) */
         function switchTab(tab, autoScroll = true) {
             const secEstoque = document.getElementById('secEstoque');
             const secHistorico = document.getElementById('secHistorico');
             const secCompras = document.getElementById('secCompras');
+            const secGaleria = document.getElementById('secGaleria');
 
             const btnEstoque = document.getElementById('btnTabEstoque');
             const btnHistorico = document.getElementById('btnTabHistorico');
             const btnCompras = document.getElementById('btnTabCompras');
+            const btnGaleria = document.getElementById('btnTabGaleria');
 
             const activeClass = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2';
             const inactiveClass = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
@@ -1503,10 +1670,12 @@
             secEstoque.classList.add('hidden');
             secHistorico.classList.add('hidden');
             secCompras.classList.add('hidden');
+            secGaleria.classList.add('hidden');
 
             btnEstoque.className = inactiveClass;
             btnHistorico.className = inactiveClass;
             btnCompras.className = inactiveClass;
+            btnGaleria.className = inactiveClass;
 
             let targetSec = null;
 
@@ -1522,6 +1691,10 @@
                 secCompras.classList.remove('hidden');
                 btnCompras.className = activeClass;
                 targetSec = secCompras;
+            } else if (tab === 'galeria') {
+                secGaleria.classList.remove('hidden');
+                btnGaleria.className = activeClass;
+                targetSec = secGaleria;
             }
 
             if (autoScroll && targetSec) {
