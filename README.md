@@ -553,24 +553,18 @@
             </div>
         </section>
 
-        <!-- ABA 4: GALERIA DE FOTOS (GOOGLE DRIVE EMBUTIDO) -->
+        <!-- ABA 4: GALERIA DE FOTOS (MODO LISTA PARA NOME COMPLETO DO ARQUIVO) -->
         <section id="secGaleria" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
-                <div>
-                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-images text-indigo-600 text-base"></i> Galeria de Fotos
-                    </h2>
-                    <p class="text-xs text-slate-500">Exibição de imagens diretamente da pasta vinculada no Google Drive</p>
-                </div>
-                <a href="https://drive.google.com/drive/folders/1iTO0H5I-GuakcgA0EkHTC3s38kaWJrHb?usp=drive_link" target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Pasta no Drive
-                </a>
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-images text-indigo-600 text-base"></i> Galeria de Fotos
+                </h2>
             </div>
 
             <div class="p-4">
                 <div class="w-full h-[680px] border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
                     <iframe 
-                        src="https://drive.google.com/embeddedfolderview?id=1iTO0H5I-GuakcgA0EkHTC3s38kaWJrHb#grid" 
+                        src="https://drive.google.com/embeddedfolderview?id=1iTO0H5I-GuakcgA0EkHTC3s38kaWJrHb#list" 
                         class="w-full h-full border-0">
                     </iframe>
                 </div>
