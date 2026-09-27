@@ -232,49 +232,13 @@
         </div>
     </div>
 
-    <!-- MODAL DE UPLOAD DE FOTOS PARA A GALERIA -->
-    <div id="modalUploadFoto" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full space-y-4 border border-slate-200">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i> Enviar Foto para Galeria
-                </h3>
-                <button onclick="closeUploadFotoModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <form onsubmit="saveFoto(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Data da Foto</label>
-                    <input type="date" id="fotoData" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Legenda / Descrição</label>
-                    <input type="text" id="fotoLegenda" required placeholder="Ex: Foto do lote recebido na central" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Arquivo da Imagem</label>
-                    <input type="file" id="fotoArquivo" accept="image/*" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                </div>
-
-                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                    <button type="button" onclick="closeUploadFotoModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold rounded-lg text-slate-700 transition">Cancelar</button>
-                    <button type="submit" id="btnSaveFoto" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-lg text-white transition shadow flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Enviar Foto
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- TOAST DE NOTIFICAÇÃO -->
     <div id="toastSync" class="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
         <i class="fa-solid fa-circle-check text-lg"></i>
         <span id="toastMsg" class="text-xs font-semibold">Dados atualizados com sucesso!</span>
     </div>
 
-    <!-- CABEÇALHO COM A ABA GALERIA -->
+    <!-- CABEÇALHO -->
     <header id="mainHeader" class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
         <div class="max-w-[1800px] mx-auto px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
             <div class="flex items-center space-x-4 w-full lg:w-auto justify-between lg:justify-start">
@@ -589,25 +553,26 @@
             </div>
         </section>
 
-        <!-- ABA 4: GALERIA DE FOTOS (EXCLUSIVA NO PAINEL, SEM SALVAR NA PLANILHA) -->
+        <!-- ABA 4: GALERIA DE FOTOS (GOOGLE DRIVE EMBUTIDO) -->
         <section id="secGaleria" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
             <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
                 <div>
                     <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-images text-indigo-600 text-base"></i> Galeria de Fotos
                     </h2>
-                    <p class="text-xs text-slate-500">Imagens carregadas da pasta do Google Drive com data e legenda</p>
+                    <p class="text-xs text-slate-500">Exibição de imagens diretamente da pasta vinculada no Google Drive</p>
                 </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button onclick="openUploadFotoModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Subir Foto com Legenda
-                    </button>
-                </div>
+                <a href="https://drive.google.com/drive/folders/1iTO0H5I-GuakcgA0EkHTC3s38kaWJrHb?usp=drive_link" target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Pasta no Drive
+                </a>
             </div>
 
-            <div class="p-6">
-                <div id="gridGaleria" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Cards de fotos gerados dinamicamente do Drive -->
+            <div class="p-4">
+                <div class="w-full h-[680px] border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                    <iframe 
+                        src="https://drive.google.com/embeddedfolderview?id=1iTO0H5I-GuakcgA0EkHTC3s38kaWJrHb#grid" 
+                        class="w-full h-full border-0">
+                    </iframe>
                 </div>
             </div>
         </section>
@@ -651,14 +616,12 @@
         const CORRECT_PASSWORD = "gF@2026*Estoque";
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyEu5tLX0yoLdXoSYP731k5DjLECNzjSy4ZaTNLtXdj4gdopRhdbXjV2uxKytlepI-4fg/exec';
-        const DRIVE_FOLDER_ID = '1cTyaZjq_nOVjAbGdWgKT6aIGkFMTMRxI';
 
         const TAB_ESTOQUE_NAME = 'Geral';
         const TAB_HISTORICO_NAME = 'Entradas-Saidas';
 
         let estoqueData = [];
         let historicoData = [];
-        let fotosData = [];
 
         function checkAuth() {
             if (sessionStorage.getItem('gf_authenticated') === 'true') {
@@ -768,37 +731,6 @@
                       .replace(/[^a-z0-9]/g, "");
         }
 
-        function compressImageAndGetBase64(file, maxWidth = 1200, quality = 0.75) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                        resolve(compressedDataUrl.split(',')[1]);
-                    };
-                    img.onerror = (err) => reject(err);
-                };
-                reader.onerror = (err) => reject(err);
-            });
-        }
-
         async function fetchGoogleSheetCSV(tabName) {
             const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
             const response = await fetch(url);
@@ -854,7 +786,6 @@
                 processData('estoque');
                 processData('historico');
                 processData('compras');
-                renderGaleriaGrid();
                 populateMovimentacaoOptions();
                 
                 const badge = document.getElementById('dbStatusBadge');
@@ -925,12 +856,6 @@
                 if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
                 return b._rowIndex - a._rowIndex;
             });
-
-            fotosData = [];
-            if (Array.isArray(json.fotos)) {
-                fotosData = json.fotos;
-                fotosData.sort((a, b) => b._timestamp - a._timestamp);
-            }
         }
 
         async function parseCSVData() {
@@ -1034,124 +959,6 @@
                 `;
                 container.appendChild(card);
             });
-        }
-
-        /* CARREGAMENTO DA ABA GALERIA */
-        function getDriveThumbnail(url) {
-            if (!url) return '';
-            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) {
-                return `https://lh3.googleusercontent.com/d/${match[1]}=s400`;
-            }
-            return url;
-        }
-
-        function renderGaleriaGrid() {
-            const container = document.getElementById('gridGaleria');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (fotosData.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">Nenhuma foto enviada ainda. Clique em "Subir Foto com Legenda" para enviar a primeira imagem!</div>`;
-                return;
-            }
-
-            fotosData.forEach(item => {
-                const thumbUrl = getDriveThumbnail(item.foto);
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition group";
-                
-                card.innerHTML = `
-                    <div class="relative h-48 bg-slate-100 flex items-center justify-center overflow-hidden border-b border-slate-100">
-                        <img src="${thumbUrl}" alt="${item.legenda}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null; this.src='https://placehold.co/400x300?text=Foto+Google+Drive';">
-                        <span class="absolute top-2 right-2 bg-slate-900/80 text-white text-[10px] font-mono px-2 py-0.5 rounded-full backdrop-blur-sm shadow">${item.data}</span>
-                    </div>
-                    <div class="p-3.5 flex flex-col justify-between flex-grow space-y-2">
-                        <p class="text-xs font-semibold text-slate-700 leading-snug line-clamp-2">${item.legenda}</p>
-                        <a href="${item.foto}" target="_blank" class="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 text-xs font-bold py-1.5 px-3 rounded-lg transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Abrir no Drive
-                        </a>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function openUploadFotoModal() {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            document.getElementById('fotoData').value = `${yyyy}-${mm}-${dd}`;
-            document.getElementById('fotoLegenda').value = '';
-            document.getElementById('fotoArquivo').value = '';
-
-            document.getElementById('modalUploadFoto').classList.remove('hidden');
-        }
-
-        function closeUploadFotoModal() {
-            document.getElementById('modalUploadFoto').classList.add('hidden');
-        }
-
-        async function saveFoto(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSaveFoto');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Compactando...`;
-
-            const rawDate = document.getElementById('fotoData').value;
-            let formattedDate = '';
-            if (rawDate && rawDate.includes('-')) {
-                const parts = rawDate.split('-');
-                formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-            } else {
-                const now = new Date();
-                formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-            }
-
-            const fotoInput = document.getElementById('fotoArquivo');
-            let fotoBase64 = null;
-
-            if (fotoInput && fotoInput.files.length > 0) {
-                const file = fotoInput.files[0];
-                try {
-                    fotoBase64 = await compressImageAndGetBase64(file);
-                } catch (err) {
-                    console.error('Erro ao comprimir foto:', err);
-                }
-            }
-
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Enviando ao Drive...`;
-
-            const payload = {
-                data: formattedDate,
-                legenda: document.getElementById('fotoLegenda').value,
-                folderId: DRIVE_FOLDER_ID,
-                fotoBase64,
-                fotoType: 'image/jpeg'
-            };
-
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'addFoto', payload })
-                });
-
-                closeUploadFotoModal();
-                showToast('Foto enviada com sucesso para a Galeria!');
-                
-                setTimeout(async () => {
-                    await syncData();
-                }, 1500);
-
-            } catch (err) {
-                alert('Erro ao enviar foto.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Enviar Foto`;
-            }
         }
 
         function toggleEquipCards() {
@@ -1670,12 +1477,12 @@
             secEstoque.classList.add('hidden');
             secHistorico.classList.add('hidden');
             secCompras.classList.add('hidden');
-            secGaleria.classList.add('hidden');
+            if (secGaleria) secGaleria.classList.add('hidden');
 
             btnEstoque.className = inactiveClass;
             btnHistorico.className = inactiveClass;
             btnCompras.className = inactiveClass;
-            btnGaleria.className = inactiveClass;
+            if (btnGaleria) btnGaleria.className = inactiveClass;
 
             let targetSec = null;
 
@@ -1692,8 +1499,8 @@
                 btnCompras.className = activeClass;
                 targetSec = secCompras;
             } else if (tab === 'galeria') {
-                secGaleria.classList.remove('hidden');
-                btnGaleria.className = activeClass;
+                if (secGaleria) secGaleria.classList.remove('hidden');
+                if (btnGaleria) btnGaleria.className = activeClass;
                 targetSec = secGaleria;
             }
 
