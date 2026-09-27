@@ -650,7 +650,7 @@
     <script>
         const CORRECT_PASSWORD = "gF@2026*Estoque";
         const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyP7DP8-LfqJ7NxwgBI31bArrZIIPjTwQjqD8MKs0jQX1aAVWlU-LsfoMhgN_GgNuIEVw/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyEu5tLX0yoLdXoSYP731k5DjLECNzjSy4ZaTNLtXdj4gdopRhdbXjV2uxKytlepI-4fg/exec';
         const DRIVE_FOLDER_ID = '1cTyaZjq_nOVjAbGdWgKT6aIGkFMTMRxI';
 
         const TAB_ESTOQUE_NAME = 'Geral';
