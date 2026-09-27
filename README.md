@@ -553,14 +553,14 @@
             </div>
         </section>
 
-        <!-- ABA 4: GALERIA E LISTAGEM EM TABELA COM MINIATURAS (NOVA IMPLEMENTAÇÃO ISOLADA) -->
+        <!-- ABA 4: GALERIA E LISTAGEM EM TABELA COM MINIATURAS -->
         <section id="secGaleria" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
             <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
                     <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-images text-indigo-600 text-base"></i> Galeria de Fotos
                     </h2>
-                    <p class="text-xs text-slate-500">Ordenadas automaticamente da foto mais recente para a mais antiga</p>
+                    <p class="text-xs text-slate-500">Ordenadas pelo nome do arquivo (datas mais recentes no topo)</p>
                 </div>
                 <button onclick="loadDrivePhotosTable()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
                     <i class="fa-solid fa-rotate"></i> Atualizar Lista
@@ -646,8 +646,8 @@
         // URL do WebApp do Estoque / Histórico (Intacto)
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyEu5tLX0yoLdXoSYP731k5DjLECNzjSy4ZaTNLtXdj4gdopRhdbXjV2uxKytlepI-4fg/exec';
 
-        // URL do NOVO WebApp Exclusivo para a Galeria
-        const GALLERY_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwBGt9Lr4D4KLHQRDztWYFo4tKeqaaTEttsb58JFP6Nlv4kWuqCRqKJ4aRYpApU80ZnWA/exec';
+        // URL ATUALIZADA DO WEB APP EXCLUSIVO DA GALERIA
+        const GALLERY_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwbnYaynbDTMoxolKWJAdXlLucO-64I4woHWskPofBEjViGp9ndJMR7Z0GT0noR11bgZA/exec';
 
         const TAB_ESTOQUE_NAME = 'Geral';
         const TAB_HISTORICO_NAME = 'Entradas-Saidas';
