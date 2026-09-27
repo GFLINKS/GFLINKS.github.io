@@ -560,7 +560,6 @@
                     <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-images text-indigo-600 text-base"></i> Galeria de Fotos
                     </h2>
-                    <p class="text-xs text-slate-500">Ordenadas pelo nome do arquivo (datas mais recentes no topo)</p>
                 </div>
                 <button onclick="loadDrivePhotosTable()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
                     <i class="fa-solid fa-rotate"></i> Atualizar Lista
