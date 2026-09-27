@@ -553,7 +553,7 @@
             </div>
         </section>
 
-        <!-- ABA 4: GALERIA DE FOTOS (MODO LISTA PARA NOME COMPLETO DO ARQUIVO) -->
+        <!-- ABA 4: GALERIA DE FOTOS (COM MINIATURAS DAS IMAGENS) -->
         <section id="secGaleria" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
             <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -564,7 +564,7 @@
             <div class="p-4">
                 <div class="w-full h-[680px] border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
                     <iframe 
-                        src="https://drive.google.com/embeddedfolderview?id=1iTO0H5I-GuakcgA0EkHTC3s38kaWJrHb#list" 
+                        src="https://drive.google.com/embeddedfolderview?id=1iTO0H5I-GuakcgA0EkHTC3s38kaWJrHb#grid" 
                         class="w-full h-full border-0">
                     </iframe>
                 </div>
