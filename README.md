@@ -2,1658 +2,1707 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Estoque & Operações - Grupo Forte Protege</title>
+    <title>Painel Links GF </title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Ícones -->
+    <!-- SheetJS (XLSX) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body {
-            background-color: #f8fafc;
-            color: #1e293b;
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        @page {
+            size: A3 landscape;
+            margin: 8mm;
         }
 
-        /* Estilização da Tabela Estilo GF Links */
-        table.custom-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #ffffff;
+        @media print {
+            .no-print { display: none !important; }
+            body { 
+                background: white !important; 
+                font-size: 9pt !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            main { 
+                max-width: 100% !important; 
+                padding: 0 !important; 
+            }
+            .overflow-x-auto { 
+                overflow: visible !important; 
+                max-height: none !important; 
+            }
+            table { 
+                width: 100% !important; 
+                page-break-inside: auto; 
+            }
+            tr { 
+                page-break-inside: avoid; 
+                page-break-after: auto; 
+            }
         }
-
-        table.custom-table th {
-            background-color: #1e293b !important;
-            color: #ffffff !important;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 0.75rem 0.75rem;
-            border-bottom: 1px solid #334155 !important;
-            user-select: none;
-        }
-
-        table.custom-table td {
-            color: #334155 !important;
-            font-weight: 600 !important;
-            font-size: 0.8125rem !important;
-            padding: 0.75rem 0.85rem;
-            border-bottom: 1px solid #f1f5f9 !important;
-        }
-
-        table.custom-table tr:hover td {
-            background-color: #f8fafc !important;
-        }
-
-        /* Menu de Filtro Suspenso Estilo Excel */
-        .excel-filter-menu {
-            position: absolute;
-            z-index: 100;
-            background-color: #ffffff;
-            color: #334155;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            width: 260px;
-            font-size: 0.75rem;
-            display: none;
-        }
-
-        .excel-filter-menu .filter-option {
-            padding: 8px 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: #334155;
-        }
-
-        .excel-filter-menu .filter-option:hover {
-            background-color: #f1f5f9;
-            color: #4f46e5;
-        }
-
-        .excel-filter-list {
-            max-height: 160px;
-            overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            background-color: #f8fafc;
-            padding: 4px;
-        }
-
-        .excel-filter-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 6px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-
-        .excel-filter-item:hover {
-            background-color: #e2e8f0;
-        }
-
-        .th-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
-        }
-
-        .filter-btn {
-            background-color: #334155;
-            color: #cbd5e1;
-            border-radius: 4px;
-            padding: 3px 6px;
-            cursor: pointer;
-            font-size: 0.65rem;
-            transition: all 0.2s;
-        }
-
-        .filter-btn:hover {
-            background-color: #4f46e5;
-            color: #ffffff;
-        }
-
-        .filter-btn.active-filter {
-            background-color: #10b981 !important;
-            color: #ffffff !important;
-        }
-
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen text-slate-800 relative" onclick="closeAllFilterMenus(event)">
+<body class="bg-slate-100 font-sans min-h-screen text-slate-800">
 
-    <!-- TELA DE LOGIN -->
-    <div id="loginScreen" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-5 border border-slate-200">
-            <img src="logo.png" alt="Grupo Forte Protege" class="h-12 w-auto mx-auto object-contain" onerror="this.style.display='none'">
-            <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
-                <i class="fa-solid fa-boxes-stacked"></i>
-            </div>
-            <div>
-                <h2 class="text-xl font-bold text-slate-800">Acesso Restrito</h2>
-                <p class="text-xs text-slate-500 mt-1">Informe a senha corporativa para acessar o Painel de Estoque</p>
-            </div>
-            <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
-                <div>
-                    <label for="inputPassword" class="block text-xs font-semibold uppercase text-slate-500 mb-1">Senha de Acesso</label>
-                    <div class="relative">
-                        <input type="password" id="inputPassword" placeholder="••••••••••••" class="w-full text-sm px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-semibold tracking-wider bg-slate-50 pr-10">
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600">
-                            <i id="eyeIcon" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                    <p id="loginError" class="text-xs text-rose-600 font-semibold mt-2 hidden flex items-center gap-1">
-                        <i class="fa-solid fa-circle-exclamation"></i> Senha incorreta. Tente novamente.
-                    </p>
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-key text-xs"></i> Acessar Painel
-                </button>
-            </form>
-            <div class="text-[11px] text-slate-400 border-t border-slate-100 pt-4 text-center">
-                Grupo Forte Protege &copy; 2026 — Acesso Seguro
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE NOVA MOVIMENTAÇÃO -->
-    <div id="modalMovimentacao" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <!-- MODAL DE OBSERVAÇÃO / TEXTO LONGO -->
+    <div id="obsModal" class="fixed inset-0 bg-slate-900/80 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-right-left text-emerald-600"></i> Registrar Nova Movimentação
+                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i>
+                    <span id="obsModalTitle">Visualizar / Editar Observação</span>
                 </h3>
-                <button onclick="closeMovimentacaoModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeObsModal()" class="text-slate-400 hover:text-slate-600 text-base">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Conteúdo Completo:</label>
+                <textarea id="obsModalTextarea" rows="6" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium leading-relaxed"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeObsModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
+                <button onclick="saveObsModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk text-xs"></i> Aplicar e Salvar no Drive
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU FLUTUANTE DE FILTRO ESTILO EXCEL -->
+    <div id="excelFilterDropdown" class="fixed hidden z-[100] bg-white border border-slate-300 shadow-2xl rounded-xl p-3 w-64 text-xs font-sans text-slate-700" onclick="event.stopPropagation()">
+        <!-- Ações de Ordenação -->
+        <div class="space-y-1 pb-2 border-b border-slate-200">
+            <button onclick="applyColumnSort('asc')" class="w-full text-left px-2.5 py-1.5 hover:bg-slate-100 rounded-md flex items-center gap-2 font-semibold text-slate-700 transition">
+                <i class="fa-solid fa-arrow-down-a-z text-indigo-600 text-sm"></i> Classificar de A a Z
+            </button>
+            <button onclick="applyColumnSort('desc')" class="w-full text-left px-2.5 py-1.5 hover:bg-slate-100 rounded-md flex items-center gap-2 font-semibold text-slate-700 transition">
+                <i class="fa-solid fa-arrow-up-z-a text-indigo-600 text-sm"></i> Classificar de Z a A
+            </button>
+        </div>
+
+        <!-- Limpar Filtro -->
+        <div class="py-1.5 border-b border-slate-200">
+            <button onclick="clearCurrentColumnFilter()" class="w-full text-left px-2.5 py-1.5 hover:bg-rose-50 rounded-md text-rose-600 flex items-center gap-2 font-semibold transition">
+                <i class="fa-solid fa-filter-circle-xmark text-sm"></i> Limpar Filtro de "<span id="excelFilterColName"></span>"
+            </button>
+        </div>
+
+        <!-- Seleção de Valores Únicos -->
+        <div class="pt-2 space-y-2">
+            <div class="relative">
+                <input type="text" id="excelFilterSearch" oninput="filterExcelUniqueList()" placeholder="Pesquisar..." class="w-full pl-7 pr-2 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-[10px]"></i>
             </div>
 
-            <form onsubmit="saveMovimentacao(event)" class="space-y-3">
+            <div class="p-1 border border-slate-200 rounded-lg bg-slate-50">
+                <label class="flex items-center gap-2 px-2 py-1 border-b border-slate-200 font-bold text-slate-800 cursor-pointer hover:bg-slate-200/60 rounded">
+                    <input type="checkbox" id="excelSelectAllCb" onchange="toggleSelectAllExcelList(this.checked)" class="rounded text-indigo-600 focus:ring-indigo-500">
+                    <span>(Selecionar Tudo)</span>
+                </label>
+                <div id="excelFilterList" class="max-h-40 overflow-y-auto space-y-1 p-1 text-[11px]"></div>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex justify-end gap-2 pt-2.5 border-t border-slate-200 mt-2">
+            <button onclick="closeExcelFilterDropdown()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
+            <button onclick="confirmExcelColumnFilter()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition shadow flex items-center gap-1">
+                <i class="fa-solid fa-check text-[10px]"></i> OK
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DE ALTERAÇÃO (GF01) -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/80 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full text-center space-y-4 border border-slate-200">
+            <div class="bg-amber-100 text-amber-600 w-14 h-14 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">Confirmar Alterações Modificadas</h3>
+                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação dos registros alterados no Google Drive, digite o código de confirmação:</p>
+            </div>
+            <div>
+                <input type="text" id="confirmCodeInput" placeholder="Digite gf01..." class="w-full text-sm px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold tracking-wider bg-slate-50 uppercase">
+                <p id="confirmError" class="text-xs text-rose-600 font-semibold mt-1.5 hidden"><i class="fa-solid fa-circle-xmark mr-1"></i>Código incorreto! Digite gf01 para confirmar.</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="cancelarEdicao()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg transition text-xs">Cancelar</button>
+                <button onclick="validarEExecutarEdicao()" class="w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition text-xs shadow flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> Confirmar e Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DE LOGIN / BLOQUEIO POR SENHA FUNCIONAL -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-5 border border-slate-200">
+            <img src="logo.png" alt="Logo GF Links" class="h-12 w-auto mx-auto object-contain" onerror="this.style.display='none'">
+            <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-slate-800">Acesso Restrito</h2>
+                <p class="text-xs text-slate-500 mt-1">Informe a senha de acesso para visualizar o Painel Links GF</p>
+            </div>
+            <form onsubmit="checkPassword(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Equipamento</label>
-                    <select id="movEquipamento" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="">Selecione um equipamento...</option>
-                    </select>
+                    <input type="password" id="accessPassword" placeholder="Digite a senha..." class="w-full text-sm px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-semibold tracking-wider bg-slate-50">
+                    <p id="loginError" class="text-xs text-rose-600 font-semibold mt-2 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i>Senha incorreta. Tente novamente.</p>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Data</label>
-                        <input type="date" id="movData" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Tipo de Operação</label>
-                        <select id="movTipo" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="Entrada">Entrada</option>
-                            <option value="Saída">Saída</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Quantidade</label>
-                        <input type="number" id="movQtd" min="1" value="1" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Origem</label>
-                        <select id="movOrigem" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">Selecione a origem...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Destino</label>
-                        <select id="movDestino" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">Selecione o destino...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Observações / Projeto</label>
-                    <input type="text" id="movObs" placeholder="Ex: Instalação Cliente X" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-
-                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                    <button type="button" onclick="closeMovimentacaoModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold rounded-lg text-slate-700 transition">Cancelar</button>
-                    <button type="submit" id="btnSaveMov" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded-lg text-white transition shadow flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Registrar Movimentação
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition text-sm shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-key text-xs"></i> Acessar Painel
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- TOAST DE NOTIFICAÇÃO -->
-    <div id="toastSync" class="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
-        <i class="fa-solid fa-circle-check text-lg"></i>
-        <span id="toastMsg" class="text-xs font-semibold">Dados atualizados com sucesso!</span>
-    </div>
-
-    <!-- CABEÇALHO -->
-    <header id="mainHeader" class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
-        <div class="max-w-[1800px] mx-auto px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
-            <div class="flex items-center space-x-4 w-full lg:w-auto justify-between lg:justify-start">
-                <div class="flex items-center gap-3">
-                    <img src="logo.png" alt="Grupo Forte Protege" class="h-10 w-auto object-contain max-h-12" onerror="this.style.display='none'">
-                    <i class="fa-solid fa-boxes-stacked text-emerald-400 text-2xl"></i>
-                    <div>
-                        <h1 class="text-xl font-bold tracking-wide">Estoque & Operações</h1>
-                        <p class="text-xs text-slate-400" id="dbStatusBadge">Status DB: Conectando...</p>
-                        <p class="text-[11px] text-slate-400 font-medium mt-0.5" id="lastUpdateText">Última atualização: Em tempo real</p>
-                    </div>
+    <!-- Header Navbar -->
+    <header class="bg-slate-900 text-white shadow-lg no-print">
+        <div class="max-w-[1800px] mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-4">
+                <img src="logo.png" alt="Logo GF Links" class="h-10 w-auto max-h-12 object-contain" onerror="this.style.display='none'">
+                <i class="fa-solid fa-network-wired text-emerald-400 text-2xl"></i>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">Painel Links GF</h1>
+                    <p class="text-xs text-slate-400" id="dbStatusBadge">Status DB: Vazio</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-0.5" id="lastUpdateBadge">Ultima atualização: Nunca</p>
                 </div>
             </div>
-
-            <div class="flex items-center gap-3 flex-wrap justify-center lg:justify-end w-full lg:w-auto">
-                <button onclick="openMovimentacaoModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-plus text-sm"></i>
-                    <span>Nova Movimentação</span>
+            
+            <div class="flex items-center gap-3 flex-wrap">
+                <button onclick="syncDriveData()" id="btnSyncDrive" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-rotate text-base" id="syncIcon"></i> Sincronizar Google Drive
                 </button>
 
-                <button onclick="syncData()" id="btnSync" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
-                    <i id="iconSync" class="fa-solid fa-rotate text-sm"></i>
-                    <span>Sincronizar Google Drive</span>
+                <label for="excelFile" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg cursor-pointer transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel text-base"></i> Carregar Manual
+                </label>
+                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="hidden">
+
+                <button onclick="exportToPDF()" id="btnPdf" disabled class="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf text-base"></i> Salvar PDF
                 </button>
 
-                <!-- TAB SWITCHER NO CABEÇALHO -->
-                <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
-                    <button onclick="switchTab('estoque')" id="btnTabEstoque" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2">
-                        <i class="fa-solid fa-cubes"></i> Estoque
-                    </button>
-                    <button onclick="switchTab('historico')" id="btnTabHistorico" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-clock-rotate-left"></i> Histórico
-                    </button>
-                    <button onclick="switchTab('compras')" id="btnTabCompras" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-cart-shopping"></i> Compras
-                    </button>
-                    <button onclick="switchTab('galeria')" id="btnTabGaleria" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-images"></i> Galeria
-                    </button>
-                </div>
+                <button onclick="exportToExcel()" id="btnExport" disabled class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-download text-base"></i> Baixar Excel
+                </button>
 
-                <button onclick="handleLogout()" class="bg-slate-700 hover:bg-rose-600 text-white text-xs font-semibold px-3 py-2.5 rounded-lg transition shadow flex items-center gap-1.5" title="Sair do Painel">
-                    <i class="fa-solid fa-right-from-bracket"></i>
+                <button onclick="clearDatabase()" id="btnClearDb" class="bg-rose-700 hover:bg-rose-600 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-trash-can text-base"></i> Limpar Banco
+                </button>
+
+                <button onclick="logout()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-3 py-2.5 rounded-lg transition shadow flex items-center gap-1.5" title="Sair do Painel">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="max-w-[1800px] mx-auto px-6 py-6 space-y-6">
+    <main class="max-w-[1800px] mx-auto px-6 py-6 space-y-6" id="pdfContent">
 
-        <!-- CARDS KPIS -->
-        <section class="space-y-4">
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div onclick="filterByMetric('central')" id="kpi-card-central" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-sky-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                    <div class="flex items-center justify-between pointer-events-none">
-                        <div>
-                            <p class="text-[11px] font-bold text-sky-600 uppercase tracking-wide">Central</p>
-                            <h3 class="text-2xl font-bold text-sky-600 mt-1" id="kpiCentral">0</h3>
-                        </div>
-                        <div class="bg-sky-100 p-3 rounded-lg text-sky-600 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-warehouse text-lg"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs font-bold text-sky-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
-                </div>
-
-                <div onclick="filterByMetric('tecnico')" id="kpi-card-tecnico" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                    <div class="flex items-center justify-between pointer-events-none">
-                        <div>
-                            <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wide">Técnico Marcelo</p>
-                            <h3 class="text-2xl font-bold text-amber-600 mt-1" id="kpiTecnico">0</h3>
-                        </div>
-                        <div class="bg-amber-100 p-3 rounded-lg text-amber-600 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-user-gear text-lg"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs font-bold text-amber-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
-                </div>
-
-                <div onclick="filterByMetric('op')" id="kpi-card-op" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                    <div class="flex items-center justify-between pointer-events-none">
-                        <div>
-                            <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-wide">Estoque Op.</p>
-                            <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="kpiOperacional">0</h3>
-                        </div>
-                        <div class="bg-emerald-100 p-3 rounded-lg text-emerald-600 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-truck-ramp-box text-lg"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs font-bold text-emerald-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
-                </div>
-
-                <div onclick="filterByMetric('acervo')" id="kpi-card-acervo" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-purple-500 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                    <div class="flex items-center justify-between pointer-events-none">
-                        <div>
-                            <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Acervo Op.</p>
-                            <h3 class="text-2xl font-bold text-purple-600 mt-1" id="kpiAcervo">0</h3>
-                        </div>
-                        <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-laptop text-lg"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs font-bold text-purple-600 mt-2 pointer-events-none">Clique para isolar <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
-                </div>
-
-                <div onclick="filterByMetric('total')" id="kpi-card-total" class="col-span-2 sm:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group">
-                    <div class="flex items-center justify-between pointer-events-none">
-                        <div>
-                            <p class="text-[11px] font-bold text-indigo-600 uppercase tracking-wide">Total Físico</p>
-                            <h3 class="text-2xl font-bold text-indigo-600 mt-1" id="kpiTotal">0</h3>
-                        </div>
-                        <div class="bg-indigo-100 p-3 rounded-lg text-indigo-600 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-cubes text-lg"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs font-bold text-indigo-600 mt-2 pointer-events-none">Exibir todas as colunas <i class="fa-solid fa-sliders text-[10px] ml-1"></i></p>
-                </div>
-            </div>
-
-            <!-- BOTÃO LISTAR EQUIPAMENTOS -->
-            <div class="flex flex-col gap-3">
-                <div class="flex justify-between items-center bg-slate-200/60 px-4 py-2.5 rounded-xl border border-slate-300/70">
-                    <span class="text-xs font-bold text-slate-700 flex items-center gap-2">
-                        <i class="fa-solid fa-list-ol text-indigo-600"></i> Resumo Individual de Equipamentos
-                    </span>
-                    <button onclick="toggleEquipCards()" id="btnToggleEquip" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
-                        <i id="iconToggleEquip" class="fa-solid fa-layer-group"></i> 
-                        <span id="textToggleEquip">Listar Equipamentos</span>
-                    </button>
-                </div>
-
-                <div id="secEquipCards" class="hidden transition-all duration-300 pt-2">
-                    <div id="gridEquipCards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA 1: SALDO DE ESTOQUE -->
-        <section id="secEstoque" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
+        <!-- Banner de Carregamento do Drive -->
+        <div id="driveLoadingBanner" class="hidden bg-sky-50 border-l-4 border-sky-500 text-sky-800 p-4 rounded-xl shadow-sm flex items-center justify-between no-print">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-circle-notch fa-spin text-sky-600 text-xl"></i>
                 <div>
-                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-indigo-600 text-base"></i> Disponibilidade por Equipamento
-                    </h2>
-                    <p class="text-xs text-slate-500" id="activeFilterBadge">Mostrando todas as localizações</p>
+                    <p class="text-xs font-bold">Sincronizando com o Google Drive...</p>
+                    <p class="text-[11px] text-sky-600">Buscando atualizações da planilha na nuvem.</p>
                 </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button onclick="clearAllFilters('estoque')" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold text-slate-700 rounded-lg transition">
-                        <i class="fa-solid fa-filter-circle-xmark text-rose-600 mr-1"></i> Limpar Filtros
-                    </button>
-                    <div class="relative w-full sm:w-64">
-                        <input type="text" id="searchEstoque" onkeyup="filterEstoque()" placeholder="Pesquisa rápida..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+            </div>
+        </div>
+
+        <!-- MÓDULO 1: CONSULTA BD_AUXILIAR -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="logo.png" alt="Logo GF Links" class="h-8 w-auto object-contain hidden md:block" onerror="this.style.display='none'">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-address-book text-indigo-600 text-lg"></i>
+                            Consulta de Cadastros e CIs (BD_Auxiliar)
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5" id="bdStatusText">
+                            Pesquise por Código CIS, Sigla, Unidade ou Endereço cadastrado na aba BD_Auxiliar.
+                        </p>
                     </div>
                 </div>
-            </div>
-
-            <div class="overflow-x-auto relative">
-                <table class="custom-table" id="tblEstoque">
-                    <thead>
-                        <tr id="theadEstoqueTr"></tr>
-                    </thead>
-                    <tbody id="tbodyEstoque" class="divide-y divide-slate-100"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- ABA 2: HISTÓRICO DE MOVIMENTAÇÕES -->
-        <section id="secHistorico" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
-                <div>
-                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-arrow-right-arrow-left text-indigo-600 text-base"></i> Histórico de Entradas e Saídas
-                    </h2>
-                    <p class="text-xs text-slate-500">Exibindo automaticamente da movimentação mais recente para a mais antiga</p>
-                </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button onclick="clearAllFilters('historico')" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold text-slate-700 rounded-lg transition">
-                        <i class="fa-solid fa-filter-circle-xmark text-rose-600 mr-1"></i> Limpar Filtros
-                    </button>
-                    <div class="relative w-full sm:w-64">
-                        <input type="text" id="searchHistorico" onkeyup="filterHistorico()" placeholder="Pesquisa rápida..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
-                    </div>
+                <div class="relative w-full md:w-96 no-print">
+                    <input type="text" id="bdSearchInput" onkeyup="searchBDByCIS()" placeholder="Digite CIS, Sigla ou Endereço..." class="w-full text-xs pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium bg-slate-50 focus:bg-white">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
                 </div>
             </div>
 
-            <div class="overflow-x-auto relative">
-                <table class="custom-table" id="tblHistorico">
-                    <thead>
-                        <tr>
-                            <th>
-                                <div class="th-container">
-                                    <span>Data</span>
-                                    <button class="filter-btn" id="fbtn-historico-data" onclick="toggleFilterDropdown(event, 'historico', 'data')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="th-container">
-                                    <span>Equipamento</span>
-                                    <button class="filter-btn" id="fbtn-historico-item" onclick="toggleFilterDropdown(event, 'historico', 'item')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th class="text-center">
-                                <div class="th-container justify-center">
-                                    <span>Tipo</span>
-                                    <button class="filter-btn" id="fbtn-historico-tipo" onclick="toggleFilterDropdown(event, 'historico', 'tipo')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th class="text-center">
-                                <div class="th-container justify-center">
-                                    <span>Qtd</span>
-                                    <button class="filter-btn" id="fbtn-historico-qtd" onclick="toggleFilterDropdown(event, 'historico', 'qtd')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="th-container">
-                                    <span>Origem</span>
-                                    <button class="filter-btn" id="fbtn-historico-origem" onclick="toggleFilterDropdown(event, 'historico', 'origem')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="th-container">
-                                    <span>Destino</span>
-                                    <button class="filter-btn" id="fbtn-historico-destino" onclick="toggleFilterDropdown(event, 'historico', 'destino')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="th-container">
-                                    <span>Observações / Projeto</span>
-                                    <button class="filter-btn" id="fbtn-historico-obs" onclick="toggleFilterDropdown(event, 'historico', 'obs')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbodyHistorico" class="divide-y divide-slate-100"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- ABA 3: HISTÓRICO DE COMPRAS -->
-        <section id="secCompras" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
-                <div>
-                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-cart-shopping text-indigo-600 text-base"></i> Histórico de Compras (Fornecedores)
-                    </h2>
-                    <p class="text-xs text-slate-500">Exibindo automaticamente movimentações com origem em Fornecedores</p>
-                </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button onclick="clearAllFilters('compras')" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold text-slate-700 rounded-lg transition">
-                        <i class="fa-solid fa-filter-circle-xmark text-rose-600 mr-1"></i> Limpar Filtros
-                    </button>
-                    <div class="relative w-full sm:w-64">
-                        <input type="text" id="searchCompras" onkeyup="filterCompras()" placeholder="Pesquisa rápida..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto relative">
-                <table class="custom-table" id="tblCompras">
-                    <thead>
-                        <tr>
-                            <th>
-                                <div class="th-container">
-                                    <span>Data</span>
-                                    <button class="filter-btn" id="fbtn-compras-data" onclick="toggleFilterDropdown(event, 'compras', 'data')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="th-container">
-                                    <span>Equipamento</span>
-                                    <button class="filter-btn" id="fbtn-compras-item" onclick="toggleFilterDropdown(event, 'compras', 'item')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th class="text-center">
-                                <div class="th-container justify-center">
-                                    <span>Tipo</span>
-                                    <button class="filter-btn" id="fbtn-compras-tipo" onclick="toggleFilterDropdown(event, 'compras', 'tipo')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th class="text-center">
-                                <div class="th-container justify-center">
-                                    <span>Qtd</span>
-                                    <button class="filter-btn" id="fbtn-compras-qtd" onclick="toggleFilterDropdown(event, 'compras', 'qtd')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="th-container">
-                                    <span>Origem</span>
-                                    <button class="filter-btn" id="fbtn-compras-origem" onclick="toggleFilterDropdown(event, 'compras', 'origem')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="th-container">
-                                    <span>Destino</span>
-                                    <button class="filter-btn" id="fbtn-compras-destino" onclick="toggleFilterDropdown(event, 'compras', 'destino')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="th-container">
-                                    <span>Observações / Projeto</span>
-                                    <button class="filter-btn" id="fbtn-compras-obs" onclick="toggleFilterDropdown(event, 'compras', 'obs')"><i class="fa-solid fa-filter"></i></button>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbodyCompras" class="divide-y divide-slate-100"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- ABA 4: GALERIA E LISTAGEM EM TABELA COM MINIATURAS -->
-        <section id="secGaleria" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <div>
-                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-images text-indigo-600 text-base"></i> Galeria de Fotos
-                    </h2>
-                </div>
-                <button onclick="loadDrivePhotosTable()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-rotate"></i> Atualizar Lista
-                </button>
-            </div>
-
-            <div class="p-4 space-y-6">
-                
-                <!-- VISUALIZADOR DA FOTO SELECIONADA (PREVIEW EXPANSÍVEL) -->
-                <div id="photoPreviewContainer" class="hidden bg-slate-900 rounded-2xl p-4 text-center border border-slate-800 transition-all shadow-xl">
-                    <div class="flex justify-between items-center mb-3 text-white px-2">
-                        <span id="previewTitle" class="text-xs font-bold tracking-wide truncate text-indigo-300"></span>
-                        <button onclick="closePhotoPreview()" class="text-slate-400 hover:text-white text-xs font-bold bg-slate-800 px-2.5 py-1 rounded-lg transition">
-                            <i class="fa-solid fa-xmark mr-1"></i> Fechar Foto
-                        </button>
-                    </div>
-                    <div class="max-h-[500px] flex justify-center items-center overflow-hidden rounded-xl bg-black/50 p-2">
-                        <img id="previewImage" src="" alt="Foto Selecionada" class="max-h-[480px] w-auto object-contain rounded-lg shadow-md">
-                    </div>
-                </div>
-
-                <!-- TABELA EM LISTA COM MINIATURAS -->
-                <div class="overflow-x-auto relative rounded-xl border border-slate-200">
-                    <table class="custom-table" id="tblGaleria">
+            <div id="bdSearchResult" class="mt-4 hidden border-t border-slate-100 pt-3">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full min-w-max text-left text-xs border-collapse">
                         <thead>
-                            <tr>
-                                <th class="w-16 text-center">Miniatura</th>
-                                <th class="w-40">Data de Envio</th>
-                                <th>Nome do Arquivo / Legenda</th>
-                                <th class="text-center w-32">Ação</th>
+                            <tr id="bdSearchResultHeader" class="bg-slate-800 text-white font-semibold">
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">CI / CÓDIGO</th>
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">SIGLA</th>
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">RESTAURANTE / UNIDADE</th>
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">ENDEREÇO COMPLETO</th>
+                                <th class="p-2.5 bg-slate-800 text-white font-bold border-b border-slate-700">UF</th>
                             </tr>
                         </thead>
-                        <tbody id="tbodyGaleria" class="divide-y divide-slate-100">
-                            <tr>
-                                <td colspan="4" class="p-6 text-center text-slate-400">Clique em "Atualizar Lista" ou acesse a aba Galeria para carregar as fotos...</td>
-                            </tr>
-                        </tbody>
+                        <tbody id="bdSearchResultBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dropzone de Arquivo -->
+        <div id="dropZone" class="bg-white border-2 border-dashed border-slate-300 rounded-xl p-12 text-center shadow-sm hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('excelFile').click()">
+            <img src="logo.png" alt="Logo GF Links" class="h-16 w-auto mx-auto mb-3 object-contain opacity-80" onerror="this.style.display='none'">
+            <i class="fa-solid fa-cloud-arrow-up text-5xl text-indigo-500 mb-3"></i>
+            <h3 class="text-lg font-bold text-slate-700">Clique para carregar uma planilha local ou use a sincronização do Drive</h3>
+            <p class="text-xs text-slate-500 mt-1">Os dados do Painel Links GF são atualizados e salvos ao confirmar alterações.</p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardSection" class="hidden space-y-6">
+
+            <!-- MÉTRICAS STATUS -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-sky-600 text-base"></i>
+                        Métricas de STATUS (Coluna F)
+                    </h3>
+                    <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-hand-pointer mr-1"></i>Clique no banner para filtrar</span>
+                </div>
+                <div id="statusCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+            </div>
+
+            <!-- MÉTRICAS COBRANÇA -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice-dollar text-emerald-600 text-base"></i>
+                        Métricas de COBRANÇA (Coluna E)
+                    </h3>
+                    <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-hand-pointer mr-1"></i>Clique no banner para filtrar</span>
+                </div>
+                
+                <!-- CONTAINER GERAL DOS CARDS DE COBRANÇA -->
+                <div id="cobrancaCardsContainer" class="space-y-4"></div>
+
+                <!-- BOTÃO DE EXPANSÃO / RECOLHIMENTO -->
+                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-center no-print">
+                    <button id="btnToggleCobrancaCards" onclick="toggleCobrancaCards()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition flex items-center gap-2 border border-indigo-200 shadow-sm">
+                        <i id="toggleCobrancaIcon" class="fa-solid fa-chevron-down text-xs"></i>
+                        <span id="toggleCobrancaText">Ver outros cards de cobrança</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-indigo-500"></i> Distribuição dos Status (Coluna F)
+                    </h4>
+                    <div class="h-64 relative">
+                        <canvas id="chartStatus"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-column text-emerald-500"></i> Distribuição das Cobranças (Coluna E)
+                    </h4>
+                    <div class="h-64 relative">
+                        <canvas id="chartCobranca"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABELA E FILTROS -->
+            <div id="tableSectionContainer" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-50/50">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800">Tabela Geral de Registros - Painel Links GF</h3>
+                        <p class="text-xs text-slate-500">Clique nos ícones de filtro nos cabeçalhos das colunas para ordenar (A-Z) e selecionar valores únicos.</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end no-print">
+                        <!-- INDICADOR VISUAL DA ÚLTIMA ALTERAÇÃO NO BD -->
+                        <span id="lastSaveIndicator" class="text-[11px] font-medium px-2.5 py-1.5 rounded-lg border bg-slate-100 text-slate-600 border-slate-200 flex items-center gap-1.5 transition-all">
+                            <i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>
+                            <span>Última alteração no BD: Nunca</span>
+                        </span>
+
+                        <button onclick="solicitarSalvarEmMassa()" id="btnSaveBatch" class="text-xs bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk text-sm"></i> Salvar Alterações em Massa
+                        </button>
+
+                        <input type="text" id="tableSearchInput" onkeyup="filterTable()" placeholder="Buscar..." class="text-xs px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                        <select id="filterCisNumNI" onchange="filterTable()" class="text-xs bg-amber-50 border border-amber-300 text-amber-900 rounded-lg px-3 py-2 font-bold">
+                            <option value="">Filtro Especial: Todos</option>
+                            <option value="ONLY_NUMERIC_NI">CIS Numérica + Cobrança N/I</option>
+                            <option value="ONLY_DUPLICATED_CIS">Duplicidade de Link na CIS (Apenas Números)</option>
+                        </select>
+                        <select id="filterStatusColF" onchange="filterTable()" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700">
+                            <option value="">STATUS: Todos</option>
+                        </select>
+                        <select id="filterCobrancaColE" onchange="filterTable()" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700">
+                            <option value="">COBRANÇA: Todas</option>
+                        </select>
+                        <button onclick="resetFilters()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-2 rounded-lg transition">Limpar Filtros</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto overflow-y-auto max-h-[600px] w-full">
+                    <table class="min-w-max w-full text-left border-collapse text-[11px]">
+                        <thead>
+                            <tr id="tableHeader" class="bg-slate-800 text-white font-semibold sticky top-0 z-20"></tr>
+                        </thead>
+                        <tbody id="ativosTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
                     </table>
                 </div>
 
+                <div class="p-3 bg-slate-50 text-xs text-slate-500 flex justify-between items-center border-t border-slate-100">
+                    <span>Mostrando <b id="displayedCount">0</b> de <b id="totalCount">0</b> registros</span>
+                </div>
             </div>
-        </section>
 
+        </div>
     </main>
 
-    <!-- MENU EXCEL FLUTUANTE -->
-    <div id="excelFilterDropdown" class="excel-filter-menu" onclick="event.stopPropagation()">
-        <div class="filter-option border-b border-slate-100" onclick="applySort('asc')">
-            <i class="fa-solid fa-arrow-down-a-z text-indigo-600"></i> Classificar de A a Z
-        </div>
-        <div class="filter-option border-b border-slate-200" onclick="applySort('desc')">
-            <i class="fa-solid fa-arrow-up-z-a text-indigo-600"></i> Classificar de Z a A
-        </div>
-
-        <div class="p-2 border-b border-slate-200">
-            <input type="text" id="excelSearchBox" oninput="filterExcelCheckboxList()" placeholder="Pesquisar itens..." class="w-full bg-slate-100 border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
-        </div>
-
-        <div class="p-2">
-            <div class="excel-filter-item font-bold border-b border-slate-200 pb-1 mb-1">
-                <input type="checkbox" id="chkSelectAll" onchange="toggleSelectAllCheckboxes(this.checked)" checked class="rounded text-indigo-600 focus:ring-indigo-500">
-                <label for="chkSelectAll">(Selecionar Tudo)</label>
-            </div>
-            <div id="excelCheckboxList" class="excel-filter-list"></div>
-        </div>
-
-        <div class="p-2 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 rounded-b-xl">
-            <button onclick="confirmColumnFilter()" class="px-3 py-1 bg-indigo-600 text-white rounded font-semibold hover:bg-indigo-500 text-xs transition">OK</button>
-            <button onclick="closeExcelFilterMenu()" class="px-3 py-1 bg-slate-200 text-slate-700 rounded font-semibold hover:bg-slate-300 text-xs transition">Cancelar</button>
-        </div>
-    </div>
-
-    <!-- RODAPÉ -->
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-12">
-        Grupo Forte Protege &copy; 2026 — Controle Interno Operacional
-    </footer>
-
-    <!-- SCRIPT DE INTEGRAÇÃO FUNCIONAL COMPLETA -->
     <script>
-        const CORRECT_PASSWORD = "gF@2026*Estoque";
-        const SHEET_ID = '1v-MZ_ga3DtOk2UfDxRZNV0awVWd3jdo1hSzCwUyvARE';
-        
-        // URL do WebApp do Estoque / Histórico (Intacto)
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyEu5tLX0yoLdXoSYP731k5DjLECNzjSy4ZaTNLtXdj4gdopRhdbXjV2uxKytlepI-4fg/exec';
-
-        // URL ATUALIZADA DO WEB APP EXCLUSIVO DA GALERIA
-        const GALLERY_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwbnYaynbDTMoxolKWJAdXlLucO-64I4woHWskPofBEjViGp9ndJMR7Z0GT0noR11bgZA/exec';
-
-        const TAB_ESTOQUE_NAME = 'Geral';
-        const TAB_HISTORICO_NAME = 'Entradas-Saidas';
-
-        let estoqueData = [];
-        let historicoData = [];
-        let currentGalleryPhotos = [];
-
-        function checkAuth() {
-            if (sessionStorage.getItem('gf_authenticated') === 'true') {
-                document.getElementById('loginScreen').classList.add('hidden');
-            } else {
-                document.getElementById('loginScreen').classList.remove('hidden');
-            }
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const passInput = document.getElementById('inputPassword');
-            const errorMsg = document.getElementById('loginError');
-
-            if (passInput.value === CORRECT_PASSWORD) {
-                sessionStorage.setItem('gf_authenticated', 'true');
-                document.getElementById('loginScreen').classList.add('hidden');
-                errorMsg.classList.add('hidden');
-                passInput.classList.remove('border-rose-500');
-            } else {
-                errorMsg.classList.remove('hidden');
-                passInput.classList.add('border-rose-500');
-                passInput.focus();
-            }
-        }
-
-        function handleLogout() {
-            sessionStorage.removeItem('gf_authenticated');
-            document.getElementById('inputPassword').value = '';
-            document.getElementById('loginError').classList.add('hidden');
-            checkAuth();
-        }
-
-        function togglePasswordVisibility() {
-            const input = document.getElementById('inputPassword');
-            const icon = document.getElementById('eyeIcon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-
-        function parseDateString(dateVal) {
-            if (!dateVal || dateVal === '-' || dateVal.toString().trim() === '') {
-                return { formatted: '-', timestamp: 0 };
-            }
-            let str = dateVal.toString().trim();
-            if (str.includes('T')) str = str.split('T')[0];
-
-            let day, month, year;
-
-            if (str.includes('/')) {
-                const parts = str.split('/');
-                if (parts.length === 3) {
-                    let p1 = parseInt(parts[0], 10);
-                    let p2 = parseInt(parts[1], 10);
-                    let p3 = parseInt(parts[2].trim(), 10);
-
-                    if (parts[0].length === 4) {
-                        year = p1; month = p2; day = p3;
-                    } else if (p1 > 12) {
-                        day = p1; month = p2; year = p3;
-                    } else if (p2 > 12) {
-                        month = p1; day = p2; year = p3;
-                    } else {
-                        day = p1; month = p2; year = p3;
-                    }
-                }
-            } else if (str.includes('-')) {
-                const parts = str.split('-');
-                if (parts.length === 3) {
-                    if (parts[0].length === 4) {
-                        year = parseInt(parts[0], 10);
-                        month = parseInt(parts[1], 10);
-                        day = parseInt(parts[2], 10);
-                    } else {
-                        day = parseInt(parts[0], 10);
-                        month = parseInt(parts[1], 10);
-                        year = parseInt(parts[2], 10);
-                    }
-                }
-            }
-
-            if (day && month && year && !isNaN(day) && !isNaN(month) && !isNaN(year)) {
-                const dt = new Date(year, month - 1, day);
-                const dd = String(day).padStart(2, '0');
-                const mm = String(month).padStart(2, '0');
-                return {
-                    formatted: `${dd}/${mm}/${year}`,
-                    timestamp: dt.getTime()
-                };
-            }
-
-            return { formatted: str, timestamp: 0 };
-        }
-
-        function normalizeKey(str) {
-            if (!str) return '';
-            return str.toString()
-                      .toLowerCase()
-                      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                      .replace(/[^a-z0-9]/g, "");
-        }
-
-        async function fetchGoogleSheetCSV(tabName) {
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Falha ao carregar aba ${tabName}`);
-            const csvText = await response.text();
-            return parseCSV(csvText);
-        }
-
-        function parseCSV(text) {
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            if (lines.length <= 1) return [];
-
-            const rawHeaders = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim());
-            const normalizedHeaders = rawHeaders.map(h => normalizeKey(h));
-            const result = [];
-
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/^"(.*)"$/, '$1').trim());
-                const obj = { _rowIndex: i + 1 };
-                normalizedHeaders.forEach((normKey, index) => {
-                    let val = values[index] || '';
-                    if (!isNaN(val) && val !== '') val = Number(val);
-                    obj[normKey] = val;
-                });
-                result.push(obj);
-            }
-            return result;
-        }
-
-        async function loadDataFromSheet() {
-            try {
-                let loadedViaWebApp = false;
-
-                try {
-                    const webAppResponse = await fetch(WEB_APP_URL);
-                    if (webAppResponse.ok) {
-                        const json = await webAppResponse.json();
-                        if (json && Array.isArray(json.estoque) && Array.isArray(json.historico)) {
-                            parseWebAppData(json);
-                            loadedViaWebApp = true;
-                        }
-                    }
-                } catch (e) {
-                    console.warn('Busca via WebApp GET indisponível, utilizando fallback CSV gviz...');
-                }
-
-                if (!loadedViaWebApp) {
-                    await parseCSVData();
-                }
-
-                updateKPICards();
-                renderEquipmentCards();
-                processData('estoque');
-                processData('historico');
-                processData('compras');
-                populateMovimentacaoOptions();
-                
-                const badge = document.getElementById('dbStatusBadge');
-                if (badge) {
-                    badge.innerText = `Status DB: Conectado (${estoqueData.length} itens)`;
-                    badge.className = "text-xs text-emerald-400 font-semibold";
-                }
-
-            } catch (err) {
-                console.error('Erro ao conectar com o Google Sheets:', err);
-                const badge = document.getElementById('dbStatusBadge');
-                if (badge) {
-                    badge.innerText = "Status DB: Erro de Conexão";
-                    badge.className = "text-xs text-rose-400 font-semibold";
-                }
-            }
-        }
-
-        function parseWebAppData(json) {
-            estoqueData = [];
-            json.estoque.forEach(r => {
-                const item = r['equipamento'] || r['item'] || r['descricao'] || r['nome'] || '';
-                const itemLower = item.toString().toLowerCase().trim();
-                if (!item || itemLower.includes('total') || itemLower === 'subtotal') return;
-
-                const central = Number(r['central']) || 0;
-                const tecnico = Number(r['tecnicomarcelo'] || r['tecnico'] || r['marcelo']) || 0;
-                const op = Number(r['estoqueop'] || r['op'] || r['estoqueoperacional']) || 0;
-                const acervo = Number(r['acervoop'] || r['acervo'] || r['acervooperacional']) || 0;
-                const totalGeral = Number(r['totalgeral'] || r['total']) || (central + tecnico + op + acervo);
-
-                estoqueData.push({
-                    _rowIndex: r._rowIndex,
-                    item: item,
-                    central, tecnico, op, acervo,
-                    total: totalGeral
-                });
-            });
-
-            historicoData = [];
-            json.historico.forEach(r => {
-                const item = r['equipamento'] || r['item'] || '';
-                const itemLower = item.toString().toLowerCase().trim();
-                if (!item || itemLower.includes('total') || itemLower === 'subtotal') return;
-
-                const tipo = r['entradasaida'] || r['tipo'] || r['operacao'] || '-';
-                const qtd = Number(r['quantidade'] || r['qtd']) || 0;
-
-                if (tipo !== 'Entrada' && tipo !== 'Saída') return;
-
-                const rawDate = r['data'] || r['datahora'] || '';
-                const parsedDate = parseDateString(rawDate);
-
-                historicoData.push({
-                    _rowIndex: r._rowIndex,
-                    data: parsedDate.formatted,
-                    _timestamp: parsedDate.timestamp,
-                    item: item || '-',
-                    tipo: tipo,
-                    qtd: qtd,
-                    origem: r['origem'] || '-',
-                    destino: r['destino'] || '-',
-                    obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
-                });
-            });
-
-            historicoData.sort((a, b) => {
-                if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
-                return b._rowIndex - a._rowIndex;
-            });
-        }
-
-        async function parseCSVData() {
-            const rawEstoque = await fetchGoogleSheetCSV(TAB_ESTOQUE_NAME);
-            estoqueData = [];
-
-            rawEstoque.forEach(r => {
-                const item = r['equipamento'] || r['item'] || r['descricao'] || r['nome'] || '';
-                const itemLower = item.toString().toLowerCase().trim();
-
-                if (!item || itemLower.includes('total') || itemLower === 'subtotal') return;
-
-                const central = Number(r['central']) || 0;
-                const tecnico = Number(r['tecnicomarcelo'] || r['tecnico'] || r['marcelo']) || 0;
-                const op = Number(r['estoqueop'] || r['op'] || r['estoqueoperacional']) || 0;
-                const acervo = Number(r['acervoop'] || r['acervo'] || r['acervooperacional']) || 0;
-                const totalGeral = Number(r['totalgeral'] || r['total']) || (central + tecnico + op + acervo);
-
-                estoqueData.push({
-                    _rowIndex: r._rowIndex,
-                    item: item,
-                    central, tecnico, op, acervo,
-                    total: totalGeral
-                });
-            });
-
-            let rawHistorico = [];
-            try {
-                rawHistorico = await fetchGoogleSheetCSV(TAB_HISTORICO_NAME);
-            } catch (e) {
-                console.warn(`Aba ${TAB_HISTORICO_NAME} não encontrada.`);
-            }
-
-            historicoData = [];
-            rawHistorico.forEach(r => {
-                const item = r['equipamento'] || r['item'] || '';
-                const itemLower = item.toString().toLowerCase().trim();
-
-                if (!item || itemLower.includes('total') || itemLower === 'subtotal') return;
-
-                const tipo = r['entradasaida'] || r['tipo'] || r['operacao'] || '-';
-                const qtd = Number(r['quantidade'] || r['qtd']) || 0;
-
-                if (tipo !== 'Entrada' && tipo !== 'Saída') return;
-
-                const rawDate = r['data'] || r['datahora'] || '';
-                const parsedDate = parseDateString(rawDate);
-
-                historicoData.push({
-                    _rowIndex: r._rowIndex,
-                    data: parsedDate.formatted,
-                    _timestamp: parsedDate.timestamp,
-                    item: item || '-',
-                    tipo: tipo,
-                    qtd: qtd,
-                    origem: r['origem'] || '-',
-                    destino: r['destino'] || '-',
-                    obs: r['observacoes'] || r['observacao'] || r['obs'] || r['projeto'] || '-'
-                });
-            });
-
-            historicoData.sort((a, b) => {
-                if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
-                return b._rowIndex - a._rowIndex;
-            });
-        }
-
-        function updateKPICards() {
-            const totalCentral = estoqueData.reduce((acc, curr) => acc + curr.central, 0);
-            const totalTecnico = estoqueData.reduce((acc, curr) => acc + curr.tecnico, 0);
-            const totalOp = estoqueData.reduce((acc, curr) => acc + curr.op, 0);
-            const totalAcervo = estoqueData.reduce((acc, curr) => acc + curr.acervo, 0);
-            const totalFisico = estoqueData.reduce((acc, curr) => acc + curr.total, 0);
-
-            document.getElementById('kpiCentral').innerText = totalCentral;
-            document.getElementById('kpiTecnico').innerText = totalTecnico;
-            document.getElementById('kpiOperacional').innerText = totalOp;
-            document.getElementById('kpiAcervo').innerText = totalAcervo;
-            document.getElementById('kpiTotal').innerText = totalFisico;
-        }
-
-        function renderEquipmentCards() {
-            const container = document.getElementById('gridEquipCards');
-            if (!container) return;
-            container.innerHTML = '';
-
-            estoqueData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-3 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 flex flex-col justify-between min-h-[85px] group";
-                card.onclick = () => filterByEquipment(item.item);
-                
-                card.innerHTML = `
-                    <div class="flex items-start justify-between pointer-events-none gap-2">
-                        <span class="text-[11px] font-bold text-slate-800 leading-snug break-words pr-1 min-w-0" title="${item.item}">${item.item}</span>
-                        <span class="text-sm font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 shrink-0 self-start">${item.total}</span>
-                    </div>
-                    <p class="text-[10px] font-bold text-indigo-500 mt-2 pointer-events-none flex items-center justify-between border-t border-slate-100 pt-1.5">
-                        <span>Ver detalhes</span>
-                        <i class="fa-solid fa-arrow-down text-[9px] group-hover:translate-y-0.5 transition-transform"></i>
-                    </p>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function toggleEquipCards() {
-            const sec = document.getElementById('secEquipCards');
-            const btnText = document.getElementById('textToggleEquip');
-            const icon = document.getElementById('iconToggleEquip');
-
-            if (sec.classList.contains('hidden')) {
-                sec.classList.remove('hidden');
-                btnText.innerText = "Ocultar Equipamentos";
-                icon.className = "fa-solid fa-eye-slash";
-            } else {
-                sec.classList.add('hidden');
-                btnText.innerText = "Listar Equipamentos";
-                icon.className = "fa-solid fa-layer-group";
-            }
-        }
-
-        function filterByEquipment(itemName) {
-            switchTab('estoque', false);
-            
-            tableState.estoque.metricFilter = null;
-            highlightActiveMetricCard(null);
-
-            const searchInput = document.getElementById('searchEstoque');
-            searchInput.value = itemName;
-            filterEstoque();
-
-            const badge = document.getElementById('activeFilterBadge');
-            badge.innerHTML = `<span class="text-indigo-600 font-bold">Filtro ativo:</span> Exibindo apenas o equipamento <strong class="text-slate-800 font-bold">${itemName}</strong>`;
-
-            const tableElement = document.getElementById('tblEstoque');
-            if (tableElement) {
-                setTimeout(() => {
-                    const headerHeight = document.getElementById('mainHeader')?.offsetHeight || 80;
-                    const elementPosition = tableElement.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }, 50);
-            }
-        }
-
-        function openMovimentacaoModal() {
-            populateMovimentacaoOptions();
-            
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            document.getElementById('movData').value = `${yyyy}-${mm}-${dd}`;
-
-            document.getElementById('modalMovimentacao').classList.remove('hidden');
-        }
-
-        function closeMovimentacaoModal() {
-            document.getElementById('modalMovimentacao').classList.add('hidden');
-        }
-
-        function populateMovimentacaoOptions() {
-            const selectEquip = document.getElementById('movEquipamento');
-            selectEquip.innerHTML = '<option value="">Selecione um equipamento...</option>';
-            estoqueData.forEach(e => {
-                const opt = document.createElement('option');
-                opt.value = e.item;
-                opt.textContent = e.item;
-                selectEquip.appendChild(opt);
-            });
-
-            const defaultLocations = ["Central", "Técnico Marcelo", "Estoque Operacional", "Acervo Operacional", "Cliente", "Fornecedor", "Levantamento"];
-
-            const normalizeLocName = (loc) => {
-                if (!loc) return '';
-                const str = loc.toString().trim();
-                if (str === 'Estoque Op.') return 'Estoque Operacional';
-                if (str === 'Acervo Op.') return 'Acervo Operacional';
-                return str;
-            };
-
-            const origensUnicas = [...new Set([...defaultLocations, ...historicoData.map(h => normalizeLocName(h.origem))])]
-                .filter(v => v && v !== '-')
-                .sort((a, b) => a.localeCompare(b, 'pt-BR'));
-
-            const destinosUnicos = [...new Set([...defaultLocations, ...historicoData.map(h => normalizeLocName(h.destino))])]
-                .filter(v => v && v !== '-')
-                .sort((a, b) => a.localeCompare(b, 'pt-BR'));
-
-            const selectOrigem = document.getElementById('movOrigem');
-            selectOrigem.innerHTML = '<option value="">Selecione a origem...</option>';
-            origensUnicas.forEach(loc => {
-                const opt = document.createElement('option');
-                opt.value = loc;
-                opt.textContent = loc;
-                selectOrigem.appendChild(opt);
-            });
-
-            const selectDestino = document.getElementById('movDestino');
-            selectDestino.innerHTML = '<option value="">Selecione o destino...</option>';
-            destinosUnicos.forEach(loc => {
-                const opt = document.createElement('option');
-                opt.value = loc;
-                opt.textContent = loc;
-                selectDestino.appendChild(opt);
-            });
-        }
-
-        async function saveMovimentacao(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSaveMov');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registrando...`;
-
-            const rawDate = document.getElementById('movData').value;
-            let formattedDate = '';
-            if (rawDate && rawDate.includes('-')) {
-                const parts = rawDate.split('-');
-                formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-            } else {
-                const now = new Date();
-                formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-            }
-
-            const payload = {
-                data: formattedDate,
-                equipamento: document.getElementById('movEquipamento').value,
-                tipo: document.getElementById('movTipo').value,
-                qtd: parseInt(document.getElementById('movQtd').value, 10),
-                origem: document.getElementById('movOrigem').value,
-                destino: document.getElementById('movDestino').value,
-                obs: document.getElementById('movObs').value
-            };
-
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'addHistorico', payload })
-                });
-
-                closeMovimentacaoModal();
-                
-                setTimeout(async () => {
-                    await syncData();
-                }, 1200);
-
-            } catch (err) {
-                alert('Erro ao registrar movimentação.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-plus"></i> Registrar Movimentação`;
-            }
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toastSync');
-            document.getElementById('toastMsg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
-            }, 3000);
-        }
-
-        const tableState = {
-            estoque: { filters: {}, sortCol: null, sortDir: null, metricFilter: null },
-            historico: { filters: {}, sortCol: null, sortDir: null },
-            compras: { filters: {}, sortCol: null, sortDir: null }
-        };
-
-        let currentActiveContext = { tableId: null, colKey: null };
-
-        const estoqueColsDef = [
-            { key: 'item', label: 'Equipamento', align: 'text-left', class: 'font-bold text-slate-900' },
-            { key: 'central', label: 'Central', align: 'text-center', class: 'text-center font-bold text-slate-800' },
-            { key: 'tecnico', label: 'Técnico Marcelo', align: 'text-center', class: 'text-center font-bold text-amber-700' },
-            { key: 'op', label: 'Estoque Op.', align: 'text-center', class: 'text-center font-bold text-emerald-700' },
-            { key: 'acervo', label: 'Acervo Op.', align: 'text-center', class: 'text-center font-bold text-purple-700' },
-            { key: 'total', label: 'Total Geral', align: 'text-center', class: 'text-center font-bold text-indigo-600 text-base' }
+        const AUTH_KEY = 'GF_PANEL_AUTH';
+        const TARGET_PASSWORD = 'gF@2026*Link';
+        const DRIVE_FILE_ID = '1P88V6dzw8kXwkcIPCufkSMPdtp4DHPg02fdvcF8TYXE';
+        const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzoYrxjqF6OgzsZ3_ieKAM7JmS9qyVDIOJOzVqApwws0Myy8f5KAeTfJjjbKB6E_WCFJw/exec";
+
+        const DB_KEY_DATA = 'APP_ATIVOS_DATA';
+        const DB_KEY_HEADERS = 'APP_ATIVOS_HEADERS';
+        const DB_KEY_AUX = 'APP_BD_AUXILIAR';
+        const DB_KEY_AUX_HEADERS = 'APP_BD_AUXILIAR_HEADERS';
+        const DB_KEY_AUX_DATA = 'APP_BD_AUXILIAR_DATA';
+        const DB_KEY_LAST_SAVE = 'GF_LAST_BD_SAVE_TIMESTAMP';
+
+        // LISTAS OFICIAIS ATUALIZADAS E CORRIGIDAS CONFORME REGRAS DO GOOGLE SHEETS
+        const OPCOES_COBRANCA = [
+            "ATIVA", "SUSPENSA", "N/I", "GUARDIAN", "CORPORATIVO", "ESTOQUE", 
+            "CANCELADA", "INATIVO", "DESATIVADA", "COBRANDO", "COBRAR NA PROXIMA MEDIÇÃO", "NÃO COBRANDO"
         ];
+        const OPCOES_STATUS = [
+            "OK", "CANCELADA", "SUSPENSA", "EM ANALISE", "DUPLICIDADE", "EM CANCELAMENTO", 
+            "MANUTENCAO", "TRANSFERENCIA CNPJ", "TRANSFERENCIA ENDERECO", "SUBSTITUIÇÃO", 
+            "PENDENTE*", "DESATIVADOS"
+        ];
+        const OPCOES_OPERADORA = ["VIVO", "CLARO", "TIM", "OI", "ALGAR", "OUTROS", "N/I"];
 
-        function renderEstoque(data) {
-            const theadTr = document.getElementById('theadEstoqueTr');
-            const tbody = document.getElementById('tbodyEstoque');
-            const metricFilter = tableState.estoque.metricFilter;
+        let rawAtivosData = [];
+        let excelHeaders = [];
+        let bdAuxiliarMap = new Map();
+        let bdAuxiliarHeaders = [];
+        let bdAuxiliarData = [];
+        let chartStatusObj, chartCobrancaObj;
+        let statusColName = "";
+        let cobrancaColName = "";
 
-            const activeCols = estoqueColsDef.filter(col => {
-                if (col.key === 'item' || col.key === 'total') return true;
-                if (!metricFilter) return true; 
-                return col.key === metricFilter; 
-            });
+        let pendingEdit = null;
 
-            theadTr.innerHTML = activeCols.map(col => `
-                <th class="${col.align}">
-                    <div class="th-container ${col.align === 'text-center' ? 'justify-center' : ''}">
-                        <span>${col.label}</span>
-                        <button class="filter-btn" id="fbtn-estoque-${col.key}" onclick="toggleFilterDropdown(event, 'estoque', '${col.key}')"><i class="fa-solid fa-filter"></i></button>
-                    </div>
-                </th>
-            `).join('');
+        // ESTADOS DOS AUTOFILTROS ESTILO EXCEL
+        let activeColumnFilters = {}; 
+        let currentSort = { colHeader: null, direction: null }; 
+        let activeDropdownCol = null;
 
-            tbody.innerHTML = '';
-            
-            if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${activeCols.length}" class="p-6 text-center text-slate-400">Nenhum equipamento encontrado.</td></tr>`;
-                return;
+        // ESTADO DO MODAL DE OBSERVAÇÃO
+        let activeObsInputId = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem(AUTH_KEY) === 'true') {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                initApp();
             }
 
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = activeCols.map(col => {
-                    let val = row[col.key];
-                    if (val === 0 || val === null || val === undefined) val = '-';
-                    return `<td class="${col.class}">${val}</td>`;
-                }).join('');
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderHistoricoTable(data, tbodyId = 'tbodyHistorico') {
-            const tbody = document.getElementById(tbodyId);
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
-                return;
-            }
-
-            data.forEach(row => {
-                const badgeClass = row.tipo === 'Entrada' 
-                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
-                    : 'bg-rose-100 text-rose-800 border-rose-300';
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="font-bold text-slate-900 font-mono text-xs whitespace-nowrap">${row.data}</td>
-                    <td class="font-bold text-slate-800">${row.item}</td>
-                    <td class="text-center">
-                        <span class="px-2.5 py-0.5 text-xs rounded-full border ${badgeClass} font-bold">${row.tipo}</span>
-                    </td>
-                    <td class="text-center font-bold text-slate-800">${row.qtd}</td>
-                    <td class="font-semibold text-slate-700">${row.origem}</td>
-                    <td class="font-semibold text-slate-700">${row.destino}</td>
-                    <td class="font-medium text-slate-600 italic">${row.obs || '-'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function processData(tableId) {
-            let dataset;
-            if (tableId === 'estoque') {
-                dataset = [...estoqueData];
-            } else if (tableId === 'historico') {
-                dataset = [...historicoData];
-            } else if (tableId === 'compras') {
-                dataset = historicoData.filter(row => row.origem && row.origem.toString().toLowerCase().includes('fornecedor'));
-            }
-
-            const state = tableState[tableId];
-
-            if (tableId === 'estoque' && state.metricFilter) {
-                dataset = dataset.filter(row => row[state.metricFilter] > 0);
-            }
-
-            const searchInputId = tableId === 'estoque' ? 'searchEstoque' : (tableId === 'historico' ? 'searchHistorico' : 'searchCompras');
-            const searchInputEl = document.getElementById(searchInputId);
-            const searchInput = searchInputEl ? searchInputEl.value.toLowerCase() : '';
-
-            if (searchInput) {
-                dataset = dataset.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(searchInput)));
-            }
-
-            Object.keys(state.filters).forEach(col => {
-                const allowedValues = state.filters[col];
-                if (allowedValues && allowedValues.length > 0) {
-                    dataset = dataset.filter(row => allowedValues.includes(String(row[col])));
-                }
-            });
-
-            if (state.sortCol) {
-                const col = state.sortCol;
-                const dir = state.sortDir === 'asc' ? 1 : -1;
-                dataset.sort((a, b) => {
-                    let valA = col === 'data' ? a._timestamp : a[col];
-                    let valB = col === 'data' ? b._timestamp : b[col];
-
-                    if (typeof valA === 'number' && typeof valB === 'number') {
-                        return (valA - valB) * dir;
+            window.addEventListener('click', (e) => {
+                const dropdown = document.getElementById('excelFilterDropdown');
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    const isClickInside = e.target.closest('#excelFilterDropdown');
+                    const isFilterBtn = e.target.closest('.excel-filter-btn');
+                    if (!isClickInside && !isFilterBtn) {
+                        dropdown.classList.add('hidden');
                     }
-                    return String(valA).localeCompare(String(valB), 'pt-BR', { numeric: true }) * dir;
-                });
-            } else if (tableId !== 'estoque') {
-                dataset.sort((a, b) => {
-                    if (b._timestamp !== a._timestamp) return b._timestamp - a._timestamp;
-                    return b._rowIndex - a._rowIndex;
-                });
-            }
-
-            if (tableId === 'estoque') renderEstoque(dataset);
-            else if (tableId === 'historico') renderHistoricoTable(dataset, 'tbodyHistorico');
-            else if (tableId === 'compras') renderHistoricoTable(dataset, 'tbodyCompras');
-
-            updateFilterButtonStates(tableId);
-        }
-
-        function filterEstoque() { processData('estoque'); }
-        function filterHistorico() { processData('historico'); }
-        function filterCompras() { processData('compras'); }
-
-        function filterByMetric(metricKey) {
-            switchTab('estoque', false);
-            const state = tableState.estoque;
-
-            if (state.metricFilter === metricKey || metricKey === 'total') {
-                state.metricFilter = null;
-            } else {
-                state.metricFilter = metricKey;
-            }
-
-            const badge = document.getElementById('activeFilterBadge');
-            const metricNames = {
-                central: 'Central',
-                tecnico: 'Técnico Marcelo',
-                op: 'Estoque Operacional',
-                acervo: 'Acervo Operacional'
-            };
-
-            if (state.metricFilter) {
-                badge.innerHTML = `<span class="text-indigo-600 font-bold">Filtro ativo:</span> Exibindo apenas a coluna da <strong class="text-slate-800">${metricNames[state.metricFilter]}</strong>`;
-            } else {
-                badge.innerText = 'Mostrando todas as localizações';
-            }
-
-            highlightActiveMetricCard(state.metricFilter);
-            processData('estoque');
-
-            const tableElement = document.getElementById('tblEstoque');
-            if (tableElement) {
-                setTimeout(() => {
-                    const headerHeight = document.getElementById('mainHeader')?.offsetHeight || 80;
-                    const elementPosition = tableElement.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }, 50);
-            }
-        }
-
-        function highlightActiveMetricCard(activeMetric) {
-            const cards = ['central', 'tecnico', 'op', 'acervo', 'total'];
-            cards.forEach(key => {
-                const card = document.getElementById(`kpi-card-${key}`);
-                if (!card) return;
-
-                if (activeMetric === key) {
-                    card.classList.add('ring-2', 'ring-indigo-500', 'shadow-md');
-                } else {
-                    card.classList.remove('ring-2', 'ring-indigo-500', 'shadow-md');
                 }
+            });
+        });
+
+        // FUNÇÃO DE EXPANSAO / RECOLHIMENTO DOS CARDS SECUNDÁRIOS DE COBRANÇA
+        function toggleCobrancaCards() {
+            const secondaryContainer = document.getElementById('cobrancaSecondaryCardsContainer');
+            const icon = document.getElementById('toggleCobrancaIcon');
+            const text = document.getElementById('toggleCobrancaText');
+
+            if (!secondaryContainer) return;
+
+            if (secondaryContainer.classList.contains('hidden')) {
+                secondaryContainer.classList.remove('hidden');
+                if (icon) icon.className = 'fa-solid fa-chevron-up text-xs';
+                if (text) text.innerText = 'Ocultar outros cards de cobrança';
+            } else {
+                secondaryContainer.classList.add('hidden');
+                if (icon) icon.className = 'fa-solid fa-chevron-down text-xs';
+                if (text) text.innerText = 'Ver outros cards de cobrança';
+            }
+        }
+
+        // LÓGICA DO MODAL DE OBSERVAÇÃO / TEXTO LONGO
+        function openObsModal(inputId, headerName) {
+            const inputEl = document.getElementById(inputId);
+            if (!inputEl) return;
+
+            activeObsInputId = inputId;
+            document.getElementById('obsModalTitle').innerText = `Editar ${headerName || 'Observação'}`;
+            document.getElementById('obsModalTextarea').value = inputEl.value;
+            document.getElementById('obsModal').classList.remove('hidden');
+            
+            setTimeout(() => {
+                const txt = document.getElementById('obsModalTextarea');
+                txt.focus();
+                txt.select();
+            }, 50);
+        }
+
+        function closeObsModal() {
+            activeObsInputId = null;
+            document.getElementById('obsModal').classList.add('hidden');
+        }
+
+        // SALVAMENTO INDIVIDUAL COM CONFIRMAÇÃO (GF01)
+        function saveObsModal() {
+            if (!activeObsInputId) return;
+
+            const inputEl = document.getElementById(activeObsInputId);
+            if (!inputEl) {
+                closeObsModal();
+                return;
+            }
+
+            const newVal = document.getElementById('obsModalTextarea').value;
+            const originalVal = inputEl.dataset.original || "";
+
+            // Atualiza o valor visual na célula da tabela
+            inputEl.value = newVal;
+            inputEl.title = newVal;
+
+            // Se houve alteração no conteúdo, solicita senha e grava individualmente no Drive
+            if (newVal !== originalVal) {
+                const tr = inputEl.closest('tr');
+                if (tr) {
+                    const excelRowIndex = parseInt(tr.dataset.excelRowIndex, 10);
+                    const parts = activeObsInputId.split('_col_');
+                    const colIdx = parseInt(parts[1], 10);
+                    const header = excelHeaders[colIdx];
+
+                    if (!isNaN(excelRowIndex) && !isNaN(colIdx) && header) {
+                        const batch = [{
+                            rowIndex: excelRowIndex,
+                            changes: [{
+                                colIndex: colIdx + 1,
+                                header: header,
+                                value: newVal
+                            }]
+                        }];
+
+                        pendingEdit = { batch: batch };
+
+                        closeObsModal();
+
+                        // Abre o modal de confirmação por senha (gf01)
+                        document.getElementById('confirmCodeInput').value = '';
+                        document.getElementById('confirmError').classList.add('hidden');
+                        document.getElementById('confirmModal').classList.remove('hidden');
+                        document.getElementById('confirmCodeInput').focus();
+                        return;
+                    }
+                }
+            }
+
+            closeObsModal();
+        }
+
+        function checkPassword(e) {
+            e.preventDefault();
+            const input = document.getElementById('accessPassword').value.trim();
+            const error = document.getElementById('loginError');
+
+            if (input === TARGET_PASSWORD) {
+                sessionStorage.setItem(AUTH_KEY, 'true');
+                document.getElementById('loginOverlay').classList.add('hidden');
+                error.classList.add('hidden');
+                initApp();
+            } else {
+                error.classList.remove('hidden');
+            }
+        }
+
+        function updateSyncTimestamp() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('pt-BR');
+            const timeStr = now.toLocaleTimeString('pt-BR');
+            const badge = document.getElementById('lastUpdateBadge');
+            if (badge) {
+                badge.innerText = `Ultima atualização: ${dateStr} às ${timeStr}`;
+            }
+        }
+
+        function updateSaveIndicator(text, iconClass = "fa-clock-rotate-left text-indigo-500", bgClass = "bg-slate-100 text-slate-600 border-slate-200") {
+            const el = document.getElementById('lastSaveIndicator');
+            if (el) {
+                el.className = `text-[11px] font-medium px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 transition-all ${bgClass}`;
+                el.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${text}</span>`;
+            }
+        }
+
+        function initApp() {
+            loadFromDatabase();
+            syncDriveData();
+
+            const storedLastSave = localStorage.getItem(DB_KEY_LAST_SAVE);
+            if (storedLastSave) {
+                updateSaveIndicator(`Última alteração no BD: ${storedLastSave}`, "fa-circle-check text-emerald-600", "bg-emerald-50 text-emerald-800 border-emerald-300");
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem(AUTH_KEY);
+            document.getElementById('accessPassword').value = '';
+            document.getElementById('loginOverlay').classList.remove('hidden');
+        }
+
+        async function syncDriveData() {
+            const banner = document.getElementById('driveLoadingBanner');
+            const syncIcon = document.getElementById('syncIcon');
+
+            if (banner) banner.classList.remove('hidden');
+            if (syncIcon) syncIcon.classList.add('fa-spin');
+
+            const downloadUrl = `https://docs.google.com/spreadsheets/d/${DRIVE_FILE_ID}/export?format=xlsx`;
+
+            try {
+                const response = await fetch(downloadUrl);
+                if (!response.ok) throw new Error('Falha ao carregar arquivo do Google Drive');
+
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true, dateNF: 'dd/mm/yyyy' });
+                parseWorkbook(workbook);
+                updateSyncTimestamp();
+            } catch (err) {
+                console.warn("Automação do Drive concluída ou mantendo base local:", err);
+            } finally {
+                if (banner) banner.classList.add('hidden');
+                if (syncIcon) syncIcon.classList.remove('fa-spin');
+            }
+        }
+
+        document.getElementById('excelFile').addEventListener('change', (e) => {
+            if (e.target.files.length) processExcelFile(e.target.files[0]);
+        });
+
+        const dropZone = document.getElementById('dropZone');
+        ['dragenter', 'dragover'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-500', 'bg-indigo-50'); });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('border-indigo-500', 'bg-indigo-50'); });
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) processExcelFile(e.dataTransfer.files[0]);
+        });
+
+        function cleanStr(val) {
+            if (val === undefined || val === null) return "";
+            return String(val).trim();
+        }
+
+        function isNumericCIS(val) {
+            if (val === undefined || val === null) return false;
+            let str = String(val).trim();
+            if (!str || str === "-" || str === "N/I" || str === "0") return false;
+            if (str.endsWith('.0')) str = str.slice(0, -2);
+            return /^\d+$/.test(str);
+        }
+
+        function formatValue(val) {
+            if (val === undefined || val === null) return "-";
+            if (val instanceof Date) {
+                if (isNaN(val.getTime())) return "-";
+                return `${String(val.getUTCDate()).padStart(2, '0')}/${String(val.getUTCMonth() + 1).padStart(2, '0')}/${val.getUTCFullYear()}`;
+            }
+            if (typeof val === 'number' && val > 20000 && val < 60000) {
+                const dateObj = new Date(new Date(Date.UTC(1899, 11, 30)).getTime() + val * 86400000);
+                return `${String(dateObj.getUTCDate()).padStart(2, '0')}/${String(dateObj.getUTCMonth() + 1).padStart(2, '0')}/${dateObj.getUTCFullYear()}`;
+            }
+            const str = String(val).trim();
+            if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+                const parts = str.split('T')[0].split('-');
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            return str || "-";
+        }
+
+        function toInputDate(valStr) {
+            if (!valStr || valStr === "-") return "";
+            if (/^\d{4}-\d{2}-\d{2}$/.test(valStr)) return valStr;
+            const parts = valStr.split('/');
+            if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            return "";
+        }
+
+        function fromInputDate(valStr) {
+            if (!valStr) return "-";
+            const parts = valStr.split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            return valStr;
+        }
+
+        function getEnderecoStartIndex() {
+            let idx = excelHeaders.findIndex(h => {
+                const u = h.toUpperCase();
+                return u.includes("ENDEREÇO") || u.includes("ENDERECO");
+            });
+            return idx !== -1 ? idx : 4;
+        }
+
+        function getEditorType(headerName) {
+            const u = String(headerName || "").toUpperCase();
+            if (u.includes("STATUS")) return "STATUS_SELECT";
+            if (u.includes("COBRANÇ") || u.includes("COBRANC")) return "COBRANCA_SELECT";
+            if (u.includes("OPERADORA") || u.includes("PROVEDOR")) return "OPERADORA_SELECT";
+            if (u.includes("DATA") || u.includes("VENCIMENTO") || u.includes("ATIVAC") || u.includes("DT_") || u.includes("DT ")) return "DATE_INPUT";
+            return "TEXT_INPUT";
+        }
+
+        function buildSelectHtml(inputId, rawVal, optionsList) {
+            const currentUpper = cleanStr(rawVal).toUpperCase();
+            let hasMatch = false;
+
+            let optionsHtml = optionsList.map(opt => {
+                const isSelected = (currentUpper === opt.toUpperCase());
+                if (isSelected) hasMatch = true;
+                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt}</option>`;
+            }).join('');
+
+            if (currentUpper && currentUpper !== "-" && !hasMatch) {
+                optionsHtml += `<option value="${rawVal}" selected>${rawVal}</option>`;
+            }
+
+            return `<select id="${inputId}" data-original="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">${optionsHtml}</select>`;
+        }
+
+        function saveToDatabase() {
+            try {
+                localStorage.setItem(DB_KEY_DATA, JSON.stringify(rawAtivosData));
+                localStorage.setItem(DB_KEY_HEADERS, JSON.stringify(excelHeaders));
+                localStorage.setItem(DB_KEY_AUX, JSON.stringify(Array.from(bdAuxiliarMap.entries())));
+                localStorage.setItem(DB_KEY_AUX_HEADERS, JSON.stringify(bdAuxiliarHeaders));
+                localStorage.setItem(DB_KEY_AUX_DATA, JSON.stringify(bdAuxiliarData));
+                updateDbBadge(true);
+            } catch (err) {
+                console.error("Erro ao salvar no banco local:", err);
+            }
+        }
+
+        function loadFromDatabase() {
+            const storedData = localStorage.getItem(DB_KEY_DATA);
+            const storedHeaders = localStorage.getItem(DB_KEY_HEADERS);
+            const storedAux = localStorage.getItem(DB_KEY_AUX);
+            const storedAuxHeaders = localStorage.getItem(DB_KEY_AUX_HEADERS);
+            const storedAuxData = localStorage.getItem(DB_KEY_AUX_DATA);
+
+            if (storedData && storedHeaders) {
+                rawAtivosData = JSON.parse(storedData);
+                excelHeaders = JSON.parse(storedHeaders);
+                if (storedAux) bdAuxiliarMap = new Map(JSON.parse(storedAux));
+                if (storedAuxHeaders) bdAuxiliarHeaders = JSON.parse(storedAuxHeaders);
+                if (storedAuxData) bdAuxiliarData = JSON.parse(storedAuxData);
+
+                if (excelHeaders.length >= 5) cobrancaColName = excelHeaders[4];
+                if (excelHeaders.length >= 6) statusColName = excelHeaders[5];
+
+                document.getElementById('dropZone').classList.add('hidden');
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                document.getElementById('btnExport').disabled = false;
+                document.getElementById('btnPdf').disabled = false;
+
+                document.getElementById('bdStatusText').innerText = `Base BD_Auxiliar carregada do banco local (${bdAuxiliarData.length || bdAuxiliarMap.size} cadastros, ${bdAuxiliarHeaders.length} colunas).`;
+
+                renderTableHeaders();
+                calculateMetrics();
+                filterTable();
+                updateDbBadge(true);
+            } else {
+                updateDbBadge(false);
+            }
+        }
+
+        function clearDatabase() {
+            if (confirm("Tem certeza que deseja apagar o Banco de Dados local e limpar o Painel Links GF?")) {
+                localStorage.removeItem(DB_KEY_DATA);
+                localStorage.removeItem(DB_KEY_HEADERS);
+                localStorage.removeItem(DB_KEY_AUX);
+                localStorage.removeItem(DB_KEY_AUX_HEADERS);
+                localStorage.removeItem(DB_KEY_AUX_DATA);
+                localStorage.removeItem(DB_KEY_LAST_SAVE);
+
+                rawAtivosData = [];
+                excelHeaders = [];
+                bdAuxiliarMap.clear();
+                bdAuxiliarHeaders = [];
+                bdAuxiliarData = [];
+                activeColumnFilters = {};
+                currentSort = { colHeader: null, direction: null };
+
+                document.getElementById('dashboardSection').classList.add('hidden');
+                document.getElementById('dropZone').classList.remove('hidden');
+                document.getElementById('btnExport').disabled = true;
+                document.getElementById('btnPdf').disabled = true;
+                document.getElementById('excelFile').value = '';
+                document.getElementById('bdStatusText').innerText = "Pesquise por Código CIS, Sigla, Unidade ou Endereço cadastrado na aba BD_Auxiliar.";
+                document.getElementById('lastUpdateBadge').innerText = "Ultima atualização: Nunca";
+                updateSaveIndicator("Última alteração no BD: Nunca");
+
+                updateDbBadge(false);
+                alert("Banco de dados local limpo com sucesso!");
+            }
+        }
+
+        function updateDbBadge(hasData) {
+            const badge = document.getElementById('dbStatusBadge');
+            if (hasData) {
+                badge.innerText = `Status DB: Ativo (${rawAtivosData.length} registros)`;
+                badge.className = "text-xs text-emerald-400 font-semibold";
+            } else {
+                badge.innerText = "Status DB: Vazio";
+                badge.className = "text-xs text-slate-400";
+            }
+        }
+
+        function processExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true, dateNF: 'dd/mm/yyyy' });
+                parseWorkbook(workbook);
+                updateSyncTimestamp();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseWorkbook(workbook) {
+            let sheetAtivos = null, sheetBD = null;
+
+            workbook.SheetNames.forEach(name => {
+                const norm = name.trim().toUpperCase();
+                if (norm.includes("ATIVO") || norm.includes("VIVO") || norm.includes("CLARO") || norm.includes("LINK")) sheetAtivos = workbook.Sheets[name];
+                else if (norm.includes("BD") || norm.includes("AUXILIAR") || norm.includes("CADASTRO")) sheetBD = workbook.Sheets[name];
+            });
+
+            if (!sheetAtivos) sheetAtivos = workbook.Sheets[workbook.SheetNames[0]];
+            if (!sheetBD && workbook.SheetNames.length > 1) sheetBD = workbook.Sheets[workbook.SheetNames[1]];
+
+            bdAuxiliarMap.clear();
+            bdAuxiliarHeaders = [];
+            bdAuxiliarData = [];
+
+            if (sheetBD) {
+                const rowsBD = XLSX.utils.sheet_to_json(sheetBD, { defval: "", cellDates: true });
+                if (rowsBD.length > 0) {
+                    bdAuxiliarHeaders = Object.keys(rowsBD[0]);
+                    rowsBD.forEach(r => {
+                        const isBDRowEmpty = Object.values(r).every(v => v === undefined || v === null || String(v).trim() === "");
+                        if (isBDRowEmpty) return;
+
+                        const formattedRow = {};
+                        Object.keys(r).forEach(k => {
+                            formattedRow[k] = formatValue(r[k]);
+                        });
+
+                        const ci = cleanStr(r["CIS"] || r["CI"] || r["CÓDIGO"] || r["CODIGO"] || r["CÓDIGO CIS"] || (bdAuxiliarHeaders[0] ? r[bdAuxiliarHeaders[0]] : ""));
+                        const sigla = cleanStr(r["SIGLA"] || r["Sigla"] || (bdAuxiliarHeaders[1] ? r[bdAuxiliarHeaders[1]] : ""));
+                        const nome = cleanStr(r["NOME DO RESTAURANTE"] || r["RESTAURANTE"] || r["UNIDADE"] || r["NOME"] || (bdAuxiliarHeaders[2] ? r[bdAuxiliarHeaders[2]] : ""));
+                        const endereco = cleanStr(r["ENDEREÇO"] || r["ENDERECO"] || r["LOGRADOURO"] || (bdAuxiliarHeaders[3] ? r[bdAuxiliarHeaders[3]] : ""));
+                        const uf = cleanStr(r["ESTADO"] || r["UF"] || (bdAuxiliarHeaders[4] ? r[bdAuxiliarHeaders[4]] : ""));
+
+                        const entry = { ci, sigla, nome, endereco, uf, rawRow: formattedRow };
+                        bdAuxiliarData.push(entry);
+
+                        if (ci) bdAuxiliarMap.set(ci.toUpperCase(), entry);
+                        if (sigla) bdAuxiliarMap.set(sigla.toUpperCase(), entry);
+                    });
+                }
+                document.getElementById('bdStatusText').innerText = `Base BD_Auxiliar carregada com ${bdAuxiliarData.length} cadastros (${bdAuxiliarHeaders.length} colunas).`;
+            }
+
+            rawAtivosData = [];
+            excelHeaders = [];
+
+            if (sheetAtivos) {
+                const jsonWithHeaders = XLSX.utils.sheet_to_json(sheetAtivos, { defval: "", cellDates: true });
+                if (jsonWithHeaders.length > 0) {
+                    excelHeaders = Object.keys(jsonWithHeaders[0]);
+                    cobrancaColName = excelHeaders[4] || excelHeaders[0];
+                    statusColName = excelHeaders[5] || excelHeaders[0];
+
+                    if (!excelHeaders.some(h => h.toUpperCase().includes("ENDEREÇO") || h.toUpperCase().includes("ENDERECO"))) {
+                        excelHeaders.push("ENDEREÇO (BD_AUXILIAR)");
+                    }
+
+                    jsonWithHeaders.forEach((row, index) => {
+                        const isRowEmpty = Object.values(row).every(v => v === undefined || v === null || String(v).trim() === "");
+                        if (isRowEmpty) return;
+
+                        let ci = "", sigla = "", operadora = "", linha = "", iccid = "";
+                        const fullRowFormatted = {};
+
+                        Object.keys(row).forEach(k => {
+                            const formattedVal = formatValue(row[k]);
+                            fullRowFormatted[k] = formattedVal;
+                            const keyUpper = k.toUpperCase();
+                            if (keyUpper.includes("CIS") || keyUpper === "CI" || keyUpper.includes("CÓDIGO")) ci = formattedVal;
+                            if (keyUpper.includes("SIGLA")) sigla = formattedVal;
+                            if (keyUpper.includes("OPERADORA") || keyUpper.includes("PROVEDORA")) operadora = formattedVal;
+                            if (keyUpper.includes("LINHA")) linha = formattedVal;
+                            if (keyUpper.includes("ICCID")) iccid = formattedVal;
+                        });
+
+                        let rawStatusColF = cleanStr(fullRowFormatted[statusColName]);
+                        if (!rawStatusColF || rawStatusColF.toUpperCase() === "N/I") rawStatusColF = "N/I";
+
+                        let rawCobrancaColE = cleanStr(fullRowFormatted[cobrancaColName]);
+                        if (!rawCobrancaColE || rawCobrancaColE.toUpperCase() === "N/I") rawCobrancaColE = "N/I";
+
+                        const bdInfo = bdAuxiliarMap.get(ci.toUpperCase()) || bdAuxiliarMap.get(sigla.toUpperCase()) || {};
+
+                        fullRowFormatted[statusColName] = rawStatusColF;
+                        fullRowFormatted[cobrancaColName] = rawCobrancaColE;
+                        fullRowFormatted["ENDEREÇO (BD_AUXILIAR)"] = bdInfo.endereco || fullRowFormatted["ENDEREÇO"] || "-";
+
+                        rawAtivosData.push({
+                            excelRowIndex: index + 2,
+                            ci: ci || bdInfo.ci || "-",
+                            sigla: sigla || bdInfo.sigla || "-",
+                            linha: linha || "-",
+                            iccid: iccid || "-",
+                            endereco: fullRowFormatted["ENDEREÇO (BD_AUXILIAR)"],
+                            statusColF: rawStatusColF,
+                            cobrancaColE: rawCobrancaColE,
+                            isCisNumeric: isNumericCIS(ci || bdInfo.ci),
+                            originalRow: fullRowFormatted
+                        });
+                    });
+                }
+            }
+
+            document.getElementById('dropZone').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('btnExport').disabled = false;
+            document.getElementById('btnPdf').disabled = false;
+
+            saveToDatabase();
+            renderTableHeaders();
+            calculateMetrics();
+            filterTable();
+        }
+
+        // CABEÇALHOS COM BOTÕES DE FILTRO/ORDENAÇÃO ESTILO EXCEL
+        function renderTableHeaders() {
+            const headerRow = document.getElementById('tableHeader');
+            headerRow.innerHTML = '';
+
+            excelHeaders.forEach((h) => {
+                const th = document.createElement('th');
+                const isFiltered = activeColumnFilters[h] && activeColumnFilters[h].size > 0;
+                const isSorted = currentSort.colHeader === h;
+
+                th.className = `p-3 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700 select-none ${isFiltered ? 'bg-slate-700' : ''}`;
+                
+                let sortBadge = "";
+                if (isSorted) {
+                    sortBadge = currentSort.direction === 'asc' ? '<i class="fa-solid fa-arrow-down-a-z text-amber-400 ml-1"></i>' : '<i class="fa-solid fa-arrow-up-z-a text-amber-400 ml-1"></i>';
+                }
+
+                let filterBtnClass = isFiltered ? "text-emerald-400 bg-emerald-950/60" : "text-slate-400 hover:text-white hover:bg-slate-700";
+
+                th.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <span>${h.toUpperCase()}${sortBadge}</span>
+                        <button onclick="openExcelFilterDropdown(event, '${h.replace(/'/g, "\\'")}')" class="excel-filter-btn p-1.5 rounded transition ${filterBtnClass}" title="Filtrar/Ordenar ${h}">
+                            <i class="fa-solid fa-filter text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                headerRow.appendChild(th);
             });
         }
 
-        function toggleFilterDropdown(event, tableId, colKey) {
-            event.stopPropagation();
-            currentActiveContext = { tableId, colKey };
+        function openExcelFilterDropdown(event, colHeader) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            activeDropdownCol = colHeader;
 
             const dropdown = document.getElementById('excelFilterDropdown');
-            const btn = event.currentTarget;
-            const rect = btn.getBoundingClientRect();
+            document.getElementById('excelFilterColName').innerText = colHeader;
+            document.getElementById('excelFilterSearch').value = '';
 
-            dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
-            dropdown.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 270)}px`;
-            dropdown.style.display = 'block';
-
-            let rawData;
-            if (tableId === 'estoque') {
-                rawData = estoqueData;
-            } else if (tableId === 'historico') {
-                rawData = historicoData;
-            } else if (tableId === 'compras') {
-                rawData = historicoData.filter(row => row.origem && row.origem.toString().toLowerCase().includes('fornecedor'));
+            const btn = event ? event.currentTarget : null;
+            if (btn) {
+                const rect = btn.getBoundingClientRect();
+                dropdown.style.top = `${rect.bottom + 4}px`;
+                dropdown.style.left = `${Math.max(10, Math.min(rect.left, window.innerWidth - 270))}px`;
             }
 
-            const uniqueValues = [...new Set(rawData.map(r => String(r[colKey])))].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+            const uniqueSet = new Set();
+            rawAtivosData.forEach(item => {
+                const val = String(item.originalRow[colHeader] || "-").trim();
+                uniqueSet.add(val || "-");
+            });
 
-            const selectedFilter = tableState[tableId].filters[colKey];
-            const checkboxContainer = document.getElementById('excelCheckboxList');
-            checkboxContainer.innerHTML = '';
+            const uniqueList = Array.from(uniqueSet).sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
 
-            document.getElementById('excelSearchBox').value = '';
-            document.getElementById('chkSelectAll').checked = !selectedFilter || selectedFilter.length === uniqueValues.length;
+            const selectedSet = activeColumnFilters[colHeader];
+            const listContainer = document.getElementById('excelFilterList');
+            listContainer.innerHTML = '';
 
-            uniqueValues.forEach(val => {
-                const isChecked = !selectedFilter || selectedFilter.includes(val);
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'excel-filter-item';
-                itemDiv.innerHTML = `
-                    <input type="checkbox" value="${val}" class="excel-chk-item rounded text-indigo-600 focus:ring-indigo-500" ${isChecked ? 'checked' : ''} onchange="updateSelectAllState()">
-                    <span class="truncate">${val === '' ? '(Vazio)' : val}</span>
+            let allChecked = !selectedSet;
+
+            uniqueList.forEach((val) => {
+                const isChecked = !selectedSet || selectedSet.has(val);
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-2 px-2 py-1 hover:bg-slate-200/60 rounded cursor-pointer text-slate-700 excel-item-label';
+                label.dataset.val = val.toLowerCase();
+                label.innerHTML = `
+                    <input type="checkbox" value="${val.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''} class="excel-val-cb rounded text-indigo-600 focus:ring-indigo-500">
+                    <span class="truncate">${val}</span>
                 `;
-                checkboxContainer.appendChild(itemDiv);
-            });
-        }
-
-        function closeExcelFilterMenu() {
-            document.getElementById('excelFilterDropdown').style.display = 'none';
-        }
-
-        function closeAllFilterMenus(event) {
-            closeExcelFilterMenu();
-        }
-
-        function filterExcelCheckboxList() {
-            const q = document.getElementById('excelSearchBox').value.toLowerCase();
-            const items = document.querySelectorAll('#excelCheckboxList .excel-filter-item');
-            items.forEach(it => {
-                const txt = it.textContent.toLowerCase();
-                it.style.display = txt.includes(q) ? 'flex' : 'none';
-            });
-        }
-
-        function toggleSelectAllCheckboxes(checked) {
-            const chks = document.querySelectorAll('.excel-chk-item');
-            chks.forEach(c => {
-                if (c.offsetParent !== null) c.checked = checked;
-            });
-        }
-
-        function updateSelectAllState() {
-            const chks = Array.from(document.querySelectorAll('.excel-chk-item'));
-            const allChecked = chks.every(c => c.checked);
-            document.getElementById('chkSelectAll').checked = allChecked;
-        }
-
-        function applySort(dir) {
-            const { tableId, colKey } = currentActiveContext;
-            tableState[tableId].sortCol = colKey;
-            tableState[tableId].sortDir = dir;
-            processData(tableId);
-            closeExcelFilterMenu();
-        }
-
-        function confirmColumnFilter() {
-            const { tableId, colKey } = currentActiveContext;
-            const chks = document.querySelectorAll('.excel-chk-item');
-            const selected = [];
-
-            chks.forEach(c => {
-                if (c.checked) selected.push(c.value);
+                listContainer.appendChild(label);
             });
 
-            tableState[tableId].filters[colKey] = selected;
-            processData(tableId);
-            closeExcelFilterMenu();
+            document.getElementById('excelSelectAllCb').checked = allChecked || (selectedSet && selectedSet.size === uniqueList.length);
+            dropdown.classList.remove('hidden');
         }
 
-        function clearAllFilters(tableId) {
-            tableState[tableId].filters = {};
-            tableState[tableId].sortCol = null;
-            tableState[tableId].sortDir = null;
-            if (tableId === 'estoque') {
-                tableState.estoque.metricFilter = null;
-                highlightActiveMetricCard(null);
-                document.getElementById('activeFilterBadge').innerText = 'Mostrando todas as localizações';
-                document.getElementById('searchEstoque').value = '';
-            } else if (tableId === 'historico') {
-                document.getElementById('searchHistorico').value = '';
-            } else if (tableId === 'compras') {
-                document.getElementById('searchCompras').value = '';
-            }
-            processData(tableId);
+        function closeExcelFilterDropdown() {
+            document.getElementById('excelFilterDropdown').classList.add('hidden');
         }
 
-        function updateFilterButtonStates(tableId) {
-            const state = tableState[tableId];
-            const keys = tableId === 'estoque' 
-                ? ['item', 'central', 'tecnico', 'op', 'acervo', 'total'] 
-                : ['data', 'item', 'tipo', 'qtd', 'origem', 'destino', 'obs'];
-
-            keys.forEach(k => {
-                const btn = document.getElementById(`fbtn-${tableId}-${k}`);
-                if (btn) {
-                    const hasFilter = state.filters[k] && state.filters[k].length > 0;
-                    const hasSort = state.sortCol === k;
-                    if (hasFilter || hasSort) {
-                        btn.classList.add('active-filter');
-                    } else {
-                        btn.classList.remove('active-filter');
-                    }
+        function filterExcelUniqueList() {
+            const query = document.getElementById('excelFilterSearch').value.toLowerCase();
+            const labels = document.querySelectorAll('#excelFilterList .excel-item-label');
+            labels.forEach(label => {
+                if (label.dataset.val.includes(query)) {
+                    label.classList.remove('hidden');
+                } else {
+                    label.classList.add('hidden');
                 }
             });
         }
 
-        /* GERENCIAMENTO DE ABAS (ESTOQUE, HISTÓRICO, COMPRAS, GALERIA) */
-        function switchTab(tab, autoScroll = true) {
-            const secEstoque = document.getElementById('secEstoque');
-            const secHistorico = document.getElementById('secHistorico');
-            const secCompras = document.getElementById('secCompras');
-            const secGaleria = document.getElementById('secGaleria');
-
-            const btnEstoque = document.getElementById('btnTabEstoque');
-            const btnHistorico = document.getElementById('btnTabHistorico');
-            const btnCompras = document.getElementById('btnTabCompras');
-            const btnGaleria = document.getElementById('btnTabGaleria');
-
-            const activeClass = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center gap-2';
-            const inactiveClass = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2';
-
-            secEstoque.classList.add('hidden');
-            secHistorico.classList.add('hidden');
-            secCompras.classList.add('hidden');
-            if (secGaleria) secGaleria.classList.add('hidden');
-
-            btnEstoque.className = inactiveClass;
-            btnHistorico.className = inactiveClass;
-            btnCompras.className = inactiveClass;
-            if (btnGaleria) btnGaleria.className = inactiveClass;
-
-            let targetSec = null;
-
-            if (tab === 'estoque') {
-                secEstoque.classList.remove('hidden');
-                btnEstoque.className = activeClass;
-                targetSec = secEstoque;
-            } else if (tab === 'historico') {
-                secHistorico.classList.remove('hidden');
-                btnHistorico.className = activeClass;
-                targetSec = secHistorico;
-            } else if (tab === 'compras') {
-                secCompras.classList.remove('hidden');
-                btnCompras.className = activeClass;
-                targetSec = secCompras;
-            } else if (tab === 'galeria') {
-                if (secGaleria) secGaleria.classList.remove('hidden');
-                if (btnGaleria) btnGaleria.className = activeClass;
-                targetSec = secGaleria;
-                if (currentGalleryPhotos.length === 0) {
-                    loadDrivePhotosTable();
+        function toggleSelectAllExcelList(checked) {
+            const checkboxes = document.querySelectorAll('#excelFilterList .excel-val-cb');
+            checkboxes.forEach(cb => {
+                if (!cb.parentElement.classList.contains('hidden')) {
+                    cb.checked = checked;
                 }
+            });
+        }
+
+        function applyColumnSort(dir) {
+            if (!activeDropdownCol) return;
+            currentSort = { colHeader: activeDropdownCol, direction: dir };
+            renderTableHeaders();
+            filterTable();
+            closeExcelFilterDropdown();
+        }
+
+        function clearCurrentColumnFilter() {
+            if (!activeDropdownCol) return;
+            delete activeColumnFilters[activeDropdownCol];
+            renderTableHeaders();
+            filterTable();
+            closeExcelFilterDropdown();
+        }
+
+        function confirmExcelColumnFilter() {
+            if (!activeDropdownCol) return;
+
+            const checkboxes = document.querySelectorAll('#excelFilterList .excel-val-cb');
+            const totalBoxes = checkboxes.length;
+            const selectedValues = new Set();
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selectedValues.add(cb.value);
+                }
+            });
+
+            if (selectedValues.size === totalBoxes) {
+                delete activeColumnFilters[activeDropdownCol];
+            } else {
+                activeColumnFilters[activeDropdownCol] = selectedValues;
             }
 
-            if (autoScroll && targetSec) {
-                setTimeout(() => {
-                    const headerHeight = document.getElementById('mainHeader')?.offsetHeight || 80;
-                    const elementPosition = targetSec.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16;
+            renderTableHeaders();
+            filterTable();
+            closeExcelFilterDropdown();
+        }
 
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
+        function renderBdSearchResultHeaders() {
+            const headerRow = document.getElementById('bdSearchResultHeader');
+            if (!headerRow) return;
+            headerRow.innerHTML = '';
+            
+            const headersToUse = bdAuxiliarHeaders.length > 0 ? bdAuxiliarHeaders : ["CI / CÓDIGO", "SIGLA", "RESTAURANTE / UNIDADE", "ENDEREÇO COMPLETO", "UF"];
+            
+            headersToUse.forEach(h => {
+                const th = document.createElement('th');
+                th.className = 'p-2.5 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700';
+                th.innerText = String(h).toUpperCase();
+                headerRow.appendChild(th);
+            });
+        }
+
+        function searchBDByCIS() {
+            const query = document.getElementById('bdSearchInput').value.trim().toUpperCase();
+            const resultBox = document.getElementById('bdSearchResult');
+            const tbody = document.getElementById('bdSearchResultBody');
+
+            if (!query) { resultBox.classList.add('hidden'); return; }
+
+            const matches = [];
+            const seen = new Set();
+            const dataToSearch = bdAuxiliarData.length > 0 ? bdAuxiliarData : Array.from(bdAuxiliarMap.values());
+
+            for (let i = 0; i < dataToSearch.length; i++) {
+                const val = dataToSearch[i];
+                const uniqueKey = `${val.ci}_${val.sigla}_${i}`;
+                if (seen.has(uniqueKey)) continue;
+
+                const ciStr = String(val.ci || '').trim().toUpperCase();
+                const siglaStr = String(val.sigla || '').trim().toUpperCase();
+                
+                const allRowStr = val.rawRow 
+                    ? Object.values(val.rawRow).map(v => String(v).toUpperCase()).join(' ')
+                    : `${ciStr} ${siglaStr} ${String(val.nome || '').toUpperCase()} ${String(val.endereco || '').toUpperCase()} ${String(val.uf || '').toUpperCase()}`;
+
+                let priority = -1;
+
+                if (ciStr === query || siglaStr === query) {
+                    priority = 1;
+                } else if (ciStr.startsWith(query) || siglaStr.startsWith(query)) {
+                    priority = 2;
+                } else if (ciStr.includes(query) || siglaStr.includes(query)) {
+                    priority = 3;
+                } else if (allRowStr.includes(query)) {
+                    priority = 4;
+                }
+
+                if (priority > 0) {
+                    seen.add(uniqueKey);
+                    const ciNum = parseInt(ciStr, 10);
+                    matches.push({
+                        item: val,
+                        priority: priority,
+                        ciNum: isNaN(ciNum) ? 999999 : ciNum
                     });
-                }, 50);
-            }
-        }
-
-        /* FUNÇÕES EXCLUSIVAS DA GALERIA EM TABELA */
-        async function loadDrivePhotosTable() {
-            const tbody = document.getElementById('tbodyGaleria');
-            if (!tbody) return;
-
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="4" class="p-6 text-center text-slate-500 font-semibold">
-                        <i class="fa-solid fa-spinner fa-spin mr-2 text-indigo-600"></i> Buscando fotos atualizadas no Google Drive...
-                    </td>
-                </tr>`;
-
-            try {
-                const response = await fetch(GALLERY_WEB_APP_URL);
-                currentGalleryPhotos = await response.json();
-
-                if (!currentGalleryPhotos || currentGalleryPhotos.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma foto encontrada na pasta.</td></tr>`;
-                    return;
                 }
+            }
 
-                tbody.innerHTML = '';
-                currentGalleryPhotos.forEach((photo, index) => {
+            matches.sort((a, b) => {
+                if (a.priority !== b.priority) return a.priority - b.priority;
+                return a.ciNum - b.ciNum;
+            });
+
+            tbody.innerHTML = '';
+            renderBdSearchResultHeaders();
+
+            if (matches.length === 0) {
+                const colSpan = bdAuxiliarHeaders.length || 5;
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="p-3 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+            } else {
+                matches.slice(0, 25).forEach(({ item: m }) => {
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-indigo-50/50 cursor-pointer transition-colors";
-                    tr.onclick = () => selectPhotoForPreview(index);
+                    tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
 
-                    tr.innerHTML = `
-                        <td class="text-center p-2">
-                            <img src="${photo.url}" alt="Miniatura" class="w-10 h-10 object-cover rounded-lg border border-slate-200 shadow-sm mx-auto">
-                        </td>
-                        <td class="font-bold text-slate-700 font-mono text-xs whitespace-nowrap">
-                            ${photo.dateFormatted}
-                        </td>
-                        <td class="font-semibold text-slate-900 text-xs">
-                            ${photo.name}
-                        </td>
-                        <td class="text-center p-2">
-                            <button onclick="event.stopPropagation(); selectPhotoForPreview(${index})" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white text-xs font-bold rounded-lg border border-indigo-200 transition">
-                                <i class="fa-solid fa-eye mr-1"></i> Visualizar
-                            </button>
-                        </td>
-                    `;
+                    if (bdAuxiliarHeaders.length > 0 && m.rawRow) {
+                        bdAuxiliarHeaders.forEach(col => {
+                            const td = document.createElement('td');
+                            td.className = 'p-2.5 whitespace-nowrap font-medium';
+                            td.innerText = (m.rawRow[col] !== undefined && m.rawRow[col] !== null && m.rawRow[col] !== "") ? m.rawRow[col] : "-";
+                            tr.appendChild(td);
+                        });
+                    } else {
+                        tr.innerHTML = `<td class="p-2.5 font-bold">${m.ci || '-'}</td><td class="p-2.5 font-bold text-indigo-600">${m.sigla || '-'}</td><td class="p-2.5">${m.nome || '-'}</td><td class="p-2.5">${m.endereco || '-'}</td><td class="p-2.5">${m.uf || '-'}</td>`;
+                    }
                     tbody.appendChild(tr);
                 });
+            }
+            resultBox.classList.remove('hidden');
+        }
 
-            } catch (error) {
-                console.error('Erro ao carregar fotos:', error);
-                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-rose-500 font-semibold">Erro ao carregar fotos da galeria. Verifique a nova URL do Apps Script.</td></tr>`;
+        function solicitarSalvarEmMassa() {
+            const startIdx = getEnderecoStartIndex();
+            const batch = [];
+            const trList = document.querySelectorAll('#ativosTableBody tr');
+
+            if (trList.length === 0) {
+                alert("Nenhum registro exibido na tabela para salvar.");
+                return;
+            }
+
+            trList.forEach((tr) => {
+                const excelRowIndex = parseInt(tr.dataset.excelRowIndex, 10);
+                const rowIdx = tr.dataset.rowIdx;
+                if (isNaN(excelRowIndex)) return;
+
+                const changes = [];
+                excelHeaders.forEach((header, colIdx) => {
+                    if (colIdx >= startIdx) {
+                        const inputEl = document.getElementById(`input_row_${rowIdx}_col_${colIdx}`);
+                        if (inputEl) {
+                            let val = inputEl.value;
+                            let originalVal = inputEl.dataset.original || "";
+
+                            if (val !== originalVal) {
+                                let valueToSend = val;
+                                if (inputEl.type === 'date') {
+                                    valueToSend = fromInputDate(val);
+                                }
+                                changes.push({
+                                    colIndex: colIdx + 1,
+                                    header: header,
+                                    value: valueToSend
+                                });
+                            }
+                        }
+                    }
+                });
+
+                if (changes.length > 0) {
+                    batch.push({
+                        rowIndex: excelRowIndex,
+                        changes: changes
+                    });
+                }
+            });
+
+            if (batch.length === 0) {
+                alert("Nenhuma alteração foi detectada para salvar.");
+                return;
+            }
+
+            pendingEdit = { batch: batch };
+
+            document.getElementById('confirmCodeInput').value = '';
+            document.getElementById('confirmError').classList.add('hidden');
+            document.getElementById('confirmModal').classList.remove('hidden');
+            document.getElementById('confirmCodeInput').focus();
+        }
+
+        function cancelarEdicao() {
+            pendingEdit = null;
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        function validarEExecutarEdicao() {
+            const codeInput = document.getElementById('confirmCodeInput').value.trim().toLowerCase();
+            const errorMsg = document.getElementById('confirmError');
+
+            if (codeInput === 'gf01') {
+                document.getElementById('confirmModal').classList.add('hidden');
+                if (pendingEdit && pendingEdit.batch) {
+                    executarSalvarEmMassaAppsScript(pendingEdit.batch);
+                }
+            } else {
+                errorMsg.classList.remove('hidden');
             }
         }
 
-        function selectPhotoForPreview(index) {
-            const photo = currentGalleryPhotos[index];
-            if (!photo) return;
+        async function executarSalvarEmMassaAppsScript(batch) {
+            const btnSave = document.getElementById('btnSaveBatch');
+            if (btnSave) btnSave.disabled = true;
 
-            const container = document.getElementById('photoPreviewContainer');
-            const img = document.getElementById('previewImage');
-            const title = document.getElementById('previewTitle');
+            updateSaveIndicator("Salvando alterações no BD...", "fa-spinner fa-spin text-amber-600", "bg-amber-50 text-amber-800 border-amber-300");
 
-            title.innerText = `${photo.dateFormatted} — ${photo.name}`;
-            img.src = photo.url;
-            container.classList.remove('hidden');
+            try {
+                await fetch(APPS_SCRIPT_WEBAPP_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8"
+                    },
+                    body: JSON.stringify({ batch: batch })
+                });
 
-            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('pt-BR');
+                const timeStr = now.toLocaleTimeString('pt-BR');
+                const timestampStr = `${dateStr} às ${timeStr}`;
+
+                localStorage.setItem(DB_KEY_LAST_SAVE, timestampStr);
+
+                updateSaveIndicator(`Última alteração no BD: ${timestampStr}`, "fa-circle-check text-emerald-600", "bg-emerald-50 text-emerald-800 border-emerald-300");
+
+                setTimeout(() => {
+                    syncDriveData();
+                }, 4000);
+            } catch (err) {
+                updateSaveIndicator("Erro ao salvar no BD", "fa-circle-xmark text-rose-600", "bg-rose-50 text-rose-800 border-rose-300");
+            } finally {
+                if (btnSave) btnSave.disabled = false;
+            }
         }
 
-        function closePhotoPreview() {
-            document.getElementById('photoPreviewContainer').classList.add('hidden');
+        // RENDERIZAÇÃO DA TABELA COM BOTÃO DE EXPANSÃO PARA INPUTS DE TEXTO
+        function renderTableBody(data) {
+            const tbody = document.getElementById('ativosTableBody');
+            tbody.innerHTML = '';
+
+            const startIdx = getEnderecoStartIndex();
+
+            data.forEach((item, rowIdx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+                tr.dataset.excelRowIndex = item.excelRowIndex;
+                tr.dataset.rowIdx = rowIdx;
+
+                excelHeaders.forEach((header, colIdx) => {
+                    const td = document.createElement('td');
+                    td.className = 'p-3 whitespace-nowrap font-medium';
+
+                    const rawVal = item.originalRow[header] || "";
+                    const editorType = getEditorType(header);
+                    const inputId = `input_row_${rowIdx}_col_${colIdx}`;
+
+                    if (colIdx >= startIdx) {
+                        if (editorType === "COBRANCA_SELECT") {
+                            td.innerHTML = buildSelectHtml(inputId, rawVal, OPCOES_COBRANCA);
+                        } else if (editorType === "STATUS_SELECT") {
+                            td.innerHTML = buildSelectHtml(inputId, rawVal, OPCOES_STATUS);
+                        } else if (editorType === "OPERADORA_SELECT") {
+                            td.innerHTML = buildSelectHtml(inputId, rawVal, OPCOES_OPERADORA);
+                        } else if (editorType === "DATE_INPUT") {
+                            const formattedIsoDate = toInputDate(rawVal);
+                            td.innerHTML = `
+                                <input type="date" id="${inputId}" data-original="${formattedIsoDate}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
+                            `;
+                        } else {
+                            td.innerHTML = `
+                                <div class="flex items-center gap-1 min-w-[170px]">
+                                    <input type="text" id="${inputId}" data-original="${rawVal}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full" title="${rawVal}">
+                                    <button type="button" onclick="openObsModal('${inputId}', '${header.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-indigo-600 p-1.5 rounded hover:bg-slate-100 transition" title="Expandir para leitura e edição">
+                                        <i class="fa-solid fa-expand text-xs"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        td.innerText = rawVal || "-";
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('displayedCount').innerText = data.length;
+            document.getElementById('totalCount').innerText = rawAtivosData.length;
         }
 
-        async function syncData() {
-            const btn = document.getElementById('btnSync');
-            const icon = document.getElementById('iconSync');
-            const lastUpdateText = document.getElementById('lastUpdateText');
+        function setSelectOption(selectEl, targetValue) {
+            if (!selectEl) return;
+            const target = String(targetValue).trim().toUpperCase();
+            let matched = false;
+            for (let i = 0; i < selectEl.options.length; i++) {
+                if (selectEl.options[i].value.trim().toUpperCase() === target) {
+                    selectEl.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) selectEl.value = targetValue;
+        }
 
-            if (icon) icon.classList.add('fa-spin');
-            if (btn) btn.disabled = true;
+        function triggerCardFilter(type, value) {
+            document.getElementById('tableSearchInput').value = '';
+            const selStatus = document.getElementById('filterStatusColF');
+            const selCobranca = document.getElementById('filterCobrancaColE');
+            const selCisNum = document.getElementById('filterCisNumNI');
 
-            await loadDataFromSheet();
+            if (selStatus) selStatus.value = '';
+            if (selCobranca) selCobranca.value = '';
+            if (selCisNum) selCisNum.value = '';
 
-            const now = new Date();
-            const dia = String(now.getDate()).padStart(2, '0');
-            const mes = String(now.getMonth() + 1).padStart(2, '0');
-            const ano = now.getFullYear();
-            const horas = String(now.getHours()).padStart(2, '0');
-            const minutos = String(now.getMinutes()).padStart(2, '0');
-
-            if (lastUpdateText) {
-                lastUpdateText.innerText = `Última atualização: ${dia}/${mes}/${ano} às ${horas}:${minutos}`;
+            if (type === 'STATUS') {
+                setSelectOption(selStatus, value);
+            } else if (type === 'COBRANÇA') {
+                setSelectOption(selCobranca, value);
+            } else if (type === 'CIS_NUM_NI') {
+                if (selCisNum) selCisNum.value = 'ONLY_NUMERIC_NI';
+            } else if (type === 'DUPLICIDADE_CIS') {
+                if (selCisNum) selCisNum.value = 'ONLY_DUPLICATED_CIS';
             }
 
-            if (icon) icon.classList.remove('fa-spin');
-            if (btn) btn.disabled = false;
-            showToast('Dados sincronizados com sucesso!');
+            filterTable();
+
+            const tableSection = document.getElementById('tableSectionContainer');
+            if (tableSection) {
+                tableSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
-            loadDataFromSheet();
-        });
+        function calculateMetrics() {
+            const total = rawAtivosData.length;
+            const statusCounts = {}, cobrancaCounts = {};
+            let cisNumCobrancaNI = 0;
+
+            // ANÁLISE E CONTAGEM DE REPETIÇÃO/DUPLICIDADE APENAS PARA CIS NUMÉRICA (IGNORA LETRAS E TEXTOS)
+            const cisFrequency = {};
+            rawAtivosData.forEach(item => {
+                const cleanCis = cleanStr(item.ci).toUpperCase();
+                if (isNumericCIS(cleanCis)) {
+                    cisFrequency[cleanCis] = (cisFrequency[cleanCis] || 0) + 1;
+                }
+            });
+
+            let totalDuplicadosCis = 0;
+            rawAtivosData.forEach(item => {
+                const cleanCis = cleanStr(item.ci).toUpperCase();
+                item.isCisDuplicated = (isNumericCIS(cleanCis) && cisFrequency[cleanCis] > 1);
+                if (item.isCisDuplicated) {
+                    totalDuplicadosCis++;
+                }
+
+                statusCounts[item.statusColF] = (statusCounts[item.statusColF] || 0) + 1;
+                cobrancaCounts[item.cobrancaColE] = (cobrancaCounts[item.cobrancaColE] || 0) + 1;
+                if (item.isCisNumeric && item.cobrancaColE === "N/I") cisNumCobrancaNI++;
+            });
+
+            // MÉTRICAS DE STATUS
+            const statusContainer = document.getElementById('statusCardsContainer');
+            statusContainer.innerHTML = '';
+            statusContainer.appendChild(createMetricCard("TOTAL DE ATIVOS", total, "100%", "fa-list-check", () => triggerCardFilter('RESET', '')));
+
+            // Cartão de Duplicidade na CIS (Apenas Números)
+            const pctDup = total ? ((totalDuplicadosCis / total) * 100).toFixed(1) + "%" : "0.0%";
+            const dupCard = createCardElement("DUPLICIDADE DE LINK NA CIS", totalDuplicadosCis, pctDup, {
+                bg: "border-l-rose-500", text: "text-rose-700", badge: "bg-rose-100", icon: "fa-copy"
+            }, () => triggerCardFilter('DUPLICIDADE_CIS', 'ONLY_DUPLICATED_CIS'));
+            statusContainer.appendChild(dupCard);
+
+            populateCards(statusContainer, statusCounts, total, 'filterStatusColF', 'STATUS', 'STATUS');
+
+            // MÉTRICAS DE COBRANÇA (COM EXPANSÃO E CARDS PRINCIPAIS)
+            const cobrancaContainer = document.getElementById('cobrancaCardsContainer');
+            cobrancaContainer.innerHTML = '';
+
+            // Grid para os Cards Principais
+            const cobrancaMainGrid = document.createElement('div');
+            cobrancaMainGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full';
+
+            // Grid para os Cards Secundários (Oculto por padrão)
+            const cobrancaSecondaryGrid = document.createElement('div');
+            cobrancaSecondaryGrid.id = 'cobrancaSecondaryCardsContainer';
+            cobrancaSecondaryGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full hidden mt-4 pt-4 border-t border-slate-100';
+
+            cobrancaContainer.appendChild(cobrancaMainGrid);
+            cobrancaContainer.appendChild(cobrancaSecondaryGrid);
+
+            // Card Principal 1: TOTAL DE REGISTROS
+            cobrancaMainGrid.appendChild(createMetricCard("TOTAL DE REGISTROS", total, "100%", "fa-receipt", () => triggerCardFilter('RESET', '')));
+
+            // Definir os 4 rótulos dos Cards Principais Exigidos
+            const mainKeysOrder = ["NÃO COBRANDO", "COBRANDO", "SUSPENSA", "COBRAR NA PROXIMA MEDIÇÃO"];
+
+            const selectCobranca = document.getElementById('filterCobrancaColE');
+            if (selectCobranca) selectCobranca.innerHTML = `<option value="">COBRANÇA: Todas</option>`;
+
+            const colorPalette = [
+                { bg: "border-l-sky-500", text: "text-sky-600", badge: "bg-sky-100", icon: "fa-magnifying-glass-chart" },
+                { bg: "border-l-emerald-500", text: "text-emerald-600", badge: "bg-emerald-100", icon: "fa-circle-check" },
+                { bg: "border-l-amber-500", text: "text-amber-600", badge: "bg-amber-100", icon: "fa-triangle-exclamation" },
+                { bg: "border-l-indigo-500", text: "text-indigo-600", badge: "bg-indigo-100", icon: "fa-sliders" }
+            ];
+
+            const allKeys = Object.keys(cobrancaCounts).sort();
+            const renderedMainKeys = new Set();
+
+            function isMainKey(k) {
+                const u = String(k || '').toUpperCase().trim();
+                return u === "NÃO COBRANDO" || u === "NAO COBRANDO" || u === "COBRANDO" || u.includes("SUSPENS") || u.includes("COBRAR NA PROXIMA");
+            }
+
+            // Gerar os 4 Cards Principais Exigidos
+            mainKeysOrder.forEach((targetLabel, idx) => {
+                const realKey = allKeys.find(k => {
+                    const u = k.toUpperCase().trim();
+                    if (targetLabel === "NÃO COBRANDO") return u === "NÃO COBRANDO" || u === "NAO COBRANDO";
+                    if (targetLabel === "COBRANDO") return u === "COBRANDO";
+                    if (targetLabel === "SUSPENSA") return u.includes("SUSPENS");
+                    if (targetLabel === "COBRAR NA PROXIMA MEDIÇÃO") return u.includes("COBRAR NA PROXIMA");
+                    return false;
+                }) || targetLabel;
+
+                const count = cobrancaCounts[realKey] || 0;
+                const pct = total ? ((count / total) * 100).toFixed(1) + "%" : "0.0%";
+                let palette = colorPalette[idx % colorPalette.length];
+
+                const card = createCardElement(realKey, count, pct, palette, () => triggerCardFilter('COBRANÇA', realKey));
+                cobrancaMainGrid.appendChild(card);
+                renderedMainKeys.add(realKey);
+            });
+
+            // Card extra: CIS NUMÉRICA N/I (vai para o grid secundário)
+            const pctCisNI = total ? ((cisNumCobrancaNI / total) * 100).toFixed(1) + "%" : "0.0%";
+            const extraCard = createCardElement("CIS NUMÉRICA N/I", cisNumCobrancaNI, pctCisNI, {
+                bg: "border-l-amber-500", text: "text-amber-700", badge: "bg-amber-100", icon: "fa-triangle-exclamation"
+            }, () => triggerCardFilter('CIS_NUM_NI', 'ONLY_NUMERIC_NI'));
+            cobrancaSecondaryGrid.appendChild(extraCard);
+
+            // Popula os Cards Secundários com o restante dos status existentes
+            let secondaryIdx = 1;
+            allKeys.forEach(key => {
+                if (!renderedMainKeys.has(key) && !isMainKey(key)) {
+                    const count = cobrancaCounts[key];
+                    const pct = total ? ((count / total) * 100).toFixed(1) + "%" : "0.0%";
+                    let palette = colorPalette[secondaryIdx % colorPalette.length];
+
+                    const card = createCardElement(key, count, pct, palette, () => triggerCardFilter('COBRANÇA', key));
+                    cobrancaSecondaryGrid.appendChild(card);
+                    secondaryIdx++;
+                }
+
+                // Popula o filtro dropdown
+                if (selectCobranca) {
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.textContent = `${key} (${cobrancaCounts[key]})`;
+                    selectCobranca.appendChild(opt);
+                }
+            });
+
+            renderCharts(statusCounts, cobrancaCounts);
+        }
+
+        function populateCards(container, countsObj, total, selectId, typeLabel, selectHeader) {
+            const selectEl = document.getElementById(selectId);
+            selectEl.innerHTML = `<option value="">${selectHeader}: Todos</option>`;
+
+            const colorPalette = [
+                { bg: "border-l-sky-500", text: "text-sky-600", badge: "bg-sky-100", icon: "fa-magnifying-glass-chart" },
+                { bg: "border-l-emerald-500", text: "text-emerald-600", badge: "bg-emerald-100", icon: "fa-circle-check" },
+                { bg: "border-l-amber-500", text: "text-amber-600", badge: "bg-amber-100", icon: "fa-triangle-exclamation" },
+                { bg: "border-l-indigo-500", text: "text-indigo-600", badge: "bg-indigo-100", icon: "fa-sliders" }
+            ];
+
+            let idx = 0;
+            Object.keys(countsObj).sort().forEach(key => {
+                const count = countsObj[key];
+                const pct = total ? ((count / total) * 100).toFixed(1) + "%" : "0.0%";
+                let palette = colorPalette[idx % colorPalette.length];
+
+                const card = createCardElement(key, count, pct, palette, () => triggerCardFilter(typeLabel, key));
+                container.appendChild(card);
+                idx++;
+
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = `${key} (${count})`;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function createMetricCard(title, count, pct, iconClass, onClickHandler) {
+            const div = document.createElement('div');
+            div.className = `bg-slate-50 p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-slate-400 transition-all active:scale-95 group`;
+            div.onclick = onClickHandler;
+            div.innerHTML = `
+                <div class="flex items-center justify-between pointer-events-none">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide group-hover:text-slate-600">${title}</p>
+                        <h3 class="text-2xl font-bold text-slate-800 mt-1">${count}</h3>
+                    </div>
+                    <div class="bg-slate-200 p-3 rounded-lg text-slate-700 group-hover:bg-slate-300 transition">
+                        <i class="fa-solid ${iconClass} text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-xs font-bold text-slate-500 mt-2 pointer-events-none">${pct} do total <span class="text-[10px] font-semibold text-indigo-600 ml-1">(Exibir todos)</span></p>
+            `;
+            return div;
+        }
+
+        function createCardElement(title, count, pct, palette, onClickHandler) {
+            const div = document.createElement('div');
+            div.className = `bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 ${palette.bg} cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all active:scale-95 group`;
+            div.onclick = onClickHandler;
+            div.innerHTML = `
+                <div class="flex items-center justify-between pointer-events-none">
+                    <div>
+                        <p class="text-[11px] font-bold ${palette.text} uppercase tracking-wide truncate max-w-[130px]" title="${title}">${title}</p>
+                        <h3 class="text-2xl font-bold ${palette.text} mt-1">${count}</h3>
+                    </div>
+                    <div class="${palette.badge} p-3 rounded-lg ${palette.text} group-hover:scale-110 transition">
+                        <i class="fa-solid ${palette.icon || 'fa-tag'} text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-xs font-bold ${palette.text} mt-2 pointer-events-none">${pct} do total <i class="fa-solid fa-arrow-down text-[10px] ml-1"></i></p>
+            `;
+            return div;
+        }
+
+        function renderCharts(statusCountsObj, cobrancaCountsObj) {
+            if (chartStatusObj) chartStatusObj.destroy();
+            const statusLabels = Object.keys(statusCountsObj);
+            const statusData = Object.values(statusCountsObj);
+            const colors = ['#0284c7', '#10b981', '#f59e0b', '#6366f1', '#a855f7', '#f43f5e', '#64748b'];
+
+            chartStatusObj = new Chart(document.getElementById('chartStatus'), {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels.length ? statusLabels : ['Sem dados'],
+                    datasets: [{
+                        data: statusData.length ? statusData : [0],
+                        backgroundColor: colors.slice(0, Math.max(statusLabels.length, 1))
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            if (chartCobrancaObj) chartCobrancaObj.destroy();
+            const cobrancaLabels = Object.keys(cobrancaCountsObj);
+            const cobrancaData = Object.values(cobrancaCountsObj);
+
+            chartCobrancaObj = new Chart(document.getElementById('chartCobranca'), {
+                type: 'bar',
+                data: {
+                    labels: cobrancaLabels.length ? cobrancaLabels : ['Sem dados'],
+                    datasets: [{
+                        label: 'Qtd Registros',
+                        data: cobrancaData.length ? cobrancaData : [0],
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        // LÓGICA DE FILTRAGEM COMBINADA + ORDENAÇÃO
+        function filterTable() {
+            const q = document.getElementById('tableSearchInput').value.toLowerCase();
+            const selectedStatus = document.getElementById('filterStatusColF').value;
+            const selectedCobranca = document.getElementById('filterCobrancaColE').value;
+            const specialFilter = document.getElementById('filterCisNumNI').value;
+
+            let filtered = rawAtivosData.filter(item => {
+                const allValues = Object.values(item.originalRow).map(v => String(v).toLowerCase()).join(' ');
+                const matchQuery = !q || allValues.includes(q);
+                const matchStatus = !selectedStatus || item.statusColF.toUpperCase() === selectedStatus.toUpperCase();
+                const matchCobranca = !selectedCobranca || item.cobrancaColE.toUpperCase() === selectedCobranca.toUpperCase();
+                
+                let matchSpecial = true;
+                if (specialFilter === "ONLY_NUMERIC_NI") {
+                    matchSpecial = item.isCisNumeric && item.cobrancaColE === "N/I";
+                } else if (specialFilter === "ONLY_DUPLICATED_CIS") {
+                    matchSpecial = item.isCisDuplicated === true;
+                }
+
+                let matchColFilters = true;
+                for (const [colHeader, allowedSet] of Object.entries(activeColumnFilters)) {
+                    if (allowedSet && allowedSet.size > 0) {
+                        const cellVal = String(item.originalRow[colHeader] || "-").trim();
+                        if (!allowedSet.has(cellVal)) {
+                            matchColFilters = false;
+                            break;
+                        }
+                    }
+                }
+
+                return matchQuery && matchStatus && matchCobranca && matchSpecial && matchColFilters;
+            });
+
+            if (currentSort.colHeader) {
+                const h = currentSort.colHeader;
+                const dir = currentSort.direction === 'asc' ? 1 : -1;
+                filtered.sort((a, b) => {
+                    const valA = String(a.originalRow[h] || '').toLowerCase();
+                    const valB = String(b.originalRow[h] || '').toLowerCase();
+                    return valA.localeCompare(valB, 'pt-BR', { numeric: true }) * dir;
+                });
+            }
+
+            renderTableBody(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('tableSearchInput').value = '';
+            document.getElementById('filterStatusColF').value = '';
+            document.getElementById('filterCobrancaColE').value = '';
+            document.getElementById('filterCisNumNI').value = '';
+
+            activeColumnFilters = {};
+            currentSort = { colHeader: null, direction: null };
+
+            renderTableHeaders();
+            filterTable();
+        }
+
+        function exportToPDF() {
+            const btnPdf = document.getElementById('btnPdf');
+            const originalText = btnPdf.innerHTML;
+            btnPdf.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-base"></i> Gerando PDF...';
+            btnPdf.disabled = true;
+
+            window.scrollTo(0, 0);
+
+            const element = document.getElementById('pdfContent');
+            const opt = {
+                margin:       [0.2, 0.2, 0.2, 0.2],
+                filename:     'Relatorio_Painel_Links_GF.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+                jsPDF:        { unit: 'in', format: 'a3', orientation: 'landscape' }
+            };
+
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    btnPdf.innerHTML = originalText;
+                    btnPdf.disabled = false;
+                }).catch(err => {
+                    btnPdf.innerHTML = originalText;
+                    btnPdf.disabled = false;
+                    window.print();
+                });
+            } else {
+                btnPdf.innerHTML = originalText;
+                btnPdf.disabled = false;
+                window.print();
+            }
+        }
+
+        function exportToExcel() {
+            if (!rawAtivosData.length) return;
+            const exportRows = rawAtivosData.map(item => item.originalRow);
+            const ws = XLSX.utils.json_to_sheet(exportRows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Painel Links GF");
+            XLSX.writeFile(wb, "Relatorio_Painel_Links_GF.xlsx");
+        }
     </script>
 </body>
 </html>
