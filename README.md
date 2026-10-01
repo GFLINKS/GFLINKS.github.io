@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Orçamentos, Gestão & PDFs</title>
+    <title> Sistema de Pré Orçamentos</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,7 +34,7 @@
                 <i class="fa-solid fa-file-invoice-dollar text-emerald-400 text-2xl"></i>
                 <div>
                     <h1 class="text-lg font-bold tracking-wide">GFLINKS - Sistema de Orçamentos</h1>
-                    <p class="text-xs text-slate-400" id="semanaHeader">ORÇAMENTOS</p>
+                    <p class="text-xs text-slate-400">ORÇAMENTOS</p>
                 </div>
             </div>
             
@@ -112,10 +112,10 @@
             <div class="border border-slate-200 rounded-xl overflow-hidden">
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
-                        <tr class="bg-slate-800 text-white font-semibold">
-                            <th class="p-3">Descrição do Item / Serviço</th>
-                            <th class="p-3 w-32">Qtd</th>
-                            <th class="p-3 w-20 text-center no-print">Ação</th>
+                        <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                            <th class="p-3 text-slate-800 font-bold">Descrição do Item / Serviço</th>
+                            <th class="p-3 w-32 text-slate-800 font-bold">Qtd</th>
+                            <th class="p-3 w-20 text-center no-print text-slate-800 font-bold">Ação</th>
                         </tr>
                     </thead>
                     <tbody id="corpoTabela" class="divide-y divide-slate-100 bg-white">
@@ -168,7 +168,7 @@
             </button>
         </div>
 
-        <!-- Cards de Métricas Estilo Painel Links GF -->
+        <!-- Cards de Métricas -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div class="bg-slate-50 p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-indigo-500 transition group" id="cardTotal" onclick="filtrarStatusPeloCard('TODOS')">
                 <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Total Geral</p>
@@ -191,7 +191,7 @@
         <!-- Abas de Filtro -->
         <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
             <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 rounded-lg transition active" id="tabPendentesBtn" onclick="filtrarStatusPeloCard('PENDENTE')">⏳ Pendentes (<span id="countTabPendentes">0</span>)</button>
-            <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition" id="tabEnviadosBtn" onclick="filtrarStatusPeloCard('ENVIADO')">✉️ Enviados (<span id="countTabEnviados">0</span>)</button>
+            <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition" id="tabEnviadosBtn" onclick="filtrarStatusPeloCard('ENVIADO')">✉️️ Enviados (<span id="countTabEnviados">0</span>)</button>
             <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition" id="tabDeclinadosBtn" onclick="filtrarStatusPeloCard('DECLINADO')">❌ Declinados (<span id="countTabDeclinados">0</span>)</button>
             <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition" id="tabTodosBtn" onclick="filtrarStatusPeloCard('TODOS')">📋 Todos</button>
         </div>
@@ -200,15 +200,15 @@
             <div class="overflow-x-auto w-full">
                 <table class="min-w-max w-full text-left text-xs border-collapse">
                     <thead>
-                        <tr class="bg-slate-800 text-white font-semibold">
-                            <th class="p-3 text-center w-16">Nº</th>
-                            <th class="p-3 text-center w-20">Sigla</th>
-                            <th class="p-3 w-36">Data / Hora</th>
-                            <th class="p-3 w-28">Técnico</th>
-                            <th class="p-3">Motivo do Atendimento</th>
-                            <th class="p-3">Itens / Detalhes</th>
-                            <th class="p-3 text-center w-24">Status</th>
-                            <th class="p-3 text-center w-28">Ações</th>
+                        <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                            <th class="p-3 text-center w-16 text-slate-800 font-bold">Nº</th>
+                            <th class="p-3 text-center w-20 text-slate-800 font-bold">Sigla</th>
+                            <th class="p-3 w-36 text-slate-800 font-bold">Data / Hora</th>
+                            <th class="p-3 w-28 text-slate-800 font-bold">Técnico</th>
+                            <th class="p-3 text-slate-800 font-bold">Motivo do Atendimento</th>
+                            <th class="p-3 text-slate-800 font-bold">Itens / Detalhes</th>
+                            <th class="p-3 text-center w-24 text-slate-800 font-bold">Status</th>
+                            <th class="p-3 text-center w-28 text-slate-800 font-bold">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaPainelBody" class="divide-y divide-slate-100 bg-white text-slate-700">
@@ -339,15 +339,11 @@
 
     function atualizarCabecalho() {
         const dataVal = document.getElementById('dataEmissao').value;
-        const numVal = document.getElementById('numOrcamento').value || '0006';
         if (dataVal) {
             const partes = dataVal.split('-');
-            const dataFormatada = `${partes[2]}_${partes[1]}_${partes[0]}`;
             const dataObj = new Date(partes[0], partes[1] - 1, partes[2]);
             const numSemana = getNumeroSemana(dataObj);
-            
             document.getElementById('semanaManual').value = `Semana ${numSemana}`;
-            document.getElementById('semanaHeader').innerText = `ORÇAMENTO Nº ${numVal} - ${dataFormatada} (SEMANA ${numSemana})`;
         }
     }
 
