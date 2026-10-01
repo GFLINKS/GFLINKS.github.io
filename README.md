@@ -65,7 +65,6 @@
             border-color: var(--primary);
         }
 
-        /* CONTAINER CARDS */
         .card-box {
             background: var(--card-bg);
             padding: 30px;
@@ -302,7 +301,7 @@
             gap: 10px;
         }
 
-        /* PAINEL DE GESTÃO E CARDS CLICÁVEIS */
+        /* PAINEL DE GESTÃO */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -402,7 +401,6 @@
         .btn-declinar { background-color: var(--danger); }
         .btn-pendente { background-color: var(--yellow); }
 
-        /* AJUSTES PARA IMPRESSÃO EM PDF DO ORÇAMENTO */
         @media print {
             body { background: white; padding: 0; }
             .container { max-width: 100%; }
@@ -423,7 +421,7 @@
         <button class="nav-btn active" id="btnNavOrcamento" onclick="alternarTela('orcamento')">📝 Criar Orçamento</button>
         <button class="nav-btn" id="btnNavPainel" onclick="alternarTela('painel')">📊 Painel de Gestão</button>
         <button class="nav-btn" id="btnNavImportar" onclick="alternarTela('importar')">📤 Importar PDF Antigo</button>
-        <button class="nav-btn" id="btnNavGaleria" onclick="alternarTela('galeria')">👁️ Visualizador Nativo PDF</button>
+        <button class="nav-btn" id="btnNavGaleria" onclick="alternarTela('galeria')">📂 Visualizador Pasta Drive</button>
     </div>
 
     <!-- TELA 1: EMISSÃO DE ORÇAMENTO -->
@@ -518,7 +516,6 @@
             <button class="btn" onclick="carregarDadosPainel()">🔄 Atualizar Dados</button>
         </div>
 
-        <!-- CARDS DE MÉTRICAS CLICÁVEIS -->
         <div class="metrics-grid">
             <div class="metric-card card-total" id="cardTotal" onclick="filtrarStatusPeloCard('TODOS')">
                 <h3>Total Geral</h3>
@@ -538,7 +535,6 @@
             </div>
         </div>
 
-        <!-- SUB ABAS DO PAINEL -->
         <div class="sub-tabs">
             <button class="sub-tab-btn active" id="tabPendentesBtn" onclick="filtrarStatusPeloCard('PENDENTE')">⏳ Pendentes (<span id="countTabPendentes">0</span>)</button>
             <button class="sub-tab-btn" id="tabEnviadosBtn" onclick="filtrarStatusPeloCard('ENVIADO')">✉️ Enviados (<span id="countTabEnviados">0</span>)</button>
@@ -546,7 +542,6 @@
             <button class="sub-tab-btn" id="tabTodosBtn" onclick="filtrarStatusPeloCard('TODOS')">📋 Todos</button>
         </div>
 
-        <!-- TABELA UNIFICADA COM FILTRO AUTOMÁTICO -->
         <div style="overflow-x:auto;">
             <table>
                 <thead>
@@ -568,19 +563,18 @@
         </div>
     </div>
 
-    <!-- TELA 3: IMPORTAR PDF ANTIGO PARA O PAINEL DE GESTÃO -->
+    <!-- TELA 3: IMPORTAR PDF ANTIGO -->
     <div id="importarPdfSection" class="card-box" style="display: none;">
         <h1><span>📤 Importar Orçamento Antigo (PDF)</span></h1>
-        <p style="font-size:13px; color:#64748b;">Cadastre orçamentos já feitos anteriormente para incluí-los diretamente no Painel de Gestão.</p>
+        <p style="font-size:13px; color:#64748b;">Cadastre orçamentos anteriores para incluí-los no Painel de Gestão.</p>
 
         <div class="grid-2" style="margin-top:20px;">
-            <!-- FORMULÁRIO DE REGISTRO DO ORÇAMENTO ANTIGO -->
             <div>
                 <div class="section-title">📝 Dados do Orçamento</div>
                 <div class="grid-2">
                     <div class="form-group">
                         <label for="impNum">Nº Orçamento <span class="req">*</span></label>
-                        <input type="text" id="impNum" placeholder="Ex: 0001">
+                        <input type="text" id="impNum" placeholder="Ex: 0005">
                     </div>
                     <div class="form-group">
                         <label for="impSigla">Sigla Cliente / Loja <span class="req">*</span></label>
@@ -610,61 +604,46 @@
 
                 <div class="form-group">
                     <label for="impMotivo">Motivo do Orçamento <span class="req">*</span></label>
-                    <textarea id="impMotivo" placeholder="Descreva o motivo do serviço..."></textarea>
+                    <textarea id="impMotivo" placeholder="Descreva o motivo..."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="impItens">Peças & Serviços Registrados</label>
-                    <textarea id="impItens" placeholder="Ex: Câmera IP (2x); Nobreak 600VA (1x)"></textarea>
+                    <textarea id="impItens" placeholder="Ex: Câmera IP (2x); Nobreak (1x)"></textarea>
                 </div>
 
                 <button class="btn btn-add" style="width:100%; padding:12px; font-size:15px; margin-top:10px;" onclick="salvarOrcamentoAntigo()">💾 Registrar no Painel de Gestão</button>
             </div>
 
-            <!-- CARREGADOR E PREVIEW LOCAL DO PDF -->
             <div>
-                <div class="section-title">📄 Selecionar Arquivo PDF Antigo</div>
+                <div class="section-title">📄 Selecionar PDF do Computador</div>
                 <div class="drop-zone" onclick="document.getElementById('impFilePdf').click()">
-                    <div class="drop-zone-text">📁 Clique aqui para selecionar o PDF do seu PC</div>
-                    <div class="drop-zone-subtext">O documento será carregado nativamente ao lado</div>
+                    <div class="drop-zone-text">📁 Clique para selecionar o PDF antigo</div>
                 </div>
                 <input type="file" id="impFilePdf" accept="application/pdf" style="display:none;" onchange="previewPdfImportacao(event)">
 
                 <div style="margin-top:15px;">
-                    <iframe id="impPdfViewer" src="" width="100%" height="450" style="border:1px solid var(--border); border-radius:8px; display:none;"></iframe>
+                    <iframe id="impPdfViewer" src="" width="100%" height="420" style="border:1px solid var(--border); border-radius:8px; display:none;"></iframe>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- TELA 4: VISUALIZADOR NATIVO DE PDF -->
+    <!-- TELA 4: VISUALIZADOR DA PASTA DO DRIVE -->
     <div id="galeriaPdfSection" class="card-box" style="display: none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h1 style="border:none; padding:0; margin:0;">👁️ Visualizador NATIVO de Documentos PDF</h1>
+            <h1 style="border:none; padding:0; margin:0;">📂 Visualizador da Pasta do Google Drive</h1>
+            <a href="https://drive.google.com/drive/folders/12p-H152le372P0Nx4C2_vX5hK34caOeS" target="_blank" class="btn" style="text-decoration:none; font-size:13px;">🔗 Abrir Pasta no Drive</a>
         </div>
+        <p style="font-size:14px; color:#64748b; margin-top:-10px;">Visualize e navegue nativamente pelos PDFs e subpastas salvos no seu Google Drive:</p>
 
-        <p style="font-size:14px; color:#64748b;">Abra e leia qualquer PDF diretamente no navegador, sem redirecionar para a pasta do Drive.</p>
-
-        <!-- SELEÇÃO DE ARQUIVO LOCAL -->
-        <div class="drop-zone" onclick="document.getElementById('nativeFilePdfInput').click()" style="margin-bottom:20px;">
-            <div class="drop-zone-text">📂 Clique aqui para Abrir qualquer Arquivo PDF do seu Computador</div>
-            <div class="drop-zone-subtext">Visualização 100% nativa em tela cheia com zoom, busca e navegação</div>
-        </div>
-        <input type="file" id="nativeFilePdfInput" accept="application/pdf" style="display: none;" onchange="carregarPdfNativoLocal(event)">
-
-        <!-- IFRAME DO LEITOR NATIVO -->
-        <div id="containerPdfNativo">
-            <iframe id="nativePdfIframe" src="" width="100%" height="700" style="border: 1px solid var(--border); border-radius: 8px; display:none;"></iframe>
-            <div id="placeholderPdfNativo" style="text-align:center; padding:60px 20px; background:#f1f5f9; border-radius:8px; color:#64748b; font-weight:bold;">
-                📄 Nenhum arquivo PDF carregado no momento.<br>Clique no campo acima para carregar e visualizar um documento PDF.
-            </div>
-        </div>
+        <iframe id="driveFolderIframe" src="https://drive.google.com/embeddedfolderview?id=12p-H152le372P0Nx4C2_vX5hK34caOeS#list" width="100%" height="650" style="border: 1px solid var(--border); border-radius: 8px;"></iframe>
     </div>
 </div>
 
 <script>
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
-    const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbx_CTDs1fCmZ1PmS5ZKstISqJ5nk0Aay0xJTia8AaWowMIh4zqXFBSXRYJu71qPeOY_Jw/exec";
+    const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbwsk-oIUSGH-Mhcp2i-xClD_ETo0_waoaHitR9RMxyhfGMm6-_ssTM5BvLHs_iaST_Ctw/exec";
     const SENHA_AUTORIZACAO = "GF01";
 
     let todosOrcamentos = [];
@@ -693,46 +672,33 @@
         configurarEventosColarEArrastar();
     };
 
-    /* NAVEGAÇÃO ENTRE AS TELAS PRINCIPAIS */
     function alternarTela(tela) {
-        const secOrcamento = document.getElementById('orcamentoSection');
-        const secPainel = document.getElementById('painelSection');
-        const secImportar = document.getElementById('importarPdfSection');
-        const secGaleria = document.getElementById('galeriaPdfSection');
+        document.getElementById('orcamentoSection').style.display = 'none';
+        document.getElementById('painelSection').style.display = 'none';
+        document.getElementById('importarPdfSection').style.display = 'none';
+        document.getElementById('galeriaPdfSection').style.display = 'none';
 
-        const btnOrcamento = document.getElementById('btnNavOrcamento');
-        const btnPainel = document.getElementById('btnNavPainel');
-        const btnImportar = document.getElementById('btnNavImportar');
-        const btnGaleria = document.getElementById('btnNavGaleria');
-
-        // Esconde todas as telas
-        secOrcamento.style.display = 'none';
-        secPainel.style.display = 'none';
-        secImportar.style.display = 'none';
-        secGaleria.style.display = 'none';
-
-        btnOrcamento.classList.remove('active');
-        btnPainel.classList.remove('active');
-        btnImportar.classList.remove('active');
-        btnGaleria.classList.remove('active');
+        document.getElementById('btnNavOrcamento').classList.remove('active');
+        document.getElementById('btnNavPainel').classList.remove('active');
+        document.getElementById('btnNavImportar').classList.remove('active');
+        document.getElementById('btnNavGaleria').classList.remove('active');
 
         if (tela === 'orcamento') {
-            secOrcamento.style.display = 'block';
-            btnOrcamento.classList.add('active');
+            document.getElementById('orcamentoSection').style.display = 'block';
+            document.getElementById('btnNavOrcamento').classList.add('active');
         } else if (tela === 'painel') {
-            secPainel.style.display = 'block';
-            btnPainel.classList.add('active');
+            document.getElementById('painelSection').style.display = 'block';
+            document.getElementById('btnNavPainel').classList.add('active');
             carregarDadosPainel();
         } else if (tela === 'importar') {
-            secImportar.style.display = 'block';
-            btnImportar.classList.add('active');
+            document.getElementById('importarPdfSection').style.display = 'block';
+            document.getElementById('btnNavImportar').classList.add('active');
         } else if (tela === 'galeria') {
-            secGaleria.style.display = 'block';
-            btnGaleria.classList.add('active');
+            document.getElementById('galeriaPdfSection').style.display = 'block';
+            document.getElementById('btnNavGaleria').classList.add('active');
         }
     }
 
-    /* EMISSÃO DE ORÇAMENTO */
     function carregarNumeroOrcamento() {
         let numeroSalvo = localStorage.getItem(CHAVE_BANCO_NUMERO);
         if (!numeroSalvo) {
@@ -811,7 +777,6 @@
 
     function processarArquivoFoto(arquivo) {
         if (!arquivo || !arquivo.type.startsWith('image/')) return;
-
         const leitor = new FileReader();
         leitor.onload = function(e) {
             const galeria = document.getElementById('galeriaFotos');
@@ -840,88 +805,46 @@
         document.addEventListener('paste', function(e) {
             const clipboardData = e.clipboardData || window.clipboardData;
             if (!clipboardData) return;
-
             const items = clipboardData.items;
-
             for (let i = 0; i < items.length; i++) {
                 if (items[i].type.indexOf('image') !== -1) {
-                    const blob = items[i].getAsFile();
-                    processarArquivoFoto(blob);
+                    processarArquivoFoto(items[i].getAsFile());
                 }
             }
         });
 
         const dropZone = document.getElementById('dropZone');
-
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }, false);
+            dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
         });
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
-        });
-
-        dropZone.addEventListener('drop', function(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-
-            for (let i = 0; i < files.length; i++) {
-                processarArquivoFoto(files[i]);
-            }
+        dropZone.addEventListener('drop', e => {
+            const files = e.dataTransfer.files;
+            for (let i = 0; i < files.length; i++) processarArquivoFoto(files[i]);
         }, false);
     }
 
     function validarFormulario() {
         let erros = [];
-
         const sigla = document.getElementById('sigla');
         const dataEmissao = document.getElementById('dataEmissao');
         const horaEmissao = document.getElementById('horaEmissao');
         const tecnico = document.getElementById('tecnico');
         const motivo = document.getElementById('motivo');
 
-        if (!sigla.value.trim()) {
-            sigla.classList.add('input-error');
-            erros.push("Sigla do Cliente / Loja");
-        }
-
-        if (!dataEmissao.value) {
-            dataEmissao.classList.add('input-error');
-            erros.push("Data da Emissão");
-        }
-
-        if (!horaEmissao.value) {
-            horaEmissao.classList.add('input-error');
-            erros.push("Hora da Emissão");
-        }
-
-        if (!tecnico.value.trim()) {
-            tecnico.classList.add('input-error');
-            erros.push("Técnico Responsável");
-        }
-
-        if (!motivo.value.trim()) {
-            motivo.classList.add('input-error');
-            erros.push("Motivo do Orçamento");
-        }
+        if (!sigla.value.trim()) { sigla.classList.add('input-error'); erros.push("Sigla do Cliente / Loja"); }
+        if (!dataEmissao.value) { dataEmissao.classList.add('input-error'); erros.push("Data da Emissão"); }
+        if (!horaEmissao.value) { horaEmissao.classList.add('input-error'); erros.push("Hora da Emissão"); }
+        if (!tecnico.value.trim()) { tecnico.classList.add('input-error'); erros.push("Técnico Responsável"); }
+        if (!motivo.value.trim()) { motivo.classList.add('input-error'); erros.push("Motivo do Orçamento"); }
 
         const linhasItens = document.querySelectorAll('#corpoTabela tr');
         let itemPreenchido = false;
-
         if (linhasItens.length === 0) {
-            erros.push("Adicione ao menos 1 item na tabela de Peças & Serviços");
+            erros.push("Adicione ao menos 1 item na tabela");
         } else {
-            linhasItens.forEach((linha) => {
+            linhasItens.forEach(linha => {
                 const desc = linha.querySelector('.item-desc');
                 const qtd = linha.querySelector('.item-qtd');
-
                 if (!desc.value.trim() || !qtd.value || parseFloat(qtd.value) <= 0) {
                     desc.classList.add('input-error');
                     qtd.classList.add('input-error');
@@ -929,24 +852,18 @@
                     itemPreenchido = true;
                 }
             });
-
-            if (!itemPreenchido) {
-                erros.push("Descrição e Quantidade dos Itens/Serviços na tabela");
-            }
+            if (!itemPreenchido) erros.push("Descrição e Quantidade na tabela");
         }
 
-        const fotos = document.querySelectorAll('#galeriaFotos .photo-card');
-        const dropZone = document.getElementById('dropZone');
-        if (fotos.length === 0) {
-            dropZone.classList.add('input-error');
+        if (document.querySelectorAll('#galeriaFotos .photo-card').length === 0) {
+            document.getElementById('dropZone').classList.add('input-error');
             erros.push("Anexo de pelo menos 1 Foto / Evidência");
         }
 
         if (erros.length > 0) {
-            alert("⚠️ PREENCHIMENTO OBRIGATÓRIO!\n\nPor favor, preencha os seguintes campos antes de salvar o PDF:\n\n• " + erros.join("\n• "));
+            alert("⚠️ PREENCHIMENTO OBRIGATÓRIO!\n\n• " + erros.join("\n• "));
             return false;
         }
-
         return true;
     }
 
@@ -956,15 +873,11 @@
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
-        })
-        .then(() => console.log("Dados salvos no Google Sheets!"))
-        .catch(err => console.error("Erro ao enviar dados para a planilha:", err));
+        });
     }
 
     function imprimirOuSalvarPDF() {
-        if (!validarFormulario()) {
-            return;
-        }
+        if (!validarFormulario()) return;
 
         const linhasItens = document.querySelectorAll('#corpoTabela tr');
         let listaItens = [];
@@ -982,7 +895,8 @@
             tecnico: document.getElementById('tecnico').value,
             semana: document.getElementById('semanaManual').value,
             motivo: document.getElementById('motivo').value,
-            itens: listaItens.join('; ')
+            itens: listaItens.join('; '),
+            status: "PENDENTE"
         };
 
         enviarParaGoogleSheets(dados);
@@ -994,7 +908,7 @@
         }, 1000);
     }
 
-    /* PAINEL DE GESTÃO DE ORÇAMENTOS */
+    /* PAINEL DE GESTÃO */
     function carregarDadosPainel() {
         fetch(URL_GOOGLE_SHEETS)
             .then(res => res.json())
@@ -1010,14 +924,11 @@
 
     function filtrarStatusPeloCard(status) {
         statusFiltroAtual = status;
-
-        // Atualiza destaque visual dos Cards
         document.getElementById('cardTotal').classList.toggle('active-card', status === 'TODOS');
         document.getElementById('cardPendente').classList.toggle('active-card', status === 'PENDENTE');
         document.getElementById('cardEnviado').classList.toggle('active-card', status === 'ENVIADO');
         document.getElementById('cardDeclinado').classList.toggle('active-card', status === 'DECLINADO');
 
-        // Atualiza destaque visual das Sub-Abas
         document.getElementById('tabPendentesBtn').classList.toggle('active', status === 'PENDENTE');
         document.getElementById('tabEnviadosBtn').classList.toggle('active', status === 'ENVIADO');
         document.getElementById('tabDeclinadosBtn').classList.toggle('active', status === 'DECLINADO');
@@ -1028,7 +939,6 @@
 
     function renderizarDashboard() {
         let cntPendente = 0, cntEnviado = 0, cntDeclinado = 0;
-
         todosOrcamentos.forEach(item => {
             const st = (item.status || 'PENDENTE').toUpperCase();
             if (st === 'PENDENTE') cntPendente++;
@@ -1059,7 +969,7 @@
         });
 
         if (itensFiltrados.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">Nenhum orçamento encontrado com o status: <b>${statusFiltroAtual}</b></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">Nenhum orçamento com status: <b>${statusFiltroAtual}</b></td></tr>`;
             return;
         }
 
@@ -1095,41 +1005,27 @@
 
     function alterarStatus(numero, novoStatus) {
         const senhaDigitada = prompt(`Para alterar o status do Orçamento Nº ${numero} para ${novoStatus}, digite a senha de confirmação:`);
-
         if (senhaDigitada === null) return;
-
         if (senhaDigitada !== SENHA_AUTORIZACAO) {
-            alert("❌ Senha incorreta! A alteração não foi realizada.");
+            alert("❌ Senha incorreta!");
             return;
         }
 
-        const payload = {
-            action: "updateStatus",
-            numero: numero,
-            status: novoStatus
-        };
-
-        fetch(URL_GOOGLE_SHEETS, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        })
+        const payload = { action: "updateStatus", numero: numero, status: novoStatus };
+        fetch(URL_GOOGLE_SHEETS, { method: 'POST', body: JSON.stringify(payload) })
         .then(() => {
-            alert(`✅ Status do Orçamento Nº ${numero} atualizado para ${novoStatus}!`);
+            alert(`✅ Status atualizado para ${novoStatus}!`);
             carregarDadosPainel();
         })
-        .catch(err => {
-            console.error("Erro ao alterar status:", err);
-            alert("Erro ao atualizar o status na planilha.");
-        });
+        .catch(err => alert("Erro ao atualizar status."));
     }
 
-    /* IMPORTAR ORÇAMENTO ANTIGO */
+    /* IMPORTAR PDF ANTIGO */
     function previewPdfImportacao(event) {
         const file = event.target.files[0];
         const viewer = document.getElementById('impPdfViewer');
         if (file && file.type === 'application/pdf') {
-            const fileUrl = URL.createObjectURL(file);
-            viewer.src = fileUrl;
+            viewer.src = URL.createObjectURL(file);
             viewer.style.display = 'block';
         }
     }
@@ -1144,7 +1040,7 @@
         const itens = document.getElementById('impItens').value.trim();
 
         if (!num || !sigla || !data || !tecnico || !motivo) {
-            alert("⚠️ Por favor, preencha os campos obrigatórios (Nº, Sigla, Data, Técnico e Motivo).");
+            alert("⚠️️ Preencha os campos obrigatórios.");
             return;
         }
 
@@ -1156,15 +1052,13 @@
             tecnico: tecnico,
             semana: "Importado",
             motivo: motivo,
-            itens: itens || "Orçamento Importado via PDF Antigo",
+            itens: itens || "Orçamento Importado",
             status: status
         };
 
         enviarParaGoogleSheets(dados);
+        alert(`✅ Orçamento Antigo Nº ${dados.numero} enviado com sucesso!`);
 
-        alert(`✅ Orçamento Antigo Nº ${dados.numero} registrado com sucesso com o status ${status}!`);
-
-        // Limpa formulário
         document.getElementById('impNum').value = '';
         document.getElementById('impSigla').value = '';
         document.getElementById('impData').value = '';
@@ -1173,24 +1067,7 @@
         document.getElementById('impItens').value = '';
         document.getElementById('impPdfViewer').style.display = 'none';
 
-        // Redireciona para o Painel de Gestão
         alternarTela('painel');
-    }
-
-    /* VISUALIZADOR NATIVO DE PDF */
-    function carregarPdfNativoLocal(event) {
-        const file = event.target.files[0];
-        const iframe = document.getElementById('nativePdfIframe');
-        const placeholder = document.getElementById('placeholderPdfNativo');
-
-        if (file && file.type === 'application/pdf') {
-            const objectUrl = URL.createObjectURL(file);
-            iframe.src = objectUrl;
-            iframe.style.display = 'block';
-            placeholder.style.display = 'none';
-        } else {
-            alert("Por favor, selecione um arquivo válido no formato PDF.");
-        }
     }
 </script>
 
