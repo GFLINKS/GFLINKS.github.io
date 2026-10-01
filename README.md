@@ -46,7 +46,7 @@
                     <i class="fa-solid fa-chart-pie"></i> Painel de Gestão
                 </button>
                 <button class="nav-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2 border border-slate-700" id="btnNavGaleria" onclick="alternarTela('galeria')">
-                    <i class="fa-solid fa-folder-open"></i> Pasta Drive
+                    <i class="fa-solid fa-folder-open"></i> Arquivos
                 </button>
             </div>
         </div>
@@ -215,18 +215,13 @@
         </div>
     </div>
 
-    <!-- TELA 3: VISUALIZADOR DA PASTA DO DRIVE -->
+    <!-- TELA 3: VISUALIZADOR DA PASTA DO DRIVE (ARQUIVOS) -->
     <div id="galeriaPdfSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6 hidden">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-folder-tree text-indigo-600"></i> Visualizador da Pasta do Google Drive
-                </h2>
-                <p class="text-xs text-slate-500">Navegue pelos PDFs e subpastas salvos no Google Drive.</p>
-            </div>
-            <a href="https://drive.google.com/drive/folders/12p-H152le372P0Nx4C2_vX5hK34caOeS" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2 text-decoration-none">
-                <i class="fa-brands fa-google-drive"></i> Abrir Pasta no Drive
-            </a>
+        <div>
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-folder-tree text-indigo-600"></i> Arquivos e Documentos
+            </h2>
+            <p class="text-xs text-slate-500">Navegue pelos PDFs e subpastas salvos no Google Drive diretamente na página.</p>
         </div>
 
         <div class="border border-slate-200 rounded-xl overflow-hidden">
