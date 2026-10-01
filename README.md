@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Sistema de Pré Orçamentos</title>
+    <title>Sistema de Orçamentos </title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -30,10 +31,10 @@
     <header class="bg-slate-900 text-white shadow-lg rounded-2xl p-4 no-print">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
-                <img src="logo.png" alt="Logo GF Links" class="h-10 w-auto object-contain" onerror="this.style.display='none'">
+                <img src="logo.png" alt="Logo" class="h-10 w-auto object-contain" onerror="this.style.display='none'">
                 <i class="fa-solid fa-file-invoice-dollar text-emerald-400 text-2xl"></i>
                 <div>
-                    <h1 class="text-lg font-bold tracking-wide">GFLINKS - Sistema de Orçamentos</h1>
+                    <h1 class="text-lg font-bold tracking-wide">Sistema de Orçamentos</h1>
                     <p class="text-xs text-slate-400">ORÇAMENTOS</p>
                 </div>
             </div>
@@ -174,7 +175,7 @@
                 <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Total Geral</p>
                 <h3 class="text-2xl font-bold text-indigo-600 mt-1" id="mTotal">0</h3>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500 cursor-pointer hover:shadow-md transition active-card" id="cardPendente" onclick="filtrarStatusPeloCard('PENDENTE')">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500 cursor-pointer hover:shadow-md transition" id="cardPendente" onclick="filtrarStatusPeloCard('PENDENTE')">
                 <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wide">Pendentes</p>
                 <h3 class="text-2xl font-bold text-amber-600 mt-1" id="mPendente">0</h3>
             </div>
@@ -190,8 +191,8 @@
 
         <!-- Abas de Filtro -->
         <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
-            <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 rounded-lg transition active" id="tabPendentesBtn" onclick="filtrarStatusPeloCard('PENDENTE')">⏳ Pendentes (<span id="countTabPendentes">0</span>)</button>
-            <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition" id="tabEnviadosBtn" onclick="filtrarStatusPeloCard('ENVIADO')">✉️️ Enviados (<span id="countTabEnviados">0</span>)</button>
+            <button class="sub-tab-btn px-4 py-2 text-xs font-bold rounded-lg transition" id="tabPendentesBtn" onclick="filtrarStatusPeloCard('PENDENTE')">⏳ Pendentes (<span id="countTabPendentes">0</span>)</button>
+            <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition" id="tabEnviadosBtn" onclick="filtrarStatusPeloCard('ENVIADO')">✉ Enviados (<span id="countTabEnviados">0</span>)</button>
             <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition" id="tabDeclinadosBtn" onclick="filtrarStatusPeloCard('DECLINADO')">❌ Declinados (<span id="countTabDeclinados">0</span>)</button>
             <button class="sub-tab-btn px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition" id="tabTodosBtn" onclick="filtrarStatusPeloCard('TODOS')">📋 Todos</button>
         </div>
@@ -287,6 +288,9 @@
         } else if (tela === 'painel') {
             document.getElementById('painelSection').classList.remove('hidden');
             document.getElementById('btnNavPainel').className = 'nav-btn bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2 active';
+            
+            // Força a seleção do card e da aba de Pendentes ao abrir o painel
+            filtrarStatusPeloCard('PENDENTE');
             carregarDadosPainel();
         } else if (tela === 'galeria') {
             document.getElementById('galeriaPdfSection').classList.remove('hidden');
