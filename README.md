@@ -214,14 +214,14 @@
             letter-spacing: 0.5px;
         }
 
-        .col-num { width: 8%; text-align: center; font-weight: bold; }
+        .col-num { width: 7%; text-align: center; font-weight: bold; }
         .col-sigla { width: 8%; text-align: center; font-weight: 600; }
-        .col-data { width: 14%; white-space: nowrap; }
+        .col-data { width: 15%; white-space: nowrap; }
         .col-tec { width: 12%; font-weight: 600; }
-        .col-motivo { width: 26%; word-break: break-word; }
+        .col-motivo { width: 28%; word-break: break-word; }
         .col-itens { width: 18%; word-break: break-word; font-size: 12px; color: #334155; }
-        .col-status { width: 8%; text-align: center; white-space: nowrap; }
-        .col-acoes { width: 10%; text-align: center; white-space: nowrap; }
+        .col-status { width: 6%; text-align: center; white-space: nowrap; }
+        .col-acoes { width: 6%; text-align: center; white-space: nowrap; }
 
         .btn {
             background-color: var(--primary);
@@ -1007,36 +1007,56 @@
         renderizarTabelaFiltrada();
     }
 
+    /* FILTRO DE DATA E HERA RIGOROSO */
     function formatarDataHoraLimpo(dataRaw, horaRaw) {
-        if (!dataRaw) return '-';
-
-        let dataStr = String(dataRaw).trim();
-        let horaStr = String(horaRaw || '').trim();
-
-        if (dataStr.includes('GMT') || dataStr.includes('1899') || dataStr.includes('Sat') || dataStr.includes('Sun')) {
-            let matchData = dataStr.match(/(\d{2}\/\d{2}\/\d{4})/);
-            if (matchData) dataStr = matchData[1];
-        }
-
-        if (horaStr.includes('1899') || horaStr.includes('GMT')) {
-            let matchHora = horaStr.match(/(\d{2}:\d{2})/);
-            horaStr = matchHora ? matchHora[1] : '';
-        }
-
-        if (dataStr.includes('-')) {
-            let p = dataStr.split('-');
-            if (p.length === 3) dataStr = `${p[2]}/${p[1]}/${p[0]}`;
-        }
-
-        if (horaStr) {
-            let hPartes = horaStr.split(':');
-            if (hPartes.length >= 2) {
-                horaStr = `${hPartes[0].padStart(2, '0')}:${hPartes[1].padStart(2, '0')}`;
+        let textoCompleto = String(dataRaw || '') + ' ' + String(horaRaw || '');
+        
+        // Isola apenas o padrão de data DD/MM/YYYY ou YYYY-MM-DD
+        let matchData = textoCompleto.match(/(\d{2})[\/_-](\d{2})[\/_-](\d{4})/) || textoCompleto.match(/(\d{4})[\/_-](\d{2})[\/_-](\d{2})/);
+        let dataFormatada = '';
+        
+        if (matchData) {
+            if (matchData[0].includes('-') && matchData[1].length === 4) { // YYYY-MM-DD
+                dataFormatada = `${matchData[3]}/${matchData[2]}/${matchData[1]}`;
+            } else {
+                dataFormatada = `${matchData[1]}/${matchData[2]}/${matchData[3]}`;
             }
-            return `📅 ${dataStr}<br><span style="color:#64748b; font-size:12px;">⏰ ${horaStr}</span>`;
         }
 
-        return `📅 ${dataStr}`;
+        // Isola apenas o padrão de hora HH:MM (excluindo anos e offsets do GMT)
+        let matchHora = textoCompleto.match(/(?:^|[^\d])([0-1]?\d|2[0-3]):([0-5]\d)(?=[^\d]|$)/);
+        let horaFormatada = '';
+
+        if (matchHora) {
+            // Ignora a hora '12:00' padrão quando associada à conversão automatizada do Excel/1899
+            if (!(textoCompleto.includes('1899') && (matchHora[1] === '12' || matchHora[1] === '00'))) {
+                horaFormatada = `${matchHora[1].padStart(2, '0')}:${matchHora[2]}`;
+            }
+        }
+
+        if (dataFormatada && horaFormatada) {
+            return `📅 ${dataFormatada}<br><span style="color:#64748b; font-size:12px;">⏰ ${horaFormatada}</span>`;
+        } else if (dataFormatada) {
+            return `📅 ${dataFormatada}`;
+        }
+        return '-';
+    }
+
+    /* FILTRO RIGOROSO PARA REMOVER EVIDÊNCIAS FOTOGRÁFICAS E PATHS LOCAIS */
+    function limparTextoItens(itensRaw) {
+        if (!itensRaw) return '-';
+        let lista = String(itensRaw).split(';');
+        let itensFiltrados = lista.filter(item => {
+            let txt = item.toUpperCase().trim();
+            if (!txt) return false;
+            if (txt.includes('EVIDÊNCIAS') || txt.includes('EVIDENCIAS')) return false;
+            if (txt.includes('FOTOGRÁFICAS') || txt.includes('FOTOGRAFICAS')) return false;
+            if (txt.includes('LEGENDA')) return false;
+            if (txt.includes('/USERS/') || txt.includes('C:') || txt.includes('ONEDRIVE') || txt.includes('DESKTOP') || txt.includes('VALIDAÇÃO')) return false;
+            if (txt.includes('.HTML') || txt.includes('.PNG') || txt.includes('.JPG') || txt.includes('.PDF')) return false;
+            return true;
+        });
+        return itensFiltrados.join('; ').trim() || '-';
     }
 
     function renderizarTabelaFiltrada() {
@@ -1063,7 +1083,7 @@
                 <td class="col-data">${formatarDataHoraLimpo(item.data, item.hora)}</td>
                 <td class="col-tec">${item.tecnico || '-'}</td>
                 <td class="col-motivo">${item.motivo || '-'}</td>
-                <td class="col-itens">${item.itens || '-'}</td>
+                <td class="col-itens">${limparTextoItens(item.itens)}</td>
                 <td class="col-status"><span class="badge badge-${st.toLowerCase()}">${st}</span></td>
                 <td class="col-acoes">${gerarBotoesAcao(item.numero, st)}</td>
             `;
@@ -1165,9 +1185,15 @@
             document.getElementById('impMotivo').value = motivoLimpo;
         }
 
-        let pecasIdx = texto.indexOf('PEÇAS & SERVIÇOS');
+        // Corta a leitura antes de chegar nas Evidências Fotográficas
+        let textoSemFotos = texto;
+        if (texto.toUpperCase().includes('EVIDÊNCIAS FOTOGRÁFICAS')) {
+            textoSemFotos = texto.split(/EVIDÊNCIAS FOTOGRÁFICAS/i)[0];
+        }
+
+        let pecasIdx = textoSemFotos.indexOf('PEÇAS & SERVIÇOS');
         if (pecasIdx !== -1) {
-            let subTexto = texto.substring(pecasIdx);
+            let subTexto = textoSemFotos.substring(pecasIdx);
             let regexItens = /([A-Za-z0-9À-ÿ\s\-\.\/]+?)\s+(\d+)\b/g;
             let match;
             let itensArray = [];
