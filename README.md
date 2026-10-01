@@ -32,7 +32,6 @@
             border: 1px solid var(--border);
         }
 
-        /* LOGO CENTRALIZADO SUPERIOR */
         .logo-container {
             text-align: center;
             margin-bottom: 20px;
@@ -196,7 +195,6 @@
             background-color: #475569;
         }
 
-        /* ÁREA DE UPLOAD E PASTE */
         .drop-zone {
             border: 2px dashed var(--primary);
             border-radius: 8px;
@@ -267,7 +265,6 @@
             gap: 10px;
         }
 
-        /* Ajustes de Impressão e PDF */
         @media print {
             body { background: white; padding: 0; }
             .container { box-shadow: none; border: none; padding: 0; max-width: 100%; }
@@ -282,7 +279,6 @@
 <body>
 
 <div class="container">
-    <!-- LOGO CENTRALIZADO SUPERIOR -->
     <div class="logo-container">
         <img src="logo.png" alt="Logo da Empresa" onerror="this.style.display='none'">
     </div>
@@ -292,7 +288,6 @@
         <span class="header-title" id="semanaHeader">ORÇAMENTOS</span>
     </h1>
 
-    <!-- 1. IDENTIFICAÇÃO E RASTREIO -->
     <div class="section-title">📍 Identificação do Atendimento</div>
     
     <div class="grid-3">
@@ -331,7 +326,6 @@
         <textarea id="motivo" placeholder="Digite o motivo do orçamento..." oninput="removerErro(this)"></textarea>
     </div>
 
-    <!-- 2. TABELA DE ITENS E SERVIÇOS -->
     <div class="section-title">📦 Peças & Serviços <span class="req">*</span></div>
     <table id="tabelaItens">
         <thead>
@@ -351,7 +345,6 @@
     </table>
     <button class="btn btn-add no-print" onclick="adicionarLinha()">+ Adicionar Item</button>
 
-    <!-- 3. FOTOS E EVIDÊNCIAS -->
     <div class="section-title">📷 Evidências Fotográficas <span class="req">*</span></div>
     
     <div class="no-print">
@@ -364,7 +357,6 @@
 
     <div class="photo-gallery" id="galeriaFotos"></div>
 
-    <!-- AÇÕES -->
     <div class="actions no-print">
         <button class="btn" onclick="imprimirOuSalvarPDF()">🖨️ Imprimir / Salvar em PDF</button>
     </div>
@@ -372,9 +364,7 @@
 
 <script>
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
-    
-    // URL DA WEB APP INTEGRADA DO GOOGLE APPS SCRIPT
-    const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbzOZp08ybPzYcgR2C_Du2YLl2fkMx16VDCSrJhRGFRkZqcms6fX9ie6noSY2YKWPS3QHQ/exec";
+    const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbx_CTDs1fCmZ1PmS5ZKstISqJ5nk0Aay0xJTia8AaWowMIh4zqXFBSXRYJu71qPeOY_Jw/exec";
 
     window.onload = function() {
         const hoje = new Date();
@@ -616,7 +606,6 @@
         return true;
     }
 
-    /* ENVIO AUTOMÁTICO PARA O GOOGLE SHEETS */
     function enviarParaGoogleSheets(dados) {
         fetch(URL_GOOGLE_SHEETS, {
             method: 'POST',
@@ -633,7 +622,6 @@
             return;
         }
 
-        // Coleta os itens da tabela
         const linhasItens = document.querySelectorAll('#corpoTabela tr');
         let listaItens = [];
         linhasItens.forEach(linha => {
@@ -642,7 +630,6 @@
             if (desc) listaItens.push(`${desc} (${qtd}x)`);
         });
 
-        // Monta a estrutura de dados
         const dados = {
             numero: document.getElementById('numOrcamento').value,
             sigla: document.getElementById('sigla').value,
@@ -654,10 +641,7 @@
             itens: listaItens.join('; ')
         };
 
-        // Envia os dados para a folha de cálculo
         enviarParaGoogleSheets(dados);
-
-        // Abre a janela de impressão
         window.print();
 
         setTimeout(() => {
