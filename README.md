@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APP ORÇAMENTO - Emissão Técnica</title>
+    <title>GFLINKS - Sistema de Orçamentos & Gestão</title>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -12,6 +12,8 @@
             --border: #cbd5e1;
             --text: #0f172a;
             --danger: #ef4444;
+            --yellow: #f59e0b;
+            --green: #10b981;
         }
 
         body {
@@ -23,8 +25,47 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
+        }
+
+        /* MENU DE NAVEGAÇÃO SUPERIOR */
+        .top-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .nav-btn {
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid var(--border);
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* CONTAINER CARDS */
+        .card-box {
             background: var(--card-bg);
             padding: 30px;
             border-radius: 12px;
@@ -78,12 +119,6 @@
         .grid-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
         }
 
@@ -176,7 +211,7 @@
         }
 
         .btn-add {
-            background-color: #10b981;
+            background-color: var(--green);
             margin-top: 10px;
         }
 
@@ -191,10 +226,6 @@
             margin-top: 4px;
         }
 
-        .btn-small:hover {
-            background-color: #475569;
-        }
-
         .drop-zone {
             border: 2px dashed var(--primary);
             border-radius: 8px;
@@ -202,12 +233,11 @@
             text-align: center;
             background-color: #f1f5f9;
             cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
+            transition: background-color 0.2s;
         }
 
         .drop-zone:hover, .drop-zone.dragover {
             background-color: #e2e8f0;
-            border-color: var(--primary-hover);
         }
 
         .drop-zone-text {
@@ -236,7 +266,6 @@
             background: #fff;
             padding: 8px;
             text-align: center;
-            position: relative;
         }
 
         .photo-card img {
@@ -265,106 +294,283 @@
             gap: 10px;
         }
 
+        /* ESTILOS DO PAINEL DE GESTÃO */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .metric-card h3 {
+            margin: 0;
+            font-size: 13px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .metric-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .card-total .number { color: var(--primary); }
+        .card-pendente .number { color: var(--yellow); }
+        .card-enviado .number { color: var(--green); }
+        .card-declinado .number { color: var(--danger); }
+
+        .sub-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .sub-tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            font-size: 15px;
+            font-weight: bold;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .sub-tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .badge-pendente { background: #fef3c7; color: #b45309; }
+        .badge-enviado { background: #d1fae5; color: #047857; }
+        .badge-declinado { background: #fee2e2; color: #b91c1c; }
+
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: none;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        .btn-action:hover { opacity: 0.85; }
+        .btn-enviar { background-color: var(--green); }
+        .btn-declinar { background-color: var(--danger); }
+        .btn-pendente { background-color: var(--yellow); }
+
+        /* AJUSTES PARA IMPRESSÃO EM PDF */
         @media print {
             body { background: white; padding: 0; }
-            .container { box-shadow: none; border: none; padding: 0; max-width: 100%; }
-            .no-print { display: none !important; }
+            .container { max-width: 100%; }
+            .top-nav, .no-print, #painelSection { display: none !important; }
+            #orcamentoSection { display: block !important; }
+            .card-box { box-shadow: none; border: none; padding: 0; }
             input, textarea { border: none !important; background: transparent !important; padding: 0 !important; }
             .photo-card img { height: auto; max-height: 200px; }
-            .btn-remove-photo { display: none !important; }
-            .req { display: none !important; }
+            .btn-remove-photo, .req { display: none !important; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="logo-container">
-        <img src="logo.png" alt="Logo da Empresa" onerror="this.style.display='none'">
+    <!-- MENU DE NAVEGAÇÃO ENTRE TELAS -->
+    <div class="top-nav no-print">
+        <button class="nav-btn active" id="btnNavOrcamento" onclick="alternarTela('orcamento')">📝 Criar Orçamento</button>
+        <button class="nav-btn" id="btnNavPainel" onclick="alternarTela('painel')">📊 Painel de Gestão</button>
     </div>
 
-    <h1>
-        <span>📝 APP ORÇAMENTO</span>
-        <span class="header-title" id="semanaHeader">ORÇAMENTOS</span>
-    </h1>
+    <!-- TELA 1: EMISSÃO DE ORÇAMENTO -->
+    <div id="orcamentoSection" class="card-box">
+        <div class="logo-container">
+            <img src="logo.png" alt="Logo da Empresa" onerror="this.style.display='none'">
+        </div>
 
-    <div class="section-title">📍 Identificação do Atendimento</div>
-    
-    <div class="grid-3">
-        <div class="form-group">
-            <label for="numOrcamento">Nº do Orçamento <span class="req">*</span></label>
-            <input type="text" id="numOrcamento" readonly style="font-weight: bold; color: var(--primary); background-color: #f1f5f9;">
-            <button class="btn-small no-print" onclick="alterarNumeroManual()">🔄 Alterar Numeração</button>
+        <h1>
+            <span>📝 APP ORÇAMENTO</span>
+            <span class="header-title" id="semanaHeader">ORÇAMENTOS</span>
+        </h1>
+
+        <div class="section-title">📍 Identificação do Atendimento</div>
+        
+        <div class="grid-3">
+            <div class="form-group">
+                <label for="numOrcamento">Nº do Orçamento <span class="req">*</span></label>
+                <input type="text" id="numOrcamento" readonly style="font-weight: bold; color: var(--primary); background-color: #f1f5f9;">
+                <button class="btn-small no-print" onclick="alterarNumeroManual()">🔄 Alterar Numeração</button>
+            </div>
+            <div class="form-group">
+                <label for="sigla">Sigla do Cliente / Loja <span class="req">*</span></label>
+                <input type="text" id="sigla" value="" placeholder="Ex: CNL" oninput="atualizarCabecalho(); removerErro(this);">
+            </div>
+            <div class="form-group">
+                <label for="dataEmissao">Data <span class="req">*</span></label>
+                <input type="date" id="dataEmissao" onchange="atualizarCabecalho(); removerErro(this);">
+            </div>
         </div>
-        <div class="form-group">
-            <label for="sigla">Sigla do Cliente / Loja <span class="req">*</span></label>
-            <input type="text" id="sigla" value="" placeholder="Ex: CNL" oninput="atualizarCabecalho(); removerErro(this);">
+
+        <div class="grid-3">
+            <div class="form-group">
+                <label for="horaEmissao">Hora <span class="req">*</span></label>
+                <input type="time" id="horaEmissao" onchange="removerErro(this)">
+            </div>
+            <div class="form-group">
+                <label for="tecnico">Técnico Responsável <span class="req">*</span></label>
+                <input type="text" id="tecnico" value="" placeholder="Nome do técnico" oninput="removerErro(this)">
+            </div>
+            <div class="form-group">
+                <label for="semanaManual">Semana do Ano</label>
+                <input type="text" id="semanaManual" placeholder="Semana X" readonly>
+            </div>
         </div>
+
         <div class="form-group">
-            <label for="dataEmissao">Data <span class="req">*</span></label>
-            <input type="date" id="dataEmissao" onchange="atualizarCabecalho(); removerErro(this);">
+            <label for="motivo">Motivo do Orçamento <span class="req">*</span></label>
+            <textarea id="motivo" placeholder="Digite o motivo do orçamento..." oninput="removerErro(this)"></textarea>
+        </div>
+
+        <div class="section-title">📦 Peças & Serviços <span class="req">*</span></div>
+        <table id="tabelaItens">
+            <thead>
+                <tr>
+                    <th style="width: 75%;">Descrição do Item / Serviço</th>
+                    <th style="width: 15%;">Qtd</th>
+                    <th class="no-print" style="width: 10%;">Ação</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela">
+                <tr>
+                    <td><input type="text" value="" placeholder="Descrição do item ou serviço" class="item-desc" oninput="removerErro(this)"></td>
+                    <td><input type="number" value="1" min="1" class="item-qtd" oninput="removerErro(this)"></td>
+                    <td class="no-print"><button class="btn btn-danger" onclick="removerLinha(this)">X</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-add no-print" onclick="adicionarLinha()">+ Adicionar Item</button>
+
+        <div class="section-title">📷 Evidências Fotográficas <span class="req">*</span></div>
+        
+        <div class="no-print">
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('fotosInput').click()">
+                <div class="drop-zone-text">📸 Clique aqui para escolher as fotos ou Arraste os arquivos</div>
+                <div class="drop-zone-subtext">💡 Você também pode **COLAR** uma imagem copiada pressionando **Ctrl + V**!</div>
+            </div>
+            <input type="file" id="fotosInput" accept="image/*" multiple style="display: none;" onchange="carregarFotos(event)">
+        </div>
+
+        <div class="photo-gallery" id="galeriaFotos"></div>
+
+        <div class="actions no-print">
+            <button class="btn" onclick="imprimirOuSalvarPDF()">🖨️ Imprimir / Salvar em PDF</button>
         </div>
     </div>
 
-    <div class="grid-3">
-        <div class="form-group">
-            <label for="horaEmissao">Hora <span class="req">*</span></label>
-            <input type="time" id="horaEmissao" onchange="removerErro(this)">
+    <!-- TELA 2: PAINEL DE GESTÃO -->
+    <div id="painelSection" class="card-box" style="display: none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h1 style="border:none; padding:0; margin:0;">📊 Painel de Gestão de Orçamentos</h1>
+            <button class="btn" onclick="carregarDadosPainel()">🔄 Atualizar Dados</button>
         </div>
-        <div class="form-group">
-            <label for="tecnico">Técnico Responsável <span class="req">*</span></label>
-            <input type="text" id="tecnico" value="" placeholder="Nome do técnico" oninput="removerErro(this)">
+
+        <!-- MÉTRICAS -->
+        <div class="metrics-grid">
+            <div class="metric-card card-total">
+                <h3>Total Geral</h3>
+                <div class="number" id="mTotal">0</div>
+            </div>
+            <div class="metric-card card-pendente">
+                <h3>Pendentes</h3>
+                <div class="number" id="mPendente">0</div>
+            </div>
+            <div class="metric-card card-enviado">
+                <h3>Enviados</h3>
+                <div class="number" id="mEnviado">0</div>
+            </div>
+            <div class="metric-card card-declinado">
+                <h3>Declinados</h3>
+                <div class="number" id="mDeclinado">0</div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="semanaManual">Semana do Ano</label>
-            <input type="text" id="semanaManual" placeholder="Semana X" readonly>
+
+        <!-- ABAS DE STATUS -->
+        <div class="sub-tabs">
+            <button class="sub-tab-btn active" id="tabPendentesBtn" onclick="alternarSubAba('pendentes')">⏳ Pendentes (<span id="countTabPendentes">0</span>)</button>
+            <button class="sub-tab-btn" id="tabHistoricoBtn" onclick="alternarSubAba('historico')">📁 Histórico (Enviados e Declinados)</button>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label for="motivo">Motivo do Orçamento <span class="req">*</span></label>
-        <textarea id="motivo" placeholder="Digite o motivo do orçamento..." oninput="removerErro(this)"></textarea>
-    </div>
-
-    <div class="section-title">📦 Peças & Serviços <span class="req">*</span></div>
-    <table id="tabelaItens">
-        <thead>
-            <tr>
-                <th style="width: 75%;">Descrição do Item / Serviço</th>
-                <th style="width: 15%;">Qtd</th>
-                <th class="no-print" style="width: 10%;">Ação</th>
-            </tr>
-        </thead>
-        <tbody id="corpoTabela">
-            <tr>
-                <td><input type="text" value="" placeholder="Descrição do item ou serviço" class="item-desc" oninput="removerErro(this)"></td>
-                <td><input type="number" value="1" min="1" class="item-qtd" oninput="removerErro(this)"></td>
-                <td class="no-print"><button class="btn btn-danger" onclick="removerLinha(this)">X</button></td>
-            </tr>
-        </tbody>
-    </table>
-    <button class="btn btn-add no-print" onclick="adicionarLinha()">+ Adicionar Item</button>
-
-    <div class="section-title">📷 Evidências Fotográficas <span class="req">*</span></div>
-    
-    <div class="no-print">
-        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fotosInput').click()">
-            <div class="drop-zone-text">📸 Clique aqui para escolher as fotos ou Arraste os arquivos</div>
-            <div class="drop-zone-subtext">💡 Você também pode **COLAR** uma imagem copiada pressionando **Ctrl + V**!</div>
+        <!-- TABELA PENDENTES -->
+        <div id="viewPendentes" style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nº Orçamento</th>
+                        <th>Sigla</th>
+                        <th>Data / Hora</th>
+                        <th>Técnico</th>
+                        <th>Motivo</th>
+                        <th>Itens</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="listaPendentes">
+                    <tr><td colspan="8" style="text-align:center;">Carregando dados...</td></tr>
+                </tbody>
+            </table>
         </div>
-        <input type="file" id="fotosInput" accept="image/*" multiple style="display: none;" onchange="carregarFotos(event)">
-    </div>
 
-    <div class="photo-gallery" id="galeriaFotos"></div>
-
-    <div class="actions no-print">
-        <button class="btn" onclick="imprimirOuSalvarPDF()">🖨️ Imprimir / Salvar em PDF</button>
+        <!-- TABELA HISTÓRICO -->
+        <div id="viewHistorico" style="display: none; overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nº Orçamento</th>
+                        <th>Sigla</th>
+                        <th>Data / Hora</th>
+                        <th>Técnico</th>
+                        <th>Motivo</th>
+                        <th>Itens</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="listaHistorico">
+                    <tr><td colspan="8" style="text-align:center;">Carregando dados...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
     const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbx_CTDs1fCmZ1PmS5ZKstISqJ5nk0Aay0xJTia8AaWowMIh4zqXFBSXRYJu71qPeOY_Jw/exec";
+    const SENHA_AUTORIZACAO = "GF01";
+
+    let todosOrcamentos = [];
 
     window.onload = function() {
         const hoje = new Date();
@@ -389,6 +595,28 @@
         configurarEventosColarEArrastar();
     };
 
+    /* ALTERNAR TELA PRINCIPAL (ORÇAMENTO x PAINEL) */
+    function alternarTela(tela) {
+        const secOrcamento = document.getElementById('orcamentoSection');
+        const secPainel = document.getElementById('painelSection');
+        const btnOrcamento = document.getElementById('btnNavOrcamento');
+        const btnPainel = document.getElementById('btnNavPainel');
+
+        if (tela === 'orcamento') {
+            secOrcamento.style.display = 'block';
+            secPainel.style.display = 'none';
+            btnOrcamento.classList.add('active');
+            btnPainel.classList.remove('active');
+        } else {
+            secOrcamento.style.display = 'none';
+            secPainel.style.display = 'block';
+            btnPainel.classList.add('active');
+            btnOrcamento.classList.remove('active');
+            carregarDadosPainel();
+        }
+    }
+
+    /* SISTEMA DE ORÇAMENTOS */
     function carregarNumeroOrcamento() {
         let numeroSalvo = localStorage.getItem(CHAVE_BANCO_NUMERO);
         if (!numeroSalvo) {
@@ -648,6 +876,131 @@
             avançarNumeroOrcamento();
             atualizarCabecalho();
         }, 1000);
+    }
+
+    /* PAINEL DE GESTÃO */
+    function carregarDadosPainel() {
+        fetch(URL_GOOGLE_SHEETS)
+            .then(res => res.json())
+            .then(data => {
+                todosOrcamentos = data;
+                renderizarDashboard();
+            })
+            .catch(err => {
+                console.error("Erro ao carregar dados:", err);
+                alert("Erro ao carregar os dados da planilha.");
+            });
+    }
+
+    function renderizarDashboard() {
+        let cntPendente = 0, cntEnviado = 0, cntDeclinado = 0;
+
+        const tbodyPendentes = document.getElementById('listaPendentes');
+        const tbodyHistorico = document.getElementById('listaHistorico');
+
+        tbodyPendentes.innerHTML = '';
+        tbodyHistorico.innerHTML = '';
+
+        todosOrcamentos.forEach(item => {
+            const status = (item.status || 'PENDENTE').toUpperCase();
+
+            if (status === 'PENDENTE') cntPendente++;
+            else if (status === 'ENVIADO') cntEnviado++;
+            else if (status === 'DECLINADO') cntDeclinado++;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${item.numero}</b></td>
+                <td>${item.sigla}</td>
+                <td>${item.data} ${item.hora}</td>
+                <td>${item.tecnico}</td>
+                <td>${item.motivo}</td>
+                <td><small>${item.itens}</small></td>
+                <td><span class="badge badge-${status.toLowerCase()}">${status}</span></td>
+                <td>${gerarBotoesAcao(item.numero, status)}</td>
+            `;
+
+            if (status === 'PENDENTE') {
+                tbodyPendentes.appendChild(tr);
+            } else {
+                tbodyHistorico.appendChild(tr);
+            }
+        });
+
+        if (tbodyPendentes.children.length === 0) {
+            tbodyPendentes.innerHTML = '<tr><td colspan="8" style="text-align:center;">Nenhum orçamento pendente.</td></tr>';
+        }
+        if (tbodyHistorico.children.length === 0) {
+            tbodyHistorico.innerHTML = '<tr><td colspan="8" style="text-align:center;">Nenhum histórico registrado.</td></tr>';
+        }
+
+        document.getElementById('mTotal').innerText = todosOrcamentos.length;
+        document.getElementById('mPendente').innerText = cntPendente;
+        document.getElementById('mEnviado').innerText = cntEnviado;
+        document.getElementById('mDeclinado').innerText = cntDeclinado;
+        document.getElementById('countTabPendentes').innerText = cntPendente;
+    }
+
+    function gerarBotoesAcao(numero, statusAtual) {
+        if (statusAtual === 'PENDENTE') {
+            return `
+                <button class="btn-action btn-enviar" onclick="alterarStatus('${numero}', 'ENVIADO')">Enviar</button>
+                <button class="btn-action btn-declinar" onclick="alterarStatus('${numero}', 'DECLINADO')">Declinar</button>
+            `;
+        } else {
+            return `
+                <button class="btn-action btn-pendente" onclick="alterarStatus('${numero}', 'PENDENTE')">Voltar p/ Pendente</button>
+            `;
+        }
+    }
+
+    function alternarSubAba(aba) {
+        const btnPendentes = document.getElementById('tabPendentesBtn');
+        const btnHistorico = document.getElementById('tabHistoricoBtn');
+        const viewPendentes = document.getElementById('viewPendentes');
+        const viewHistorico = document.getElementById('viewHistorico');
+
+        if (aba === 'pendentes') {
+            btnPendentes.classList.add('active');
+            btnHistorico.classList.remove('active');
+            viewPendentes.style.display = 'block';
+            viewHistorico.style.display = 'none';
+        } else {
+            btnHistorico.classList.add('active');
+            btnPendentes.classList.remove('active');
+            viewHistorico.style.display = 'block';
+            viewHistorico.style.display = 'none';
+        }
+    }
+
+    function alterarStatus(numero, novoStatus) {
+        const senhaDigitada = prompt(`Para alterar o status do Orçamento Nº ${numero} para ${novoStatus}, digite a senha de confirmação:`);
+
+        if (senhaDigitada === null) return;
+
+        if (senhaDigitada !== SENHA_AUTORIZACAO) {
+            alert("❌ Senha incorreta! A alteração não foi realizada.");
+            return;
+        }
+
+        const payload = {
+            action: "updateStatus",
+            numero: numero,
+            status: novoStatus
+        };
+
+        fetch(URL_GOOGLE_SHEETS, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            alert(`✅ Status do Orçamento Nº ${numero} atualizado para ${novoStatus}!`);
+            carregarDadosPainel();
+        })
+        .catch(err => {
+            console.error("Erro ao alterar status:", err);
+            alert("Erro ao atualizar o status na planilha.");
+        });
     }
 </script>
 
