@@ -3,6 +3,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GFLINKS - Sistema de Orçamentos, Gestão & PDFs</title>
+
+    <!-- BIBLIOTECA PARA LEITURA DE TEXTO EM PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
     <style>
         :root {
             --primary: #1e3a8a;
@@ -401,6 +405,17 @@
         .btn-declinar { background-color: var(--danger); }
         .btn-pendente { background-color: var(--yellow); }
 
+        .status-alert {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+
         @media print {
             body { background: white; padding: 0; }
             .container { max-width: 100%; }
@@ -563,10 +578,14 @@
         </div>
     </div>
 
-    <!-- TELA 3: IMPORTAR PDF ANTIGO -->
+    <!-- TELA 3: IMPORTAR PDF ANTIGO COM LEITURA AUTOMÁTICA DA FICHA -->
     <div id="importarPdfSection" class="card-box" style="display: none;">
         <h1><span>📤 Importar Orçamento Antigo (PDF)</span></h1>
-        <p style="font-size:13px; color:#64748b;">Cadastre orçamentos anteriores para incluí-los no Painel de Gestão.</p>
+        <p style="font-size:13px; color:#64748b;">Ao selecionar um arquivo PDF, os dados serão lidos e preenchidos automaticamente no formulário abaixo.</p>
+
+        <div id="alertLeituraPdf" class="status-alert">
+            ✨ Dados lidos e preenchidos automaticamente do arquivo PDF!
+        </div>
 
         <div class="grid-2" style="margin-top:20px;">
             <div>
@@ -619,6 +638,7 @@
                 <div class="section-title">📄 Selecionar PDF do Computador</div>
                 <div class="drop-zone" onclick="document.getElementById('impFilePdf').click()">
                     <div class="drop-zone-text">📁 Clique para selecionar o PDF antigo</div>
+                    <div class="drop-zone-subtext">Os dados serão extraídos automaticamente após a seleção</div>
                 </div>
                 <input type="file" id="impFilePdf" accept="application/pdf" style="display:none;" onchange="previewPdfImportacao(event)">
 
@@ -642,6 +662,10 @@
 </div>
 
 <script>
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
     const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbwsk-oIUSGH-Mhcp2i-xClD_ETo0_waoaHitR9RMxyhfGMm6-_ssTM5BvLHs_iaST_Ctw/exec";
     const SENHA_AUTORIZACAO = "GF01";
@@ -1020,13 +1044,94 @@
         .catch(err => alert("Erro ao atualizar status."));
     }
 
-    /* IMPORTAR PDF ANTIGO */
-    function previewPdfImportacao(event) {
+    /* IMPORTAR PDF ANTIGO E LEITURA AUTOMÁTICA */
+    async function previewPdfImportacao(event) {
         const file = event.target.files[0];
         const viewer = document.getElementById('impPdfViewer');
-        if (file && file.type === 'application/pdf') {
-            viewer.src = URL.createObjectURL(file);
-            viewer.style.display = 'block';
+        const alertBox = document.getElementById('alertLeituraPdf');
+
+        if (!file || file.type !== 'application/pdf') return;
+
+        viewer.src = URL.createObjectURL(file);
+        viewer.style.display = 'block';
+
+        if (typeof pdfjsLib === 'undefined') return;
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = '';
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                fullText += pageText + '\n';
+            }
+
+            extrairPreencherDadosDoTexto(fullText, file.name);
+
+            alertBox.style.display = 'block';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
+        } catch (err) {
+            console.error("Erro ao ler o arquivo PDF:", err);
+        }
+    }
+
+    function extrairPreencherDadosDoTexto(texto, nomeArquivo) {
+        // Extrai Nº do Orçamento
+        let numMatch = texto.match(/ORÇAMENTO\s*N[º°]?\s*(\d+)/i) || texto.match(/ORÇAMENTOS?\s*(\d+)/i) || nomeArquivo.match(/(\d{4})/);
+        if (numMatch && numMatch[1]) {
+            document.getElementById('impNum').value = String(numMatch[1]).padStart(4, '0');
+        }
+
+        // Extrai Sigla do Cliente / Loja
+        let siglaMatch = texto.match(/Sigla\s*(?:do\s*Cliente\s*\/?\s*Loja)?:?\s*([A-Za-z0-9_-]+)/i);
+        if (siglaMatch && siglaMatch[1]) {
+            document.getElementById('impSigla').value = siglaMatch[1].trim().toUpperCase();
+        }
+
+        // Extrai Data (DD/MM/YYYY) e converte para YYYY-MM-DD
+        let dataMatch = texto.match(/Data:?\s*(\d{2}\/\d{2}\/\d{4})/i) || texto.match(/(\d{2}\/\d{2}\/\d{4})/);
+        if (dataMatch && dataMatch[1]) {
+            let partes = dataMatch[1].split('/');
+            if (partes.length === 3) {
+                document.getElementById('impData').value = `${partes[2]}-${partes[1]}-${partes[0]}`;
+            }
+        }
+
+        // Extrai Técnico Responsável
+        let tecMatch = texto.match(/Técnico\s*(?:Responsável)?:?\s*([A-Za-zÀ-ÿ\s]+?)(?=\s*Semana|\s*Data|\s*Hora|\s*Endereço|\n|$)/i);
+        if (tecMatch && tecMatch[1]) {
+            document.getElementById('impTecnico').value = tecMatch[1].trim();
+        }
+
+        // Extrai Motivo / Endereço do Atendimento
+        let motMatch = texto.match(/(?:Endereço\s*Completo\s*do\s*Local|Motivo\s*(?:do\s*Orçamento)?):?\s*([\s\S]+?)(?=\s*PEÇAS|\s*Evidências|\n\n|$)/i);
+        if (motMatch && motMatch[1]) {
+            let motivoLimpo = motMatch[1].replace(/\s+/g, ' ').trim();
+            document.getElementById('impMotivo').value = motivoLimpo;
+        }
+
+        // Extrai Peças & Serviços
+        let pecasIdx = texto.indexOf('PEÇAS & SERVIÇOS');
+        if (pecasIdx !== -1) {
+            let subTexto = texto.substring(pecasIdx);
+            let regexItens = /([A-Za-z0-9À-ÿ\s\-\.\/]+?)\s+(\d+)\b/g;
+            let match;
+            let itensArray = [];
+
+            while ((match = regexItens.exec(subTexto)) !== null) {
+                let nomeItem = match[1].replace(/Descrição do Item \/ Serviço/gi, '').replace(/Qtd/gi, '').trim();
+                let qtd = match[2];
+                if (nomeItem && !nomeItem.toUpperCase().includes('DESCRIÇÃO') && !nomeItem.toUpperCase().includes('SERVIÇO')) {
+                    itensArray.push(`${nomeItem} (${qtd}x)`);
+                }
+            }
+
+            if (itensArray.length > 0) {
+                document.getElementById('impItens').value = itensArray.join('; ');
+            }
         }
     }
 
@@ -1040,7 +1145,7 @@
         const itens = document.getElementById('impItens').value.trim();
 
         if (!num || !sigla || !data || !tecnico || !motivo) {
-            alert("⚠️️ Preencha os campos obrigatórios.");
+            alert("⚠️ Preencha os campos obrigatórios.");
             return;
         }
 
