@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GFLINKS - Sistema de Orçamentos & Gestão</title>
+    <title>GFLINKS - Sistema de Orçamentos, Gestão & PDFs</title>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -33,20 +33,21 @@
         .top-nav {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 25px;
             background: var(--card-bg);
             padding: 12px;
             border-radius: 10px;
             border: 1px solid var(--border);
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
         }
 
         .nav-btn {
             background-color: #f1f5f9;
             color: #334155;
             border: 1px solid var(--border);
-            padding: 10px 24px;
+            padding: 10px 20px;
             border-radius: 8px;
             font-weight: bold;
             font-size: 14px;
@@ -64,7 +65,7 @@
             border-color: var(--primary);
         }
 
-        /* CONTAINER CARDS */
+        /* CAIXAS DAS TELAS */
         .card-box {
             background: var(--card-bg);
             padding: 30px;
@@ -294,7 +295,7 @@
             gap: 10px;
         }
 
-        /* ESTILOS DO PAINEL DE GESTÃO */
+        /* PAINEL DE GESTÃO */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -381,11 +382,26 @@
         .btn-declinar { background-color: var(--danger); }
         .btn-pendente { background-color: var(--yellow); }
 
-        /* AJUSTES PARA IMPRESSÃO EM PDF */
+        /* GALERIA & VISUALIZADOR DE PDF */
+        .pdf-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .pdf-viewer-box {
+            margin-top: 25px;
+            border-top: 2px solid var(--border);
+            padding-top: 20px;
+        }
+
+        /* AJUSTES PARA IMPRESSÃO EM PDF DO ORÇAMENTO */
         @media print {
             body { background: white; padding: 0; }
             .container { max-width: 100%; }
-            .top-nav, .no-print, #painelSection { display: none !important; }
+            .top-nav, .no-print, #painelSection, #galeriaPdfSection { display: none !important; }
             #orcamentoSection { display: block !important; }
             .card-box { box-shadow: none; border: none; padding: 0; }
             input, textarea { border: none !important; background: transparent !important; padding: 0 !important; }
@@ -397,10 +413,11 @@
 <body>
 
 <div class="container">
-    <!-- MENU DE NAVEGAÇÃO ENTRE TELAS -->
+    <!-- MENU DE NAVEGAÇÃO PRINCIPAL -->
     <div class="top-nav no-print">
         <button class="nav-btn active" id="btnNavOrcamento" onclick="alternarTela('orcamento')">📝 Criar Orçamento</button>
         <button class="nav-btn" id="btnNavPainel" onclick="alternarTela('painel')">📊 Painel de Gestão</button>
+        <button class="nav-btn" id="btnNavGaleria" onclick="alternarTela('galeria')">📂 Galeria & PDFs</button>
     </div>
 
     <!-- TELA 1: EMISSÃO DE ORÇAMENTO -->
@@ -515,7 +532,7 @@
             </div>
         </div>
 
-        <!-- ABAS DE STATUS -->
+        <!-- SUB ABAS -->
         <div class="sub-tabs">
             <button class="sub-tab-btn active" id="tabPendentesBtn" onclick="alternarSubAba('pendentes')">⏳ Pendentes (<span id="countTabPendentes">0</span>)</button>
             <button class="sub-tab-btn" id="tabHistoricoBtn" onclick="alternarSubAba('historico')">📁 Histórico (Enviados e Declinados)</button>
@@ -563,11 +580,42 @@
             </table>
         </div>
     </div>
+
+    <!-- TELA 3: GALERIA E VISUALIZADOR DE PDF -->
+    <div id="galeriaPdfSection" class="card-box" style="display: none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h1 style="border:none; padding:0; margin:0;">📁 Galeria e Visualizador de PDFs</h1>
+            <a href="https://drive.google.com/drive/folders/12p-H152le372P0Nx4C2_vX5hK34caOeS" target="_blank" class="btn" style="text-decoration:none;">🔗 Abrir Pasta no Google Drive</a>
+        </div>
+
+        <div class="pdf-controls">
+            <button class="btn-small" style="padding:8px 14px; font-size:13px;" onclick="alternarModoPasta('grid')">📱 Modo Grade (Ícones)</button>
+            <button class="btn-small" style="padding:8px 14px; font-size:13px;" onclick="alternarModoPasta('list')">📜 Modo Lista</button>
+        </div>
+
+        <!-- PASTA DO GOOGLE DRIVE INCORPORADA -->
+        <div class="section-title">📂 Arquivos da Pasta do Google Drive</div>
+        <iframe id="folderIframe" src="https://drive.google.com/embeddedfolderview?id=12p-H152le372P0Nx4C2_vX5hK34caOeS#grid" width="100%" height="480" style="border: 1px solid var(--border); border-radius: 8px;"></iframe>
+
+        <!-- VISUALIZADOR INDIVIDUAL DE PDF -->
+        <div class="pdf-viewer-box">
+            <div class="section-title">🔍 Visualizador Direto de Documento PDF</div>
+            <p style="font-size:13px; color:#64748b; margin-top:-5px;">Cole o link ou o ID do arquivo do Google Drive para visualizá-lo em tela cheia abaixo:</p>
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" id="pdfUrlInput" placeholder="Ex: https://drive.google.com/file/d/12p-H152le372P0Nx4C2_vX5hK34caOeS/view ou o ID do arquivo">
+                <button class="btn" style="white-space:nowrap;" onclick="carregarPdfPorInput()">🔍 Visualizar PDF</button>
+            </div>
+
+            <iframe id="pdfPreviewFrame" src="" width="100%" height="600" style="border: 1px solid var(--border); border-radius: 8px; display:none;"></iframe>
+        </div>
+    </div>
 </div>
 
 <script>
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
     const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbx_CTDs1fCmZ1PmS5ZKstISqJ5nk0Aay0xJTia8AaWowMIh4zqXFBSXRYJu71qPeOY_Jw/exec";
+    const ID_PASTA_DRIVE = "12p-H152le372P0Nx4C2_vX5hK34caOeS";
     const SENHA_AUTORIZACAO = "GF01";
 
     let todosOrcamentos = [];
@@ -595,28 +643,39 @@
         configurarEventosColarEArrastar();
     };
 
-    /* ALTERNAR TELA PRINCIPAL (ORÇAMENTO x PAINEL) */
+    /* NAVEGAÇÃO ENTRE AS TELAS PRINCIPAIS */
     function alternarTela(tela) {
         const secOrcamento = document.getElementById('orcamentoSection');
         const secPainel = document.getElementById('painelSection');
+        const secGaleria = document.getElementById('galeriaPdfSection');
+
         const btnOrcamento = document.getElementById('btnNavOrcamento');
         const btnPainel = document.getElementById('btnNavPainel');
+        const btnGaleria = document.getElementById('btnNavGaleria');
+
+        // Esconde todas
+        secOrcamento.style.display = 'none';
+        secPainel.style.display = 'none';
+        secGaleria.style.display = 'none';
+
+        btnOrcamento.classList.remove('active');
+        btnPainel.classList.remove('active');
+        btnGaleria.classList.remove('active');
 
         if (tela === 'orcamento') {
             secOrcamento.style.display = 'block';
-            secPainel.style.display = 'none';
             btnOrcamento.classList.add('active');
-            btnPainel.classList.remove('active');
-        } else {
-            secOrcamento.style.display = 'none';
+        } else if (tela === 'painel') {
             secPainel.style.display = 'block';
             btnPainel.classList.add('active');
-            btnOrcamento.classList.remove('active');
             carregarDadosPainel();
+        } else if (tela === 'galeria') {
+            secGaleria.style.display = 'block';
+            btnGaleria.classList.add('active');
         }
     }
 
-    /* SISTEMA DE ORÇAMENTOS */
+    /* EMISSÃO DE ORÇAMENTO */
     function carregarNumeroOrcamento() {
         let numeroSalvo = localStorage.getItem(CHAVE_BANCO_NUMERO);
         if (!numeroSalvo) {
@@ -878,7 +937,7 @@
         }, 1000);
     }
 
-    /* PAINEL DE GESTÃO */
+    /* PAINEL DE GESTÃO DE ORÇAMENTOS */
     function carregarDadosPainel() {
         fetch(URL_GOOGLE_SHEETS)
             .then(res => res.json())
@@ -1001,6 +1060,35 @@
             console.error("Erro ao alterar status:", err);
             alert("Erro ao atualizar o status na planilha.");
         });
+    }
+
+    /* GALERIA & VISUALIZADOR DE PDF */
+    function alternarModoPasta(modo) {
+        const iframe = document.getElementById('folderIframe');
+        iframe.src = `https://drive.google.com/embeddedfolderview?id=${ID_PASTA_DRIVE}#${modo}`;
+    }
+
+    function carregarPdfPorInput() {
+        const val = document.getElementById('pdfUrlInput').value.trim();
+        const frame = document.getElementById('pdfPreviewFrame');
+
+        if (!val) {
+            alert("Por favor, cole o link ou ID de um arquivo PDF do Google Drive.");
+            return;
+        }
+
+        let fileId = val;
+
+        // Extrai o ID caso tenha colado um link completo do Drive
+        if (val.includes('/d/')) {
+            const partes = val.split('/d/');
+            if (partes[1]) {
+                fileId = partes[1].split('/')[0].split('?')[0];
+            }
+        }
+
+        frame.src = `https://drive.google.com/file/d/${fileId}/preview`;
+        frame.style.display = 'block';
     }
 </script>
 
