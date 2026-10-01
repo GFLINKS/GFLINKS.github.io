@@ -1,9 +1,8 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Orçamentos </title>
+    <title>Sistema de Orçamentos, Gestão & PDFs</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -76,15 +75,15 @@
                 </div>
                 <div class="space-y-1">
                     <label class="block text-xs font-semibold text-slate-600">Sigla do Cliente / Loja <span class="text-rose-500">*</span></label>
-                    <input type="text" id="sigla" placeholder="Ex: CNL" class="w-full text-xs px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 uppercase font-semibold" oninput="atualizarCabecalho(); removerErro(this);">
+                    <input type="text" id="sigla" placeholder="Ex: CNL" class="w-full text-xs px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 uppercase font-semibold" oninput="removerErro(this);">
                 </div>
                 <div class="space-y-1">
                     <label class="block text-xs font-semibold text-slate-600">Data <span class="text-rose-500">*</span></label>
-                    <input type="date" id="dataEmissao" class="w-full text-xs px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" onchange="atualizarCabecalho(); removerErro(this);">
+                    <input type="date" id="dataEmissao" class="w-full text-xs px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" onchange="removerErro(this);">
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div class="space-y-1">
                     <label class="block text-xs font-semibold text-slate-600">Hora <span class="text-rose-500">*</span></label>
                     <input type="time" id="horaEmissao" class="w-full text-xs px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" onchange="removerErro(this)">
@@ -92,10 +91,6 @@
                 <div class="space-y-1">
                     <label class="block text-xs font-semibold text-slate-600">Técnico Responsável <span class="text-rose-500">*</span></label>
                     <input type="text" id="tecnico" placeholder="Nome do técnico" class="w-full text-xs px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" oninput="removerErro(this)">
-                </div>
-                <div class="space-y-1">
-                    <label class="block text-xs font-semibold text-slate-600">Semana do Ano</label>
-                    <input type="text" id="semanaManual" placeholder="Semana X" readonly class="w-full text-xs px-3 py-2.5 border border-slate-300 rounded-lg bg-slate-50 font-semibold text-slate-500">
                 </div>
             </div>
 
@@ -268,7 +263,6 @@
         }
 
         carregarNumeroOrcamento();
-        atualizarCabecalho();
         configurarEventosColarEArrastar();
         carregarDadosSilenciosamente();
     };
@@ -289,7 +283,6 @@
             document.getElementById('painelSection').classList.remove('hidden');
             document.getElementById('btnNavPainel').className = 'nav-btn bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2 active';
             
-            // Força a seleção do card e da aba de Pendentes ao abrir o painel
             filtrarStatusPeloCard('PENDENTE');
             carregarDadosPainel();
         } else if (tela === 'galeria') {
@@ -329,25 +322,6 @@
             let numParsed = parseInt(novo);
             localStorage.setItem(CHAVE_BANCO_NUMERO, numParsed);
             exibirNumeroFormatado(numParsed);
-            atualizarCabecalho();
-        }
-    }
-
-    function getNumeroSemana(d) {
-        const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-        const dayNum = date.getUTCDay() || 7;
-        date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-        const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-        return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-    }
-
-    function atualizarCabecalho() {
-        const dataVal = document.getElementById('dataEmissao').value;
-        if (dataVal) {
-            const partes = dataVal.split('-');
-            const dataObj = new Date(partes[0], partes[1] - 1, partes[2]);
-            const numSemana = getNumeroSemana(dataObj);
-            document.getElementById('semanaManual').value = `Semana ${numSemana}`;
         }
     }
 
@@ -542,7 +516,7 @@
             data: document.getElementById('dataEmissao').value,
             hora: document.getElementById('horaEmissao').value,
             tecnico: document.getElementById('tecnico').value,
-            semana: document.getElementById('semanaManual').value,
+            semana: "",
             motivo: document.getElementById('motivo').value,
             itens: listaItens.join('; '),
             status: "PENDENTE"
@@ -553,7 +527,6 @@
 
         setTimeout(() => {
             avançarNumeroOrcamento();
-            atualizarCabecalho();
             carregarDadosSilenciosamente();
         }, 1000);
     }
