@@ -180,24 +180,48 @@
             min-height: 65px;
         }
 
+        /* ESTILIZAÇÃO E REDIMENSIONAMENTO DA TABELA */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-top: 15px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            min-width: 850px;
+            background: white;
         }
 
         th, td {
             border: 1px solid var(--border);
-            padding: 10px;
+            padding: 12px 10px;
             text-align: left;
-            font-size: 14px;
+            font-size: 13px;
+            vertical-align: middle;
+            line-height: 1.4;
         }
 
         th {
             background-color: #f1f5f9;
             color: #334155;
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
         }
+
+        .col-num { width: 8%; text-align: center; font-weight: bold; }
+        .col-sigla { width: 8%; text-align: center; font-weight: 600; }
+        .col-data { width: 14%; white-space: nowrap; }
+        .col-tec { width: 12%; font-weight: 600; }
+        .col-motivo { width: 26%; word-break: break-word; }
+        .col-itens { width: 18%; word-break: break-word; font-size: 12px; color: #334155; }
+        .col-status { width: 8%; text-align: center; white-space: nowrap; }
+        .col-acoes { width: 10%; text-align: center; white-space: nowrap; }
 
         .btn {
             background-color: var(--primary);
@@ -378,9 +402,9 @@
         }
 
         .badge {
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             display: inline-block;
         }
@@ -398,6 +422,7 @@
             cursor: pointer;
             color: white;
             transition: opacity 0.2s;
+            margin: 2px 0;
         }
 
         .btn-action:hover { opacity: 0.85; }
@@ -557,18 +582,18 @@
             <button class="sub-tab-btn" id="tabTodosBtn" onclick="filtrarStatusPeloCard('TODOS')">📋 Todos</button>
         </div>
 
-        <div style="overflow-x:auto;">
+        <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>Nº Orçamento</th>
-                        <th>Sigla</th>
-                        <th>Data / Hora</th>
-                        <th>Técnico</th>
-                        <th>Motivo</th>
-                        <th>Itens / Detalhes</th>
-                        <th>Status</th>
-                        <th>Ações</th>
+                        <th class="col-num">Nº</th>
+                        <th class="col-sigla">Sigla</th>
+                        <th class="col-data">Data / Hora</th>
+                        <th class="col-tec">Técnico</th>
+                        <th class="col-motivo">Motivo do Atendimento</th>
+                        <th class="col-itens">Itens / Detalhes</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-acoes">Ações</th>
                     </tr>
                 </thead>
                 <tbody id="tabelaPainelBody">
@@ -578,7 +603,7 @@
         </div>
     </div>
 
-    <!-- TELA 3: IMPORTAR PDF ANTIGO COM LEITURA AUTOMÁTICA DA FICHA -->
+    <!-- TELA 3: IMPORTAR PDF ANTIGO -->
     <div id="importarPdfSection" class="card-box" style="display: none;">
         <h1><span>📤 Importar Orçamento Antigo (PDF)</span></h1>
         <p style="font-size:13px; color:#64748b;">Ao selecionar um arquivo PDF, os dados serão lidos e preenchidos automaticamente no formulário abaixo.</p>
@@ -667,7 +692,7 @@
     }
 
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
-    const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbwsk-oIUSGH-Mhcp2i-xClD_ETo0_waoaHitR9RMxyhfGMm6-_ssTM5BvLHs_iaST_Ctw/exec";
+    const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbyx3HZZ16vgxZ_5vSvCyEWZbQhaIXCExf7vTQUDHPiHAnUUdJEE0Q6h3KonFOJZ0dsNKA/exec";
     const SENHA_AUTORIZACAO = "GF01";
 
     let todosOrcamentos = [];
@@ -982,6 +1007,38 @@
         renderizarTabelaFiltrada();
     }
 
+    function formatarDataHoraLimpo(dataRaw, horaRaw) {
+        if (!dataRaw) return '-';
+
+        let dataStr = String(dataRaw).trim();
+        let horaStr = String(horaRaw || '').trim();
+
+        if (dataStr.includes('GMT') || dataStr.includes('1899') || dataStr.includes('Sat') || dataStr.includes('Sun')) {
+            let matchData = dataStr.match(/(\d{2}\/\d{2}\/\d{4})/);
+            if (matchData) dataStr = matchData[1];
+        }
+
+        if (horaStr.includes('1899') || horaStr.includes('GMT')) {
+            let matchHora = horaStr.match(/(\d{2}:\d{2})/);
+            horaStr = matchHora ? matchHora[1] : '';
+        }
+
+        if (dataStr.includes('-')) {
+            let p = dataStr.split('-');
+            if (p.length === 3) dataStr = `${p[2]}/${p[1]}/${p[0]}`;
+        }
+
+        if (horaStr) {
+            let hPartes = horaStr.split(':');
+            if (hPartes.length >= 2) {
+                horaStr = `${hPartes[0].padStart(2, '0')}:${hPartes[1].padStart(2, '0')}`;
+            }
+            return `📅 ${dataStr}<br><span style="color:#64748b; font-size:12px;">⏰ ${horaStr}</span>`;
+        }
+
+        return `📅 ${dataStr}`;
+    }
+
     function renderizarTabelaFiltrada() {
         const tbody = document.getElementById('tabelaPainelBody');
         tbody.innerHTML = '';
@@ -993,7 +1050,7 @@
         });
 
         if (itensFiltrados.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">Nenhum orçamento com status: <b>${statusFiltroAtual}</b></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:25px; color:#64748b;">Nenhum orçamento encontrado com o status: <b>${statusFiltroAtual}</b></td></tr>`;
             return;
         }
 
@@ -1001,14 +1058,14 @@
             const st = (item.status || 'PENDENTE').toUpperCase();
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><b>${item.numero}</b></td>
-                <td>${item.sigla}</td>
-                <td>${item.data} ${item.hora}</td>
-                <td>${item.tecnico}</td>
-                <td>${item.motivo}</td>
-                <td><small>${item.itens || '-'}</small></td>
-                <td><span class="badge badge-${st.toLowerCase()}">${st}</span></td>
-                <td>${gerarBotoesAcao(item.numero, st)}</td>
+                <td class="col-num">${item.numero}</td>
+                <td class="col-sigla">${item.sigla}</td>
+                <td class="col-data">${formatarDataHoraLimpo(item.data, item.hora)}</td>
+                <td class="col-tec">${item.tecnico || '-'}</td>
+                <td class="col-motivo">${item.motivo || '-'}</td>
+                <td class="col-itens">${item.itens || '-'}</td>
+                <td class="col-status"><span class="badge badge-${st.toLowerCase()}">${st}</span></td>
+                <td class="col-acoes">${gerarBotoesAcao(item.numero, st)}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -1079,19 +1136,16 @@
     }
 
     function extrairPreencherDadosDoTexto(texto, nomeArquivo) {
-        // Extrai Nº do Orçamento
         let numMatch = texto.match(/ORÇAMENTO\s*N[º°]?\s*(\d+)/i) || texto.match(/ORÇAMENTOS?\s*(\d+)/i) || nomeArquivo.match(/(\d{4})/);
         if (numMatch && numMatch[1]) {
             document.getElementById('impNum').value = String(numMatch[1]).padStart(4, '0');
         }
 
-        // Extrai Sigla do Cliente / Loja
         let siglaMatch = texto.match(/Sigla\s*(?:do\s*Cliente\s*\/?\s*Loja)?:?\s*([A-Za-z0-9_-]+)/i);
         if (siglaMatch && siglaMatch[1]) {
             document.getElementById('impSigla').value = siglaMatch[1].trim().toUpperCase();
         }
 
-        // Extrai Data (DD/MM/YYYY) e converte para YYYY-MM-DD
         let dataMatch = texto.match(/Data:?\s*(\d{2}\/\d{2}\/\d{4})/i) || texto.match(/(\d{2}\/\d{2}\/\d{4})/);
         if (dataMatch && dataMatch[1]) {
             let partes = dataMatch[1].split('/');
@@ -1100,20 +1154,17 @@
             }
         }
 
-        // Extrai Técnico Responsável
         let tecMatch = texto.match(/Técnico\s*(?:Responsável)?:?\s*([A-Za-zÀ-ÿ\s]+?)(?=\s*Semana|\s*Data|\s*Hora|\s*Endereço|\n|$)/i);
         if (tecMatch && tecMatch[1]) {
             document.getElementById('impTecnico').value = tecMatch[1].trim();
         }
 
-        // Extrai Motivo / Endereço do Atendimento
         let motMatch = texto.match(/(?:Endereço\s*Completo\s*do\s*Local|Motivo\s*(?:do\s*Orçamento)?):?\s*([\s\S]+?)(?=\s*PEÇAS|\s*Evidências|\n\n|$)/i);
         if (motMatch && motMatch[1]) {
             let motivoLimpo = motMatch[1].replace(/\s+/g, ' ').trim();
             document.getElementById('impMotivo').value = motivoLimpo;
         }
 
-        // Extrai Peças & Serviços
         let pecasIdx = texto.indexOf('PEÇAS & SERVIÇOS');
         if (pecasIdx !== -1) {
             let subTexto = texto.substring(pecasIdx);
