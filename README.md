@@ -152,7 +152,6 @@
 
         input[type="text"],
         input[type="date"],
-        input[type="time"],
         input[type="number"],
         select,
         textarea {
@@ -180,7 +179,7 @@
             min-height: 65px;
         }
 
-        /* ESTILIZAÇÃO E REDIMENSIONAMENTO DA TABELA */
+        /* ESTILIZAÇÃO DA TABELA */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -216,9 +215,9 @@
 
         .col-num { width: 7%; text-align: center; font-weight: bold; }
         .col-sigla { width: 8%; text-align: center; font-weight: 600; }
-        .col-data { width: 15%; white-space: nowrap; }
+        .col-data { width: 12%; white-space: nowrap; text-align: center; }
         .col-tec { width: 12%; font-weight: 600; }
-        .col-motivo { width: 28%; word-break: break-word; }
+        .col-motivo { width: 31%; word-break: break-word; }
         .col-itens { width: 18%; word-break: break-word; font-size: 12px; color: #334155; }
         .col-status { width: 6%; text-align: center; white-space: nowrap; }
         .col-acoes { width: 6%; text-align: center; white-space: nowrap; }
@@ -493,11 +492,7 @@
             </div>
         </div>
 
-        <div class="grid-3">
-            <div class="form-group">
-                <label for="horaEmissao">Hora <span class="req">*</span></label>
-                <input type="time" id="horaEmissao" onchange="removerErro(this)">
-            </div>
+        <div class="grid-2">
             <div class="form-group">
                 <label for="tecnico">Técnico Responsável <span class="req">*</span></label>
                 <input type="text" id="tecnico" value="" placeholder="Nome do técnico" oninput="removerErro(this)">
@@ -588,7 +583,7 @@
                     <tr>
                         <th class="col-num">Nº</th>
                         <th class="col-sigla">Sigla</th>
-                        <th class="col-data">Data / Hora</th>
+                        <th class="col-data">Data</th>
                         <th class="col-tec">Técnico</th>
                         <th class="col-motivo">Motivo do Atendimento</th>
                         <th class="col-itens">Itens / Detalhes</th>
@@ -692,7 +687,7 @@
     }
 
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
-    const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbyx3HZZ16vgxZ_5vSvCyEWZbQhaIXCExf7vTQUDHPiHAnUUdJEE0Q6h3KonFOJZ0dsNKA/exec";
+    const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbyOe6e7jDIEYVLGXaNoqBXR2IkFeYS-EIfl_NMK65yZGVH65xnjmHCpuUVvKxhRWcYSKQ/exec";
     const SENHA_AUTORIZACAO = "GF01";
 
     let todosOrcamentos = [];
@@ -701,19 +696,12 @@
     window.onload = function() {
         const hoje = new Date();
         const dataInput = document.getElementById('dataEmissao');
-        const horaInput = document.getElementById('horaEmissao');
 
         if (!dataInput.value) {
             const ano = hoje.getFullYear();
             const mes = String(hoje.getMonth() + 1).padStart(2, '0');
             const dia = String(hoje.getDate()).padStart(2, '0');
             dataInput.value = `${ano}-${mes}-${dia}`;
-        }
-
-        if (!horaInput.value) {
-            const horas = String(hoje.getHours()).padStart(2, '0');
-            const minutos = String(hoje.getMinutes()).padStart(2, '0');
-            horaInput.value = `${horas}:${minutos}`;
         }
 
         carregarNumeroOrcamento();
@@ -876,13 +864,11 @@
         let erros = [];
         const sigla = document.getElementById('sigla');
         const dataEmissao = document.getElementById('dataEmissao');
-        const horaEmissao = document.getElementById('horaEmissao');
         const tecnico = document.getElementById('tecnico');
         const motivo = document.getElementById('motivo');
 
         if (!sigla.value.trim()) { sigla.classList.add('input-error'); erros.push("Sigla do Cliente / Loja"); }
         if (!dataEmissao.value) { dataEmissao.classList.add('input-error'); erros.push("Data da Emissão"); }
-        if (!horaEmissao.value) { horaEmissao.classList.add('input-error'); erros.push("Hora da Emissão"); }
         if (!tecnico.value.trim()) { tecnico.classList.add('input-error'); erros.push("Técnico Responsável"); }
         if (!motivo.value.trim()) { motivo.classList.add('input-error'); erros.push("Motivo do Orçamento"); }
 
@@ -940,7 +926,6 @@
             numero: document.getElementById('numOrcamento').value,
             sigla: document.getElementById('sigla').value,
             data: document.getElementById('dataEmissao').value,
-            hora: document.getElementById('horaEmissao').value,
             tecnico: document.getElementById('tecnico').value,
             semana: document.getElementById('semanaManual').value,
             motivo: document.getElementById('motivo').value,
@@ -1007,37 +992,19 @@
         renderizarTabelaFiltrada();
     }
 
-    /* FILTRO DE DATA E HERA RIGOROSO */
-    function formatarDataHoraLimpo(dataRaw, horaRaw) {
-        let textoCompleto = String(dataRaw || '') + ' ' + String(horaRaw || '');
+    /* FORMATAR APENAS A DATA */
+    function formatarDataLimpo(dataRaw) {
+        if (!dataRaw) return '-';
+        let textoCompleto = String(dataRaw).trim();
         
-        // Isola apenas o padrão de data DD/MM/YYYY ou YYYY-MM-DD
         let matchData = textoCompleto.match(/(\d{2})[\/_-](\d{2})[\/_-](\d{4})/) || textoCompleto.match(/(\d{4})[\/_-](\d{2})[\/_-](\d{2})/);
-        let dataFormatada = '';
         
         if (matchData) {
             if (matchData[0].includes('-') && matchData[1].length === 4) { // YYYY-MM-DD
-                dataFormatada = `${matchData[3]}/${matchData[2]}/${matchData[1]}`;
+                return `📅 ${matchData[3]}/${matchData[2]}/${matchData[1]}`;
             } else {
-                dataFormatada = `${matchData[1]}/${matchData[2]}/${matchData[3]}`;
+                return `📅 ${matchData[1]}/${matchData[2]}/${matchData[3]}`;
             }
-        }
-
-        // Isola apenas o padrão de hora HH:MM (excluindo anos e offsets do GMT)
-        let matchHora = textoCompleto.match(/(?:^|[^\d])([0-1]?\d|2[0-3]):([0-5]\d)(?=[^\d]|$)/);
-        let horaFormatada = '';
-
-        if (matchHora) {
-            // Ignora a hora '12:00' padrão quando associada à conversão automatizada do Excel/1899
-            if (!(textoCompleto.includes('1899') && (matchHora[1] === '12' || matchHora[1] === '00'))) {
-                horaFormatada = `${matchHora[1].padStart(2, '0')}:${matchHora[2]}`;
-            }
-        }
-
-        if (dataFormatada && horaFormatada) {
-            return `📅 ${dataFormatada}<br><span style="color:#64748b; font-size:12px;">⏰ ${horaFormatada}</span>`;
-        } else if (dataFormatada) {
-            return `📅 ${dataFormatada}`;
         }
         return '-';
     }
@@ -1080,7 +1047,7 @@
             tr.innerHTML = `
                 <td class="col-num">${item.numero}</td>
                 <td class="col-sigla">${item.sigla}</td>
-                <td class="col-data">${formatarDataHoraLimpo(item.data, item.hora)}</td>
+                <td class="col-data">${formatarDataLimpo(item.data)}</td>
                 <td class="col-tec">${item.tecnico || '-'}</td>
                 <td class="col-motivo">${item.motivo || '-'}</td>
                 <td class="col-itens">${limparTextoItens(item.itens)}</td>
@@ -1185,7 +1152,6 @@
             document.getElementById('impMotivo').value = motivoLimpo;
         }
 
-        // Corta a leitura antes de chegar nas Evidências Fotográficas
         let textoSemFotos = texto;
         if (texto.toUpperCase().includes('EVIDÊNCIAS FOTOGRÁFICAS')) {
             textoSemFotos = texto.split(/EVIDÊNCIAS FOTOGRÁFICAS/i)[0];
@@ -1230,7 +1196,6 @@
             numero: String(num).padStart(4, '0'),
             sigla: sigla,
             data: data,
-            hora: "12:00",
             tecnico: tecnico,
             semana: "Importado",
             motivo: motivo,
