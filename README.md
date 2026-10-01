@@ -216,9 +216,9 @@
 
         .col-num { width: 7%; text-align: center; font-weight: bold; }
         .col-sigla { width: 8%; text-align: center; font-weight: 600; }
-        .col-data { width: 12%; white-space: nowrap; text-align: center; }
+        .col-data { width: 15%; white-space: nowrap; }
         .col-tec { width: 12%; font-weight: 600; }
-        .col-motivo { width: 31%; word-break: break-word; }
+        .col-motivo { width: 28%; word-break: break-word; }
         .col-itens { width: 18%; word-break: break-word; font-size: 12px; color: #334155; }
         .col-status { width: 6%; text-align: center; white-space: nowrap; }
         .col-acoes { width: 6%; text-align: center; white-space: nowrap; }
@@ -588,7 +588,7 @@
                     <tr>
                         <th class="col-num">Nº</th>
                         <th class="col-sigla">Sigla</th>
-                        <th class="col-data">Data</th>
+                        <th class="col-data">Data / Hora</th>
                         <th class="col-tec">Técnico</th>
                         <th class="col-motivo">Motivo do Atendimento</th>
                         <th class="col-itens">Itens / Detalhes</th>
@@ -1007,10 +1007,11 @@
         renderizarTabelaFiltrada();
     }
 
-    /* FORMATAR APENAS A DATA (OCULTA HORÁRIOS) */
+    /* FILTRO DE DATA E HERA RIGOROSO */
     function formatarDataHoraLimpo(dataRaw, horaRaw) {
         let textoCompleto = String(dataRaw || '') + ' ' + String(horaRaw || '');
         
+        // Isola apenas o padrão de data DD/MM/YYYY ou YYYY-MM-DD
         let matchData = textoCompleto.match(/(\d{2})[\/_-](\d{2})[\/_-](\d{4})/) || textoCompleto.match(/(\d{4})[\/_-](\d{2})[\/_-](\d{2})/);
         let dataFormatada = '';
         
@@ -1022,7 +1023,20 @@
             }
         }
 
-        if (dataFormatada) {
+        // Isola apenas o padrão de hora HH:MM (excluindo anos e offsets do GMT)
+        let matchHora = textoCompleto.match(/(?:^|[^\d])([0-1]?\d|2[0-3]):([0-5]\d)(?=[^\d]|$)/);
+        let horaFormatada = '';
+
+        if (matchHora) {
+            // Ignora a hora '12:00' padrão quando associada à conversão automatizada do Excel/1899
+            if (!(textoCompleto.includes('1899') && (matchHora[1] === '12' || matchHora[1] === '00'))) {
+                horaFormatada = `${matchHora[1].padStart(2, '0')}:${matchHora[2]}`;
+            }
+        }
+
+        if (dataFormatada && horaFormatada) {
+            return `📅 ${dataFormatada}<br><span style="color:#64748b; font-size:12px;">⏰ ${horaFormatada}</span>`;
+        } else if (dataFormatada) {
             return `📅 ${dataFormatada}`;
         }
         return '-';
@@ -1171,6 +1185,7 @@
             document.getElementById('impMotivo').value = motivoLimpo;
         }
 
+        // Corta a leitura antes de chegar nas Evidências Fotográficas
         let textoSemFotos = texto;
         if (texto.toUpperCase().includes('EVIDÊNCIAS FOTOGRÁFICAS')) {
             textoSemFotos = texto.split(/EVIDÊNCIAS FOTOGRÁFICAS/i)[0];
