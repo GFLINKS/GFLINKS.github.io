@@ -4,9 +4,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GFLINKS - Sistema de Orçamentos, Gestão & PDFs</title>
 
-    <!-- BIBLIOTECA PARA LEITURA DE TEXTO EM PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
     <style>
         :root {
             --primary: #1e3a8a;
@@ -430,21 +427,10 @@
         .btn-declinar { background-color: var(--danger); }
         .btn-pendente { background-color: var(--yellow); }
 
-        .status-alert {
-            background-color: #d1fae5;
-            color: #065f46;
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: bold;
-            margin-top: 10px;
-            display: none;
-        }
-
         @media print {
             body { background: white; padding: 0; }
             .container { max-width: 100%; }
-            .top-nav, .no-print, #painelSection, #galeriaPdfSection, #importarPdfSection { display: none !important; }
+            .top-nav, .no-print, #painelSection, #galeriaPdfSection { display: none !important; }
             #orcamentoSection { display: block !important; }
             .card-box { box-shadow: none; border: none; padding: 0; }
             input, textarea, select { border: none !important; background: transparent !important; padding: 0 !important; }
@@ -460,7 +446,6 @@
     <div class="top-nav no-print">
         <button class="nav-btn active" id="btnNavOrcamento" onclick="alternarTela('orcamento')">📝 Criar Orçamento</button>
         <button class="nav-btn" id="btnNavPainel" onclick="alternarTela('painel')">📊 Painel de Gestão</button>
-        <button class="nav-btn" id="btnNavImportar" onclick="alternarTela('importar')">📤 Importar PDF Antigo</button>
         <button class="nav-btn" id="btnNavGaleria" onclick="alternarTela('galeria')">📂 Visualizador Pasta Drive</button>
     </div>
 
@@ -603,78 +588,7 @@
         </div>
     </div>
 
-    <!-- TELA 3: IMPORTAR PDF ANTIGO -->
-    <div id="importarPdfSection" class="card-box" style="display: none;">
-        <h1><span>📤 Importar Orçamento Antigo (PDF)</span></h1>
-        <p style="font-size:13px; color:#64748b;">Ao selecionar um arquivo PDF, os dados serão lidos e preenchidos automaticamente no formulário abaixo.</p>
-
-        <div id="alertLeituraPdf" class="status-alert">
-            ✨ Dados lidos e preenchidos automaticamente do arquivo PDF!
-        </div>
-
-        <div class="grid-2" style="margin-top:20px;">
-            <div>
-                <div class="section-title">📝 Dados do Orçamento</div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="impNum">Nº Orçamento <span class="req">*</span></label>
-                        <input type="text" id="impNum" placeholder="Ex: 0005">
-                    </div>
-                    <div class="form-group">
-                        <label for="impSigla">Sigla Cliente / Loja <span class="req">*</span></label>
-                        <input type="text" id="impSigla" placeholder="Ex: CNL">
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="impData">Data <span class="req">*</span></label>
-                        <input type="date" id="impData">
-                    </div>
-                    <div class="form-group">
-                        <label for="impTecnico">Técnico Responsável <span class="req">*</span></label>
-                        <input type="text" id="impTecnico" placeholder="Nome do Técnico">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="impStatus">Status Inicial no Painel <span class="req">*</span></label>
-                    <select id="impStatus" style="font-weight:bold; color:var(--primary);">
-                        <option value="PENDENTE">⏳ PENDENTE</option>
-                        <option value="ENVIADO">✉️ ENVIADO</option>
-                        <option value="DECLINADO">❌ DECLINADO</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="impMotivo">Motivo do Orçamento <span class="req">*</span></label>
-                    <textarea id="impMotivo" placeholder="Descreva o motivo..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="impItens">Peças & Serviços Registrados</label>
-                    <textarea id="impItens" placeholder="Ex: Câmera IP (2x); Nobreak (1x)"></textarea>
-                </div>
-
-                <button class="btn btn-add" style="width:100%; padding:12px; font-size:15px; margin-top:10px;" onclick="salvarOrcamentoAntigo()">💾 Registrar no Painel de Gestão</button>
-            </div>
-
-            <div>
-                <div class="section-title">📄 Selecionar PDF do Computador</div>
-                <div class="drop-zone" onclick="document.getElementById('impFilePdf').click()">
-                    <div class="drop-zone-text">📁 Clique para selecionar o PDF antigo</div>
-                    <div class="drop-zone-subtext">Os dados serão extraídos automaticamente após a seleção</div>
-                </div>
-                <input type="file" id="impFilePdf" accept="application/pdf" style="display:none;" onchange="previewPdfImportacao(event)">
-
-                <div style="margin-top:15px;">
-                    <iframe id="impPdfViewer" src="" width="100%" height="420" style="border:1px solid var(--border); border-radius:8px; display:none;"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TELA 4: VISUALIZADOR DA PASTA DO DRIVE -->
+    <!-- TELA 3: VISUALIZADOR DA PASTA DO DRIVE -->
     <div id="galeriaPdfSection" class="card-box" style="display: none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h1 style="border:none; padding:0; margin:0;">📂 Visualizador da Pasta do Google Drive</h1>
@@ -687,10 +601,6 @@
 </div>
 
 <script>
-    if (typeof pdfjsLib !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
-
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
     const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbw9sSw41bHALRiDoJvFYDyHVfiA5OhNgaC5harmTg-2pWPbcnsQuZKQkyL1yOZ7eP68qQ/exec";
     const SENHA_AUTORIZACAO = "GF01";
@@ -719,17 +629,16 @@
         carregarNumeroOrcamento();
         atualizarCabecalho();
         configurarEventosColarEArrastar();
+        carregarDadosSilenciosamente();
     };
 
     function alternarTela(tela) {
         document.getElementById('orcamentoSection').style.display = 'none';
         document.getElementById('painelSection').style.display = 'none';
-        document.getElementById('importarPdfSection').style.display = 'none';
         document.getElementById('galeriaPdfSection').style.display = 'none';
 
         document.getElementById('btnNavOrcamento').classList.remove('active');
         document.getElementById('btnNavPainel').classList.remove('active');
-        document.getElementById('btnNavImportar').classList.remove('active');
         document.getElementById('btnNavGaleria').classList.remove('active');
 
         if (tela === 'orcamento') {
@@ -739,9 +648,6 @@
             document.getElementById('painelSection').style.display = 'block';
             document.getElementById('btnNavPainel').classList.add('active');
             carregarDadosPainel();
-        } else if (tela === 'importar') {
-            document.getElementById('importarPdfSection').style.display = 'block';
-            document.getElementById('btnNavImportar').classList.add('active');
         } else if (tela === 'galeria') {
             document.getElementById('galeriaPdfSection').style.display = 'block';
             document.getElementById('btnNavGaleria').classList.add('active');
@@ -925,8 +831,62 @@
         });
     }
 
-    function imprimirOuSalvarPDF() {
+    function carregarDadosSilenciosamente() {
+        fetch(URL_GOOGLE_SHEETS)
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    todosOrcamentos = data;
+                }
+            })
+            .catch(err => console.log("Aguardando conexão com a planilha."));
+    }
+
+    function obterUltimoOrcamentoPorSigla(siglaProcurada) {
+        if (!todosOrcamentos || todosOrcamentos.length === 0) return null;
+        
+        const siglaUpper = siglaProcurada.trim().toUpperCase();
+        const registrosCliente = todosOrcamentos.filter(item => 
+            String(item.sigla || '').trim().toUpperCase() === siglaUpper
+        );
+
+        if (registrosCliente.length === 0) return null;
+        return registrosCliente[registrosCliente.length - 1];
+    }
+
+    async function imprimirOuSalvarPDF() {
         if (!validarFormulario()) return;
+
+        const siglaDig = document.getElementById('sigla').value.trim();
+
+        try {
+            const res = await fetch(URL_GOOGLE_SHEETS);
+            const data = await res.json();
+            if (Array.isArray(data)) todosOrcamentos = data;
+        } catch (e) {}
+
+        const ultimoOrcamento = obterUltimoOrcamentoPorSigla(siglaDig);
+
+        if (ultimoOrcamento) {
+            const dataFormatada = formatarDataHoraLimpo(ultimoOrcamento.data, ultimoOrcamento.hora).replace(/<br>/g, ' ').replace(/<[^>]*>?/gm, '');
+            
+            const confirmar = confirm(
+                `⚠️ ATENÇÃO: Já existe um orçamento cadastrado para a sigla "${siglaDig.toUpperCase()}"!\n\n` +
+                `• Nº do Último Orçamento: ${ultimoOrcamento.numero}\n` +
+                `• Data do Último Atendimento: ${dataFormatada}\n\n` +
+                `Deseja prosseguir com o envio de um novo orçamento para este cliente?`
+            );
+
+            if (!confirmar) return;
+
+            const senhaDigitada = prompt(`Para confirmar a emissão duplicada para a sigla "${siglaDig.toUpperCase()}", digite a senha de autorização:`);
+            
+            if (senhaDigitada === null) return;
+            if (senhaDigitada !== SENHA_AUTORIZACAO) {
+                alert("❌ Senha incorreta! Envio cancelado.");
+                return;
+            }
+        }
 
         const linhasItens = document.querySelectorAll('#corpoTabela tr');
         let listaItens = [];
@@ -938,7 +898,7 @@
 
         const dados = {
             numero: document.getElementById('numOrcamento').value,
-            sigla: document.getElementById('sigla').value,
+            sigla: siglaDig,
             data: document.getElementById('dataEmissao').value,
             hora: document.getElementById('horaEmissao').value,
             tecnico: document.getElementById('tecnico').value,
@@ -954,6 +914,7 @@
         setTimeout(() => {
             avançarNumeroOrcamento();
             atualizarCabecalho();
+            carregarDadosSilenciosamente();
         }, 1000);
     }
 
@@ -1007,7 +968,6 @@
         renderizarTabelaFiltrada();
     }
 
-    /* FORMATAR DATA E HORA COM ISOLAMENTO RIGOROSO */
     function formatarDataHoraLimpo(dataRaw, horaRaw) {
         let textoCompleto = String(dataRaw || '') + ' ' + String(horaRaw || '');
         
@@ -1015,7 +975,7 @@
         let dataFormatada = '';
         
         if (matchData) {
-            if (matchData[0].includes('-') && matchData[1].length === 4) { // YYYY-MM-DD
+            if (matchData[0].includes('-') && matchData[1].length === 4) {
                 dataFormatada = `${matchData[3]}/${matchData[2]}/${matchData[1]}`;
             } else {
                 dataFormatada = `${matchData[1]}/${matchData[2]}/${matchData[3]}`;
@@ -1039,7 +999,6 @@
         return '-';
     }
 
-    /* FILTRO RIGOROSO PARA REMOVER EVIDÊNCIAS FOTOGRÁFICAS E PATHS LOCAIS */
     function limparTextoItens(itensRaw) {
         if (!itensRaw) return '-';
         let lista = String(itensRaw).split(';');
@@ -1116,136 +1075,6 @@
             carregarDadosPainel();
         })
         .catch(err => alert("Erro ao atualizar status."));
-    }
-
-    /* IMPORTAR PDF ANTIGO E LEITURA AUTOMÁTICA */
-    async function previewPdfImportacao(event) {
-        const file = event.target.files[0];
-        const viewer = document.getElementById('impPdfViewer');
-        const alertBox = document.getElementById('alertLeituraPdf');
-
-        if (!file || file.type !== 'application/pdf') return;
-
-        viewer.src = URL.createObjectURL(file);
-        viewer.style.display = 'block';
-
-        if (typeof pdfjsLib === 'undefined') return;
-
-        try {
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            let fullText = '';
-
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                const page = await pdf.getPage(pageNum);
-                const textContent = await page.getTextContent();
-                const pageText = textContent.items.map(item => item.str).join(' ');
-                fullText += pageText + '\n';
-            }
-
-            extrairPreencherDadosDoTexto(fullText, file.name);
-
-            alertBox.style.display = 'block';
-            setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
-        } catch (err) {
-            console.error("Erro ao ler o arquivo PDF:", err);
-        }
-    }
-
-    function extrairPreencherDadosDoTexto(texto, nomeArquivo) {
-        let numMatch = texto.match(/ORÇAMENTO\s*N[º°]?\s*(\d+)/i) || texto.match(/ORÇAMENTOS?\s*(\d+)/i) || nomeArquivo.match(/(\d{4})/);
-        if (numMatch && numMatch[1]) {
-            document.getElementById('impNum').value = String(numMatch[1]).padStart(4, '0');
-        }
-
-        let siglaMatch = texto.match(/Sigla\s*(?:do\s*Cliente\s*\/?\s*Loja)?:?\s*([A-Za-z0-9_-]+)/i);
-        if (siglaMatch && siglaMatch[1]) {
-            document.getElementById('impSigla').value = siglaMatch[1].trim().toUpperCase();
-        }
-
-        let dataMatch = texto.match(/Data:?\s*(\d{2}\/\d{2}\/\d{4})/i) || texto.match(/(\d{2}\/\d{2}\/\d{4})/);
-        if (dataMatch && dataMatch[1]) {
-            let partes = dataMatch[1].split('/');
-            if (partes.length === 3) {
-                document.getElementById('impData').value = `${partes[2]}-${partes[1]}-${partes[0]}`;
-            }
-        }
-
-        let tecMatch = texto.match(/Técnico\s*(?:Responsável)?:?\s*([A-Za-zÀ-ÿ\s]+?)(?=\s*Semana|\s*Data|\s*Hora|\s*Endereço|\n|$)/i);
-        if (tecMatch && tecMatch[1]) {
-            document.getElementById('impTecnico').value = tecMatch[1].trim();
-        }
-
-        let motMatch = texto.match(/(?:Endereço\s*Completo\s*do\s*Local|Motivo\s*(?:do\s*Orçamento)?):?\s*([\s\S]+?)(?=\s*PEÇAS|\s*Evidências|\n\n|$)/i);
-        if (motMatch && motMatch[1]) {
-            let motivoLimpo = motMatch[1].replace(/\s+/g, ' ').trim();
-            document.getElementById('impMotivo').value = motivoLimpo;
-        }
-
-        let textoSemFotos = texto;
-        if (texto.toUpperCase().includes('EVIDÊNCIAS FOTOGRÁFICAS')) {
-            textoSemFotos = texto.split(/EVIDÊNCIAS FOTOGRÁFICAS/i)[0];
-        }
-
-        let pecasIdx = textoSemFotos.indexOf('PEÇAS & SERVIÇOS');
-        if (pecasIdx !== -1) {
-            let subTexto = textoSemFotos.substring(pecasIdx);
-            let regexItens = /([A-Za-z0-9À-ÿ\s\-\.\/]+?)\s+(\d+)\b/g;
-            let match;
-            let itensArray = [];
-
-            while ((match = regexItens.exec(subTexto)) !== null) {
-                let nomeItem = match[1].replace(/Descrição do Item \/ Serviço/gi, '').replace(/Qtd/gi, '').trim();
-                let qtd = match[2];
-                if (nomeItem && !nomeItem.toUpperCase().includes('DESCRIÇÃO') && !nomeItem.toUpperCase().includes('SERVIÇO')) {
-                    itensArray.push(`${nomeItem} (${qtd}x)`);
-                }
-            }
-
-            if (itensArray.length > 0) {
-                document.getElementById('impItens').value = itensArray.join('; ');
-            }
-        }
-    }
-
-    function salvarOrcamentoAntigo() {
-        const num = document.getElementById('impNum').value.trim();
-        const sigla = document.getElementById('impSigla').value.trim();
-        const data = document.getElementById('impData').value;
-        const tecnico = document.getElementById('impTecnico').value.trim();
-        const status = document.getElementById('impStatus').value;
-        const motivo = document.getElementById('impMotivo').value.trim();
-        const itens = document.getElementById('impItens').value.trim();
-
-        if (!num || !sigla || !data || !tecnico || !motivo) {
-            alert("⚠️ Preencha os campos obrigatórios.");
-            return;
-        }
-
-        const dados = {
-            numero: String(num).padStart(4, '0'),
-            sigla: sigla,
-            data: data,
-            hora: "12:00",
-            tecnico: tecnico,
-            semana: "Importado",
-            motivo: motivo,
-            itens: itens || "Orçamento Importado",
-            status: status
-        };
-
-        enviarParaGoogleSheets(dados);
-        alert(`✅ Orçamento Antigo Nº ${dados.numero} enviado com sucesso!`);
-
-        document.getElementById('impNum').value = '';
-        document.getElementById('impSigla').value = '';
-        document.getElementById('impData').value = '';
-        document.getElementById('impTecnico').value = '';
-        document.getElementById('impMotivo').value = '';
-        document.getElementById('impItens').value = '';
-        document.getElementById('impPdfViewer').style.display = 'none';
-
-        alternarTela('painel');
     }
 </script>
 
