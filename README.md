@@ -13,6 +13,13 @@
 
     <style>
         @media print {
+            @page {
+                margin: 0;
+                size: auto;
+            }
+            body {
+                margin: 1.5cm;
+            }
             .no-print { display: none !important; }
             body { background: white !important; font-size: 9pt !important; }
             .card-box { box-shadow: none !important; border: none !important; padding: 0 !important; }
@@ -202,26 +209,38 @@
             </div>
         </div>
 
-        <!-- Tabela -->
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-            <div class="overflow-x-auto w-full">
-                <table class="min-w-max w-full text-left text-xs border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
-                            <th class="p-3 text-center w-16 text-slate-800 font-bold">Nº</th>
-                            <th class="p-3 text-center w-20 text-slate-800 font-bold">Sigla</th>
-                            <th class="p-3 w-36 text-slate-800 font-bold">Data / Hora</th>
-                            <th class="p-3 w-28 text-slate-800 font-bold">Técnico</th>
-                            <th class="p-3 text-slate-800 font-bold">Motivo do Atendimento</th>
-                            <th class="p-3 text-slate-800 font-bold">Itens / Detalhes</th>
-                            <th class="p-3 text-center w-24 text-slate-800 font-bold">Status</th>
-                            <th class="p-3 text-center w-28 text-slate-800 font-bold">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaPainelBody" class="divide-y divide-slate-100 bg-white text-slate-700">
-                        <tr><td colspan="8" class="p-6 text-center text-slate-400">Carregando dados...</td></tr>
-                    </tbody>
-                </table>
+        <!-- Tabela com Setas de Rolagem Rápida nas Laterais -->
+        <div class="relative group">
+            <!-- Seta Esquerda para correr pelas colunas -->
+            <button onclick="rolarTabelaHorizontal(-250)" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-slate-900/80 hover:bg-slate-900 text-white p-3 rounded-r-xl shadow-lg transition opacity-80 hover:opacity-100 flex items-center justify-center" title="Rolar para esquerda">
+                <i class="fa-solid fa-chevron-left text-sm"></i>
+            </button>
+
+            <!-- Seta Direita para correr pelas colunas -->
+            <button onclick="rolarTabelaHorizontal(250)" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-slate-900/80 hover:bg-slate-900 text-white p-3 rounded-l-xl shadow-lg transition opacity-80 hover:opacity-100 flex items-center justify-center" title="Rolar para direita">
+                <i class="fa-solid fa-chevron-right text-sm"></i>
+            </button>
+
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <div class="overflow-x-auto w-full scroll-smooth" id="containerTabelaPainel">
+                    <table class="min-w-max w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <th class="p-3 text-center w-16 text-slate-800 font-bold">Nº</th>
+                                <th class="p-3 text-center w-20 text-slate-800 font-bold">Sigla</th>
+                                <th class="p-3 w-36 text-slate-800 font-bold">Data / Hora</th>
+                                <th class="p-3 w-28 text-slate-800 font-bold">Técnico</th>
+                                <th class="p-3 text-slate-800 font-bold">Motivo do Atendimento</th>
+                                <th class="p-3 text-slate-800 font-bold">Itens / Detalhes</th>
+                                <th class="p-3 text-center w-24 text-slate-800 font-bold">Status</th>
+                                <th class="p-3 text-center w-28 text-slate-800 font-bold">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaPainelBody" class="divide-y divide-slate-100 bg-white text-slate-700">
+                            <tr><td colspan="8" class="p-6 text-center text-slate-400">Carregando dados...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -347,6 +366,11 @@
             localStorage.setItem(CHAVE_BANCO_NUMERO, numParsed);
             exibirNumeroFormatado(numParsed);
         }
+    }
+
+    function rolarTabelaHorizontal(quantidade) {
+        const container = document.getElementById('containerTabelaPainel');
+        container.scrollBy({ left: quantidade, behavior: 'smooth' });
     }
 
     function adicionarLinha() {
