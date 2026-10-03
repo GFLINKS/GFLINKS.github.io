@@ -263,21 +263,11 @@
 
     <!-- TELA 3: VISUALIZADOR DA PASTA DO DRIVE (ARQUIVOS) -->
     <div id="galeriaPdfSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6 hidden">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-folder-tree text-indigo-600"></i> Arquivos e Documentos
-                </h2>
-                <p class="text-xs text-slate-500">Navegue pelos PDFs e subpastas salvos no Google Drive diretamente na página.</p>
-            </div>
-
-            <!-- Campo de Pesquisa Exclusivo em Arquivos -->
-            <div class="relative w-full sm:w-72">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                </span>
-                <input type="text" id="filtroArquivos" placeholder="Pesquisar arquivos (ex: 20)..." class="w-full text-xs pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-semibold" oninput="filtrarArquivosDrive(this.value)">
-            </div>
+        <div>
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-folder-tree text-indigo-600"></i> Arquivos e Documentos
+            </h2>
+            <p class="text-xs text-slate-500">Navegue pelos PDFs e subpastas salvos no Google Drive diretamente na página.</p>
         </div>
 
         <div class="border border-slate-200 rounded-xl overflow-hidden">
@@ -291,7 +281,6 @@
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
     const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbw9sSw41bHALRiDoJvFYDyHVfiA5OhNgaC5harmTg-2pWPbcnsQuZKQkyL1yOZ7eP68qQ/exec";
     const SENHA_AUTORIZACAO = "GF01";
-    const DRIVE_FOLDER_ID = "12p-H152le372P0Nx4C2_vX5hK34caOeS";
 
     let todosOrcamentos = [];
     let statusFiltroAtual = 'PENDENTE';
@@ -342,17 +331,6 @@
         } else if (tela === 'galeria') {
             document.getElementById('galeriaPdfSection').classList.remove('hidden');
             document.getElementById('btnNavGaleria').className = 'nav-btn bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2 active';
-        }
-    }
-
-    function filtrarArquivosDrive(termo) {
-        const iframe = document.getElementById('driveFolderIframe');
-        const termoLimpo = termo.trim();
-        // Atualiza o iframe com o parâmetro de busca do Google Drive integrado
-        if (termoLimpo) {
-            iframe.src = `https://drive.google.com/embeddedfolderview?id=${DRIVE_FOLDER_ID}&q=${encodeURIComponent(termoLimpo)}#list`;
-        } else {
-            iframe.src = `https://drive.google.com/embeddedfolderview?id=${DRIVE_FOLDER_ID}#list`;
         }
     }
 
