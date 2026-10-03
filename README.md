@@ -334,6 +334,12 @@
         }
     }
 
+    function abrirArquivoOrcamento(numero) {
+        // Alterna para a tela de Arquivos
+        alternarTela('galeria');
+        // Opcional: Aqui você também pode focar ou realizar alguma busca na pasta do Drive se necessário
+    }
+
     function carregarNumeroOrcamento() {
         let numeroSalvo = localStorage.getItem(CHAVE_BANCO_NUMERO);
         if (!numeroSalvo) {
@@ -721,7 +727,11 @@
             const tr = document.createElement('tr');
             tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
             tr.innerHTML = `
-                <td class="p-3 text-center font-bold">${item.numero}</td>
+                <td class="p-3 text-center">
+                    <a href="#" onclick="abrirArquivoOrcamento('${item.numero}')" class="font-bold text-indigo-600 hover:text-indigo-800 underline decoration-indigo-300 hover:decoration-indigo-600 transition" title="Abrir arquivo do orçamento ${item.numero}">
+                        ${item.numero}
+                    </a>
+                </td>
                 <td class="p-3 text-center font-semibold text-indigo-600">${item.sigla}</td>
                 <td class="p-3 whitespace-nowrap">${formatarDataHoraLimpo(item.data, item.hora)}</td>
                 <td class="p-3 font-semibold">${item.tecnico || '-'}</td>
