@@ -176,66 +176,52 @@
             </div>
         </div>
 
-        <!-- BARRA DE FILTROS E PESQUISA AVANÇADA (COLUNA D, L E CALENDÁRIO DUPLO) -->
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 no-print space-y-4">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-3">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-filter text-indigo-600 text-base"></i>
-                    <h3 class="text-sm font-bold text-slate-800">Filtros de Pesquisa & Período Personalizado</h3>
-                </div>
-                <div class="flex items-center gap-2 flex-wrap">
-                    <button onclick="setPresetPeriod('today')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Hoje</button>
-                    <button onclick="setPresetPeriod('7d')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 7 dias</button>
-                    <button onclick="setPresetPeriod('30d')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 30 dias</button>
-                    <button onclick="setPresetPeriod('thisMonth')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Atual</button>
-                    <button onclick="setPresetPeriod('lastMonth')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Anterior</button>
-                    <button onclick="clearSearchFilters()" class="text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1 rounded-lg border border-rose-200 transition flex items-center gap-1">
-                        <i class="fa-solid fa-rotate-left"></i> Limpar Filtros
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-                <!-- PESQUISA COLUNA D -->
-                <div>
-                    <label for="searchColD" class="block font-bold text-slate-700 mb-1">🔍 Pesquisar em Coluna D (Tipo/Descrição/OS):</label>
-                    <input type="text" id="searchColD" oninput="applyGlobalFilters()" placeholder="Ex: Corretiva, Preventiva..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
-                </div>
-
-                <!-- PESQUISA COLUNA L -->
-                <div>
-                    <label for="searchColL" class="block font-bold text-slate-700 mb-1">🔍 Pesquisar em Coluna L (Obs/Assunto/Equip.):</label>
-                    <input type="text" id="searchColL" oninput="applyGlobalFilters()" placeholder="Ex: VIP 1220, Câmera, Troca..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
-                </div>
-
-                <!-- CALENDÁRIO INÍCIO -->
-                <div>
-                    <label for="startDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Inicial (Abertura):</label>
-                    <input type="date" id="startDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
-                </div>
-
-                <!-- CALENDÁRIO FIM -->
-                <div>
-                    <label for="endDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Final (Abertura):</label>
-                    <input type="date" id="endDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
-                </div>
-            </div>
-        </div>
-
-        <!-- INDICADOR DE FILTRO DE CARD ATIVO -->
-        <div id="activeFilterBadge" class="hidden bg-amber-50 border-l-4 border-amber-500 text-amber-900 p-3.5 rounded-xl shadow-sm flex justify-between items-center no-print">
-            <div class="text-xs flex items-center gap-2">
-                <i class="fa-solid fa-filter text-amber-600 text-sm"></i>
-                <span class="font-bold">Filtro de Card Ativo:</span>
-                <span id="activeFilterText" class="font-semibold text-amber-800">Nenhum</span>
-            </div>
-            <button onclick="filterByKPI('ALL')" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-900 px-3 py-1 rounded-lg font-bold border border-amber-400 transition">
-                ✕ Limpar Filtro
-            </button>
-        </div>
-
         <!-- ================= TAB 1: VISÃO GERAL ================= -->
         <div id="tabGeral" class="tab-pane space-y-6">
+
+            <!-- FILTRO DE PERÍODO PERSONALIZADO (APENAS CALENDÁRIO) -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 no-print space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-days text-indigo-600 text-base"></i>
+                        <h3 class="text-sm font-bold text-slate-800">Filtro de Período Personalizado (Abertura)</h3>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="setPresetPeriod('today', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Hoje</button>
+                        <button onclick="setPresetPeriod('7d', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 7 dias</button>
+                        <button onclick="setPresetPeriod('30d', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 30 dias</button>
+                        <button onclick="setPresetPeriod('thisMonth', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Atual</button>
+                        <button onclick="setPresetPeriod('lastMonth', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Anterior</button>
+                        <button onclick="clearDateFilters('geral')" class="text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1 rounded-lg border border-rose-200 transition flex items-center gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> Limpar Datas
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <label for="startDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Inicial:</label>
+                        <input type="date" id="startDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
+                    </div>
+
+                    <div>
+                        <label for="endDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Final:</label>
+                        <input type="date" id="endDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
+                    </div>
+                </div>
+            </div>
+
+            <!-- INDICADOR DE FILTRO DE CARD ATIVO -->
+            <div id="activeFilterBadge" class="hidden bg-amber-50 border-l-4 border-amber-500 text-amber-900 p-3.5 rounded-xl shadow-sm flex justify-between items-center no-print">
+                <div class="text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-filter text-amber-600 text-sm"></i>
+                    <span class="font-bold">Filtro de Card Ativo:</span>
+                    <span id="activeFilterText" class="font-semibold text-amber-800">Nenhum</span>
+                </div>
+                <button onclick="filterByKPI('ALL')" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-900 px-3 py-1 rounded-lg font-bold border border-amber-400 transition">
+                    ✕ Limpar Filtro
+                </button>
+            </div>
 
             <!-- INTERACTIVE KPI SUMMARY CARDS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -287,7 +273,7 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-rose-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️️ Clique para ver OSs fora do prazo</span>
+                        <span>🖱️ Clique para ver OSs fora do prazo</span>
                     </p>
                 </div>
 
@@ -382,33 +368,44 @@
         <!-- ================= TAB 2: COMPARATIVO MENSAL E SEMANAL ================= -->
         <div id="tabComparativo" class="tab-pane hidden space-y-6">
 
-            <!-- CONTROLES MENSAL / SEMANAL -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-blue-600"></i> Análise Comparativa de Atendimentos
-                    </h2>
-                    <p class="text-xs text-slate-500">Selecione o técnico e o nível de detalhamento para comparar a produtividade real.</p>
+            <!-- CONTROLES COM CALENDÁRIO EMBUTIDO NA ABA COMPARATIVO -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-blue-600"></i> Análise Comparativa de Atendimentos
+                        </h2>
+                        <p class="text-xs text-slate-500">Selecione o técnico e o período para comparar a produtividade real.</p>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="setPresetPeriod('today', 'comp')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Hoje</button>
+                        <button onclick="setPresetPeriod('7d', 'comp')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 7 dias</button>
+                        <button onclick="setPresetPeriod('30d', 'comp')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 30 dias</button>
+                        <button onclick="setPresetPeriod('thisMonth', 'comp')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Atual</button>
+                        <button onclick="setPresetPeriod('lastMonth', 'comp')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Anterior</button>
+                        <button onclick="clearDateFilters('comp')" class="text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1 rounded-lg border border-rose-200 transition flex items-center gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> Limpar Datas
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <label for="selectTecnicoComp" class="text-xs font-bold text-slate-700">👨‍🔧 Técnico:</label>
-                        <select id="selectTecnicoComp" onchange="updateComparativoCharts()" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none min-w-[200px]">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <label for="selectTecnicoComp" class="block font-bold text-slate-700 mb-1">👨‍🔧 Técnico de Campo:</label>
+                        <select id="selectTecnicoComp" onchange="updateComparativoCharts()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             <option value="TODOS">Todos os Técnicos (Ativos)</option>
                         </select>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <label for="selectRangeSemanal" class="text-xs font-bold text-slate-700">🗓 Zoom Semanal:</label>
-                        <select id="selectRangeSemanal" onchange="updateComparativoCharts()" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            <option value="CURRENT">Semana Atual (Mais Recente)</option>
-                            <option value="PREV">Última Semana (Anterior)</option>
-                            <option value="4">Últimas 4 Semanas</option>
-                            <option value="10" selected>Últimas 10 Semanas</option>
-                            <option value="16">Últimas 16 Semanas</option>
-                            <option value="ALL">Todas as Semanas</option>
-                        </select>
+                    <div>
+                        <label for="startDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Inicial:</label>
+                        <input type="date" id="startDateComp" onchange="updateComparativoCharts()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 font-medium">
+                    </div>
+
+                    <div>
+                        <label for="endDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Final:</label>
+                        <input type="date" id="endDateComp" onchange="updateComparativoCharts()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 font-medium">
                     </div>
                 </div>
             </div>
@@ -490,7 +487,7 @@
                 <div id="chartSemanalSection" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 print-keep-together transition-all duration-300">
                     <h4 class="text-xs font-bold text-slate-700 uppercase mb-4 flex items-center justify-between">
                         <span class="flex items-center gap-2"><i class="fa-solid fa-calendar-week text-emerald-500"></i> Comparativo Semanal</span>
-                        <span id="badgeSemanal" class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">Últimas 10 Semanas</span>
+                        <span id="badgeSemanal" class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">Evolução Semanal</span>
                     </h4>
                     <div class="h-72 relative">
                         <canvas id="chartSemanal"></canvas>
@@ -527,14 +524,14 @@
 
     <!-- EMBEDDED JAVASCRIPT LOGIC -->
     <script>
-        // URL DO SEU GOOGLE APPS SCRIPT WEB APP (MANTIDA ORIGINAL DA SUA VERSÃO FUNCIONAL)
+        // URL DO SEU GOOGLE APPS SCRIPT WEB APP
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCQgoB_cP3V3BAhFOGmqs1rCxW3Ae7l_a6aLXBWaV1FKkV2iuOGsXmSKTOp2FsckuRAw/exec";
 
         let driveHistoryData = [];
         let activeData = [];
         let currentKPIFilter = 'ALL';
 
-        // SMART DATE PARSER FOR BRAZILIAN, ISO, AND EXCEL SERIAL DATES
+        // SMART DATE PARSER
         function parseDateSmart(val) {
             if (val === null || val === undefined || val === '') return null;
             if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
@@ -586,9 +583,8 @@
             return null;
         }
 
-        // CÁLCULO DE ATRASO SLA BASEADO NAS COLUNAS E, I E J
+        // CÁLCULO DE ATRASO SLA
         function isSLAOverdue(item) {
-            let rawAbertura = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || '';
             let rawPrevista = item['Data/Hora Prevista de Atendimento'] || item['Data/Hora Prevista'] || item['Data Prevista de Atendimento'] || item['Data Prevista'] || item['I'] || '';
             let rawFechamento = item['Data do Fechamento'] || item['Data_Fechamento'] || item['Data Fechamento'] || item['Data de Fechamento'] || item['J'] || '';
 
@@ -608,7 +604,7 @@
             return status.includes('atrasad');
         }
 
-        // EXCLUDED TECHNICIANS LIST
+        // TÉCNICOS EXCLUÍDOS
         const EXCLUDED_TECHS = [
             'wesley mendonça silva',
             'alex sandro da silva pedrosa',
@@ -624,7 +620,7 @@
             return EXCLUDED_TECHS.some(ex => normalized.includes(ex));
         }
 
-        // Logo fallbacks
+        // LOGO FALLBACKS
         const logoVariants = ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo.svg', 'logo', 'LOGO.png', 'LOGO.JPG', 'LOGO.PNG'];
         let logoAttemptIndex = 0;
 
@@ -675,7 +671,7 @@
         let chartMensalObj = null;
         let chartSemanalObj = null;
 
-        // FUNÇÃO DE BUSCA DOS DADOS NO GOOGLE DRIVE VIA WEB APP (EXATAMENTE COMO FUNCIONA)
+        // BUSCA NO DRIVE VIA APPS SCRIPT
         function fetchDatabaseFromDrive() {
             const bannerMsg = document.getElementById('bannerMessage');
             if (bannerMsg) {
@@ -698,7 +694,6 @@
                             });
                         }
 
-                        // Carrega a planilha mais recente por padrão
                         loadDriveRecord(0);
                     } else if (historyRecords && historyRecords.status === "error") {
                         if (bannerMsg) {
@@ -778,13 +773,10 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // LÓGICA DOS FILTROS GLOBAIS (COLUNAS D, L, CALENDÁRIO E KPIS)
+        // APLICAÇÃO DOS FILTROS POR DATAS (VISÃO GERAL)
         function applyGlobalFilters() {
             if (!activeData || !activeData.length) return;
 
-            const termD = (document.getElementById('searchColD').value || '').trim().toLowerCase();
-            const termL = (document.getElementById('searchColL').value || '').trim().toLowerCase();
-            
             const startVal = document.getElementById('startDateFilter').value;
             const endVal = document.getElementById('endDateFilter').value;
             
@@ -792,19 +784,6 @@
             let dtEnd = endVal ? new Date(endVal + 'T23:59:59') : null;
 
             const filteredData = activeData.filter(item => {
-                // Filtro por Coluna D
-                if (termD) {
-                    let colD = (item['Tipo da Ordem de Serviço'] || item['Tipo'] || item['Descrição'] || item['D'] || '').toString().toLowerCase();
-                    if (!colD.includes(termD)) return false;
-                }
-
-                // Filtro por Coluna L
-                if (termL) {
-                    let colL = (item['Observação'] || item['Observacao'] || item['Assunto'] || item['Equipamento'] || item['Técnico'] || item['L'] || '').toString().toLowerCase();
-                    if (!colL.includes(termL)) return false;
-                }
-
-                // Filtro por Calendário Duplo (Data de Abertura)
                 if (dtStart || dtEnd) {
                     let rawDt = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || '';
                     let dtItem = parseDateSmart(rawDt);
@@ -813,14 +792,14 @@
                     if (dtStart && dtItem.getTime() < dtStart.getTime()) return false;
                     if (dtEnd && dtItem.getTime() > dtEnd.getTime()) return false;
                 }
-
                 return true;
             });
 
             renderDashboard(filteredData);
         }
 
-        function setPresetPeriod(preset) {
+        // PRESETS DE DATAS PARA ATALHO (GERAL OU COMPARATIVO)
+        function setPresetPeriod(preset, target) {
             const now = new Date();
             let start = new Date();
             let end = new Date();
@@ -848,22 +827,34 @@
                 return [year, month, day].join('-');
             };
 
-            document.getElementById('startDateFilter').value = formatDate(start);
-            document.getElementById('endDateFilter').value = formatDate(end);
+            const startId = target === 'comp' ? 'startDateComp' : 'startDateFilter';
+            const endId = target === 'comp' ? 'endDateComp' : 'endDateFilter';
 
-            applyGlobalFilters();
+            document.getElementById(startId).value = formatDate(start);
+            document.getElementById(endId).value = formatDate(end);
+
+            if (target === 'comp') {
+                updateComparativoCharts();
+            } else {
+                applyGlobalFilters();
+            }
         }
 
-        function clearSearchFilters() {
-            document.getElementById('searchColD').value = '';
-            document.getElementById('searchColL').value = '';
-            document.getElementById('startDateFilter').value = '';
-            document.getElementById('endDateFilter').value = '';
-            currentKPIFilter = 'ALL';
-            applyGlobalFilters();
+        function clearDateFilters(target) {
+            const startId = target === 'comp' ? 'startDateComp' : 'startDateFilter';
+            const endId = target === 'comp' ? 'endDateComp' : 'endDateFilter';
+
+            document.getElementById(startId).value = '';
+            document.getElementById(endId).value = '';
+
+            if (target === 'comp') {
+                updateComparativoCharts();
+            } else {
+                currentKPIFilter = 'ALL';
+                applyGlobalFilters();
+            }
         }
 
-        // FUNÇÃO DE INTERAÇÃO DOS CARDS DE KPI
         function filterByKPI(filterType) {
             if (filterType === 'TECNICOS') {
                 document.getElementById('tableTechSection').scrollIntoView({ behavior: 'smooth' });
@@ -1137,13 +1128,30 @@
             });
         }
 
+        // ATUALIZAÇÃO DOS GRÁFICOS DA ABA COMPARATIVO COM FILTRO DE DATAS
         function updateComparativoCharts() {
             const selectedTech = document.getElementById('selectTecnicoComp').value;
-            const selectedRangeSemanal = document.getElementById('selectRangeSemanal').value;
+
+            const startVal = document.getElementById('startDateComp').value;
+            const endVal = document.getElementById('endDateComp').value;
+
+            let dtStart = startVal ? new Date(startVal + 'T00:00:00') : null;
+            let dtEnd = endVal ? new Date(endVal + 'T23:59:59') : null;
 
             let activeCompanyData = activeData.filter(item => {
                 let tech = item['Técnico'] || item['Tecnico'] || '';
-                return !isExcludedTech(tech);
+                if (isExcludedTech(tech)) return false;
+
+                if (dtStart || dtEnd) {
+                    let rawDt = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || '';
+                    let dtItem = parseDateSmart(rawDt);
+
+                    if (!dtItem) return false;
+                    if (dtStart && dtItem.getTime() < dtStart.getTime()) return false;
+                    if (dtEnd && dtItem.getTime() > dtEnd.getTime()) return false;
+                }
+
+                return true;
             });
 
             if (currentKPIFilter === 'CORRETIVA') {
@@ -1215,43 +1223,8 @@
             const pctShareTotal = totalCompanyOS > 0 ? ((totalTechAllOS / totalCompanyOS) * 100).toFixed(1) : "0";
 
             let sortedSemKeys = Object.keys(histSemanalMap).sort((a,b) => histSemanalMap[a].sortDate - histSemanalMap[b].sortDate);
-            let displaySemKeys = sortedSemKeys;
 
-            if (selectedRangeSemanal === "CURRENT") {
-                if (sortedSemKeys.length > 0) {
-                    displaySemKeys = [sortedSemKeys[sortedSemKeys.length - 1]];
-                }
-                document.getElementById('badgeSemanal').innerText = "Semana Atual (Mais Recente)";
-            } else if (selectedRangeSemanal === "PREV") {
-                if (sortedSemKeys.length > 1) {
-                    displaySemKeys = [sortedSemKeys[sortedSemKeys.length - 2]];
-                } else if (sortedSemKeys.length === 1) {
-                    displaySemKeys = [sortedSemKeys[0]];
-                }
-                document.getElementById('badgeSemanal').innerText = "Última Semana (Anterior)";
-            } else if (selectedRangeSemanal === "4" && sortedSemKeys.length > 4) {
-                displaySemKeys = sortedSemKeys.slice(sortedSemKeys.length - 4);
-                document.getElementById('badgeSemanal').innerText = "Últimas 4 Semanas";
-            } else if (selectedRangeSemanal === "10" && sortedSemKeys.length > 10) {
-                displaySemKeys = sortedSemKeys.slice(sortedSemKeys.length - 10);
-                document.getElementById('badgeSemanal').innerText = "Últimas 10 Semanas";
-            } else if (selectedRangeSemanal === "16" && sortedSemKeys.length > 16) {
-                displaySemKeys = sortedSemKeys.slice(sortedSemKeys.length - 16);
-                document.getElementById('badgeSemanal').innerText = "Últimas 16 Semanas";
-            } else {
-                document.getElementById('badgeSemanal').innerText = "Todas as Semanas (" + sortedSemKeys.length + ")";
-            }
-
-            let totalFilteredOS = 0;
-            displaySemKeys.forEach(k => {
-                totalFilteredOS += histSemanalMap[k] ? histSemanalMap[k].count : 0;
-            });
-
-            if (selectedRangeSemanal === "ALL") {
-                totalFilteredOS = totalTechAllOS;
-            }
-
-            document.getElementById('compTotalOS').innerText = totalFilteredOS;
+            document.getElementById('compTotalOS').innerText = totalTechAllOS;
             document.getElementById('compMediaMes').innerText = mediaHistMes;
             document.getElementById('compMediaSemana').innerText = mediaHistSemana;
             document.getElementById('compPctTotal').innerText = pctShareTotal + '%';
@@ -1262,8 +1235,8 @@
 
             renderChartMensal(mensalLabels, mensalValues);
 
-            const semanalLabels = displaySemKeys.map(k => histSemanalMap[k].label);
-            const semanalValues = displaySemKeys.map(k => histSemanalMap[k].count);
+            const semanalLabels = sortedSemKeys.map(k => histSemanalMap[k].label);
+            const semanalValues = sortedSemKeys.map(k => histSemanalMap[k].count);
 
             renderChartSemanal(semanalLabels, semanalValues);
 
@@ -1372,7 +1345,7 @@
             });
         }
 
-        // FUNÇÃO DE EXPORTAÇÃO EXCEL DA BASE
+        // EXPORTAÇÕES PDF E EXCEL
         function exportToExcel() {
             if (!activeData.length) return;
             const ws = XLSX.utils.json_to_sheet(activeData);
@@ -1381,7 +1354,6 @@
             XLSX.writeFile(wb, "Relatorio_Atendimento_Tecnico.xlsx");
         }
 
-        // FUNÇÃO DE EXPORTAÇÃO PDF
         function exportToPDF() {
             const btnPdf = document.getElementById('btnPdf');
             const originalText = btnPdf.innerHTML;
@@ -1415,7 +1387,7 @@
             }
         }
 
-        // LÓGICA DO MODAL DE OBSERVAÇÃO DE TEXTO LONGO
+        // MODAL DE OBSERVAÇÃO
         let activeObsInputId = null;
 
         function openObsModal(inputId, headerName) {
