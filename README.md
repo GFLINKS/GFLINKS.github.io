@@ -91,50 +91,6 @@
         </div>
     </div>
 
-    <!-- MENU FLUTUANTE DE FILTRO ESTILO EXCEL -->
-    <div id="excelFilterDropdown" class="fixed hidden z-[100] bg-white border border-slate-300 shadow-2xl rounded-xl p-3 w-64 text-xs font-sans text-slate-700" onclick="event.stopPropagation()">
-        <!-- Ações de Ordenação -->
-        <div class="space-y-1 pb-2 border-b border-slate-200">
-            <button onclick="applyColumnSort('asc')" class="w-full text-left px-2.5 py-1.5 hover:bg-slate-100 rounded-md flex items-center gap-2 font-semibold text-slate-700 transition">
-                <i class="fa-solid fa-arrow-down-a-z text-indigo-600 text-sm"></i> Classificar de A a Z
-            </button>
-            <button onclick="applyColumnSort('desc')" class="w-full text-left px-2.5 py-1.5 hover:bg-slate-100 rounded-md flex items-center gap-2 font-semibold text-slate-700 transition">
-                <i class="fa-solid fa-arrow-up-z-a text-indigo-600 text-sm"></i> Classificar de Z a A
-            </button>
-        </div>
-
-        <!-- Limpar Filtro -->
-        <div class="py-1.5 border-b border-slate-200">
-            <button onclick="clearCurrentColumnFilter()" class="w-full text-left px-2.5 py-1.5 hover:bg-rose-50 rounded-md text-rose-600 flex items-center gap-2 font-semibold transition">
-                <i class="fa-solid fa-filter-circle-xmark text-sm"></i> Limpar Filtro de "<span id="excelFilterColName"></span>"
-            </button>
-        </div>
-
-        <!-- Seleção de Valores Únicos -->
-        <div class="pt-2 space-y-2">
-            <div class="relative">
-                <input type="text" id="excelFilterSearch" oninput="filterExcelUniqueList()" placeholder="Pesquisar..." class="w-full pl-7 pr-2 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
-                <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-[10px]"></i>
-            </div>
-
-            <div class="p-1 border border-slate-200 rounded-lg bg-slate-50">
-                <label class="flex items-center gap-2 px-2 py-1 border-b border-slate-200 font-bold text-slate-800 cursor-pointer hover:bg-slate-200/60 rounded">
-                    <input type="checkbox" id="excelSelectAllCb" onchange="toggleSelectAllExcelList(this.checked)" class="rounded text-indigo-600 focus:ring-indigo-500">
-                    <span>(Selecionar Tudo)</span>
-                </label>
-                <div id="excelFilterList" class="max-h-40 overflow-y-auto space-y-1 p-1 text-[11px]"></div>
-            </div>
-        </div>
-
-        <!-- Botões de Ação -->
-        <div class="flex justify-end gap-2 pt-2.5 border-t border-slate-200 mt-2">
-            <button onclick="closeExcelFilterDropdown()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
-            <button onclick="confirmExcelColumnFilter()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition shadow flex items-center gap-1">
-                <i class="fa-solid fa-check text-[10px]"></i> OK
-            </button>
-        </div>
-    </div>
-
     <!-- HEADER NAVBAR ESTILO GF -->
     <header class="bg-slate-900 text-white shadow-lg no-print">
         <div class="max-w-[1800px] mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -220,111 +176,50 @@
             </div>
         </div>
 
-        <!-- BARRA DE FILTROS: CALENDÁRIO DUPLO & BUSCA (COLUNAS D E L) -->
-        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 no-print">
-            
-            <!-- SELETOR DE DATA / CALENDÁRIO DUPLO -->
-            <div class="relative w-full md:w-auto">
-                <div class="flex items-center bg-slate-50 border border-slate-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
-                    <input type="text" id="dateRangeInput" readonly onclick="toggleDatePicker()" 
-                           placeholder="01/01/2026 → 03/10/2026" 
-                           class="px-3 py-2 text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer w-52 text-center">
-                    
-                    <button onclick="clearDateRange(event)" title="Limpar Filtro de Datas" class="text-slate-400 hover:text-rose-600 px-2 text-xs transition">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-
-                    <button onclick="toggleDatePicker()" class="bg-slate-700 hover:bg-slate-800 text-white px-3.5 py-2 text-xs transition flex items-center justify-center">
-                        <i class="fa-solid fa-calendar-days"></i>
-                    </button>
+        <!-- BARRA DE FILTROS E PESQUISA AVANÇADA (COLUNA D, L E CALENDÁRIO DUPLO) -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 no-print space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-filter text-indigo-600 text-base"></i>
+                    <h3 class="text-sm font-bold text-slate-800">Filtros de Pesquisa & Período Personalizado</h3>
                 </div>
-
-                <!-- POPOVER DO CALENDÁRIO DUPLO COM ATALHOS -->
-                <div id="datePickerPopover" class="hidden absolute left-0 top-12 z-[80] bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 flex flex-col md:flex-row gap-4 w-[680px]">
-                    
-                    <!-- ATALHOS LATERAIS (ESQUERDA) -->
-                    <div class="w-44 border-r border-slate-200 pr-3 space-y-1 text-xs font-medium text-slate-600">
-                        <button onclick="selectPreset('hoje')" class="preset-btn w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">Hoje</button>
-                        <button onclick="selectPreset('ontem')" class="preset-btn w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">Ontem</button>
-                        <button onclick="selectPreset('7dias')" class="preset-btn w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">Últimos 7 dias</button>
-                        <button onclick="selectPreset('30dias')" class="preset-btn w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">Últimos 30 dias</button>
-                        <button onclick="selectPreset('mes_atual')" class="preset-btn w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">Mês Atual</button>
-                        <button onclick="selectPreset('mes_anterior')" class="preset-btn w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">Mês Anterior</button>
-                        <button onclick="selectPreset('3meses')" class="preset-btn w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">Últimos 3 meses</button>
-                        <button onclick="selectPreset('6meses')" class="preset-btn w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">Últimos 6 meses</button>
-                        <button onclick="selectPreset('personalizado')" id="btnPersonalizado" class="preset-btn active w-full text-left px-3 py-1.5 rounded-lg bg-slate-700 text-white font-semibold transition">Personalizado</button>
-                    </div>
-
-                    <!-- PAINEL DE CALENDÁRIOS DUPLOS -->
-                    <div class="flex-1 space-y-3">
-                        <!-- CABEÇALHO DE NAVEGAÇÃO DO CALENDÁRIO -->
-                        <div class="flex items-center justify-between pb-2 border-b border-slate-100 text-xs font-bold text-slate-700">
-                            <button onclick="changeCalendarMonth(-1)" class="p-1 hover:bg-slate-100 rounded text-slate-500 transition">
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </button>
-                            
-                            <div class="flex items-center gap-2">
-                                <select id="calMonthSelect" onchange="renderCalendarGrid()" class="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
-                                    <option value="0">jan.</option><option value="1">fev.</option><option value="2">mar.</option>
-                                    <option value="3">abr.</option><option value="4">mai.</option><option value="5">jun.</option>
-                                    <option value="6">jul.</option><option value="7">ago.</option><option value="8">set.</option>
-                                    <option value="9">out.</option><option value="10">nov.</option><option value="11">dez.</option>
-                                </select>
-                                <select id="calYearSelect" onchange="renderCalendarGrid()" class="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
-                                    <!-- Anos gerados dinamicamente via JS -->
-                                </select>
-                            </div>
-
-                            <button onclick="changeCalendarMonth(1)" class="p-1 hover:bg-slate-100 rounded text-slate-500 transition">
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </button>
-                        </div>
-
-                        <!-- GRIDS DOS DOIS MESES -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <p id="calMonthLabel1" class="text-center text-xs font-bold text-slate-600 mb-2"></p>
-                                <div class="grid grid-cols-7 gap-1 text-[11px] text-center font-semibold text-slate-400 mb-1">
-                                    <span>dom.</span><span>seg.</span><span>ter.</span><span>qua.</span><span>qui.</span><span>sex.</span><span>sáb.</span>
-                                </div>
-                                <div id="calGrid1" class="grid grid-cols-7 gap-1 text-xs"></div>
-                            </div>
-
-                            <div>
-                                <p id="calMonthLabel2" class="text-center text-xs font-bold text-slate-600 mb-2"></p>
-                                <div class="grid grid-cols-7 gap-1 text-[11px] text-center font-semibold text-slate-400 mb-1">
-                                    <span>dom.</span><span>seg.</span><span>ter.</span><span>qua.</span><span>qui.</span><span>sex.</span><span>sáb.</span>
-                                </div>
-                                <div id="calGrid2" class="grid grid-cols-7 gap-1 text-xs"></div>
-                            </div>
-                        </div>
-
-                        <!-- BOTÕES DE AÇÃO -->
-                        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                            <button onclick="toggleDatePicker()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition">Cancelar</button>
-                            <button onclick="applyCalendarRange()" class="px-4 py-1.5 text-xs font-semibold bg-slate-700 hover:bg-slate-800 text-white rounded-lg shadow transition">Aplicar Filtro</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CAMPO DE PESQUISA TEXTUAL (COLUNAS D & L) -->
-            <div class="flex items-center w-full md:w-auto flex-1 max-w-xl">
-                <div class="flex items-center w-full bg-slate-50 border border-slate-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
-                    <button class="px-3 py-2 bg-slate-100 border-r border-slate-300 text-slate-600 hover:bg-slate-200 transition" title="Opções de Pesquisa">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                    
-                    <input type="text" id="searchInput" onkeyup="handleSearchKey(event)" 
-                           placeholder="Pesquisar por Código/OS (Col. D) ou Descrição/Status (Col. L)..." 
-                           class="w-full px-3 py-2 text-xs text-slate-700 bg-transparent outline-none">
-                    
-                    <button onclick="executeSearch()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 text-xs transition flex items-center justify-center" title="Buscar">
-                        <i class="fa-solid fa-magnifying-glass"></i>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="setPresetPeriod('today')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Hoje</button>
+                    <button onclick="setPresetPeriod('7d')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 7 dias</button>
+                    <button onclick="setPresetPeriod('30d')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 30 dias</button>
+                    <button onclick="setPresetPeriod('thisMonth')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Atual</button>
+                    <button onclick="setPresetPeriod('lastMonth')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Anterior</button>
+                    <button onclick="clearSearchFilters()" class="text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1 rounded-lg border border-rose-200 transition flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> Limpar Filtros
                     </button>
                 </div>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                <!-- PESQUISA COLUNA D -->
+                <div>
+                    <label for="searchColD" class="block font-bold text-slate-700 mb-1">🔍 Pesquisar em Coluna D (Tipo/Descrição/OS):</label>
+                    <input type="text" id="searchColD" oninput="applyGlobalFilters()" placeholder="Ex: Corretiva, Preventiva..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
+                </div>
+
+                <!-- PESQUISA COLUNA L -->
+                <div>
+                    <label for="searchColL" class="block font-bold text-slate-700 mb-1">🔍 Pesquisar em Coluna L (Obs/Assunto/Equip.):</label>
+                    <input type="text" id="searchColL" oninput="applyGlobalFilters()" placeholder="Ex: VIP 1220, Câmera, Troca..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
+                </div>
+
+                <!-- CALENDÁRIO INÍCIO -->
+                <div>
+                    <label for="startDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Inicial (Abertura):</label>
+                    <input type="date" id="startDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
+                </div>
+
+                <!-- CALENDÁRIO FIM -->
+                <div>
+                    <label for="endDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Final (Abertura):</label>
+                    <input type="date" id="endDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
+                </div>
+            </div>
         </div>
 
         <!-- INDICADOR DE FILTRO DE CARD ATIVO -->
@@ -392,7 +287,7 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-rose-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Clique para ver OSs fora do prazo</span>
+                        <span>🖱️️ Clique para ver OSs fora do prazo</span>
                     </p>
                 </div>
 
@@ -632,18 +527,12 @@
 
     <!-- EMBEDDED JAVASCRIPT LOGIC -->
     <script>
-        // URL DO SEU GOOGLE APPS SCRIPT WEB APP
+        // URL DO SEU GOOGLE APPS SCRIPT WEB APP (MANTIDA ORIGINAL DA SUA VERSÃO FUNCIONAL)
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCQgoB_cP3V3BAhFOGmqs1rCxW3Ae7l_a6aLXBWaV1FKkV2iuOGsXmSKTOp2FsckuRAw/exec";
 
         let driveHistoryData = [];
-
-        // ESTADO GLOBAL DOS FILTROS ADICIONADOS
-        let filterStartDate = null;
-        let filterEndDate = null;
-        let filterSearchText = "";
-
-        let calCurrentYear = new Date().getFullYear();
-        let calCurrentMonth = new Date().getMonth();
+        let activeData = [];
+        let currentKPIFilter = 'ALL';
 
         // SMART DATE PARSER FOR BRAZILIAN, ISO, AND EXCEL SERIAL DATES
         function parseDateSmart(val) {
@@ -778,9 +667,6 @@
             }
         }
 
-        let activeData = [];
-        let currentKPIFilter = 'ALL';
-
         let chartStatusObj = null;
         let chartTecnicosObj = null;
         let chartLojasObj = null;
@@ -789,228 +675,7 @@
         let chartMensalObj = null;
         let chartSemanalObj = null;
 
-        // FUNÇÕES DE BUSCA TEXTUAL NAS COLUNAS D E L
-        function getColumnValue(item, colLetter, colIndex) {
-            if (!item) return '';
-            
-            if (item[colLetter] !== undefined) return String(item[colLetter]);
-            if (item['Coluna ' + colLetter] !== undefined) return String(item['Coluna ' + colLetter]);
-
-            const keys = Object.keys(item);
-            if (keys.length > colIndex && item[keys[colIndex]] !== undefined) {
-                return String(item[keys[colIndex]]);
-            }
-
-            if (colLetter === 'D') {
-                const valD = item['Nº OS'] || item['Numero OS'] || item['OS'] || item['Código'] || item['Cliente'] || item['Fantasia Cliente'];
-                if (valD !== undefined) return String(valD);
-            }
-            if (colLetter === 'L') {
-                const valL = item['Descrição'] || item['Equipamento'] || item['Observação'] || item['Observacoes'] || item['Status'] || item['Defeito'];
-                if (valL !== undefined) return String(valL);
-            }
-
-            return '';
-        }
-
-        function handleSearchKey(event) {
-            if (event.key === 'Enter') {
-                executeSearch();
-            }
-        }
-
-        function executeSearch() {
-            const input = document.getElementById('searchInput');
-            filterSearchText = input ? input.value.trim().toLowerCase() : "";
-            renderDashboard(activeData);
-        }
-
-        // FUNÇÕES DO CALENDÁRIO DUPLO E PRESETS
-        function toggleDatePicker() {
-            const popover = document.getElementById('datePickerPopover');
-            if (popover) {
-                popover.classList.toggle('hidden');
-                if (!popover.classList.contains('hidden')) {
-                    initCalendarSelects();
-                    renderCalendarGrid();
-                }
-            }
-        }
-
-        function initCalendarSelects() {
-            const yearSelect = document.getElementById('calYearSelect');
-            if (yearSelect && yearSelect.options.length === 0) {
-                const currentYear = new Date().getFullYear();
-                for (let y = currentYear - 5; y <= currentYear + 2; y++) {
-                    const opt = document.createElement('option');
-                    opt.value = y;
-                    opt.innerText = y;
-                    if (y === calCurrentYear) opt.selected = true;
-                    yearSelect.appendChild(opt);
-                }
-            }
-            document.getElementById('calMonthSelect').value = calCurrentMonth;
-        }
-
-        function changeCalendarMonth(delta) {
-            calCurrentMonth += delta;
-            if (calCurrentMonth > 11) {
-                calCurrentMonth = 0;
-                calCurrentYear++;
-            } else if (calCurrentMonth < 0) {
-                calCurrentMonth = 11;
-                calCurrentYear--;
-            }
-            document.getElementById('calMonthSelect').value = calCurrentMonth;
-            document.getElementById('calYearSelect').value = calCurrentYear;
-            renderCalendarGrid();
-        }
-
-        const monthNamesBr = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-
-        function renderCalendarGrid() {
-            calCurrentMonth = parseInt(document.getElementById('calMonthSelect').value, 10);
-            calCurrentYear = parseInt(document.getElementById('calYearSelect').value, 10);
-
-            renderSingleMonthGrid('calGrid1', 'calMonthLabel1', calCurrentYear, calCurrentMonth);
-
-            let nextM = calCurrentMonth + 1;
-            let nextY = calCurrentYear;
-            if (nextM > 11) { nextM = 0; nextY++; }
-            renderSingleMonthGrid('calGrid2', 'calMonthLabel2', nextY, nextM);
-        }
-
-        function renderSingleMonthGrid(gridId, labelId, year, month) {
-            document.getElementById(labelId).innerText = `${monthNamesBr[month]} ${year}`;
-            const grid = document.getElementById(gridId);
-            grid.innerHTML = '';
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            for (let i = 0; i < firstDay; i++) {
-                grid.appendChild(document.createElement('div'));
-            }
-
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateObj = new Date(year, month, d);
-                const btn = document.createElement('button');
-                btn.innerText = d;
-                btn.className = "p-1.5 rounded-lg text-center font-medium transition hover:bg-slate-200 text-slate-700";
-
-                if (filterStartDate && filterEndDate && dateObj >= filterStartDate && dateObj <= filterEndDate) {
-                    btn.classList.add('bg-slate-700', 'text-white', 'font-bold');
-                    btn.classList.remove('hover:bg-slate-200');
-                }
-
-                btn.onclick = () => onCalendarDayClick(dateObj);
-                grid.appendChild(btn);
-            }
-        }
-
-        function onCalendarDayClick(dateObj) {
-            if (!filterStartDate || (filterStartDate && filterEndDate)) {
-                filterStartDate = new Date(dateObj.setHours(0, 0, 0, 0));
-                filterEndDate = null;
-            } else if (filterStartDate && !filterEndDate) {
-                if (dateObj < filterStartDate) {
-                    filterStartDate = new Date(dateObj.setHours(0, 0, 0, 0));
-                } else {
-                    filterEndDate = new Date(dateObj.setHours(23, 59, 59, 999));
-                }
-            }
-            highlightActivePreset(document.getElementById('btnPersonalizado'));
-            renderCalendarGrid();
-        }
-
-        function applyCalendarRange() {
-            if (filterStartDate && !filterEndDate) {
-                filterEndDate = new Date(filterStartDate);
-                filterEndDate.setHours(23, 59, 59, 999);
-            }
-
-            updateDateInputDisplay();
-            toggleDatePicker();
-            renderDashboard(activeData);
-        }
-
-        function clearDateRange(e) {
-            if (e) e.stopPropagation();
-            filterStartDate = null;
-            filterEndDate = null;
-            document.getElementById('dateRangeInput').value = "";
-            renderDashboard(activeData);
-        }
-
-        function updateDateInputDisplay() {
-            if (filterStartDate && filterEndDate) {
-                const startStr = filterStartDate.toLocaleDateString('pt-BR');
-                const endStr = filterEndDate.toLocaleDateString('pt-BR');
-                document.getElementById('dateRangeInput').value = `${startStr} → ${endStr}`;
-            } else {
-                document.getElementById('dateRangeInput').value = "";
-            }
-        }
-
-        function selectPreset(presetKey) {
-            const now = new Date();
-            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-            const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-
-            if (presetKey === 'hoje') {
-                filterStartDate = todayStart;
-                filterEndDate = todayEnd;
-            } else if (presetKey === 'ontem') {
-                const yesterday = new Date(todayStart);
-                yesterday.setDate(yesterday.getDate() - 1);
-                filterStartDate = yesterday;
-                filterEndDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59);
-            } else if (presetKey === '7dias') {
-                const d = new Date(todayStart);
-                d.setDate(d.getDate() - 6);
-                filterStartDate = d;
-                filterEndDate = todayEnd;
-            } else if (presetKey === '30dias') {
-                const d = new Date(todayStart);
-                d.setDate(d.getDate() - 29);
-                filterStartDate = d;
-                filterEndDate = todayEnd;
-            } else if (presetKey === 'mes_atual') {
-                filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-                filterEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-            } else if (presetKey === 'mes_anterior') {
-                filterStartDate = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
-                filterEndDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-            } else if (presetKey === '3meses') {
-                const d = new Date(todayStart);
-                d.setMonth(d.getMonth() - 3);
-                filterStartDate = d;
-                filterEndDate = todayEnd;
-            } else if (presetKey === '6meses') {
-                const d = new Date(todayStart);
-                d.setMonth(d.getMonth() - 6);
-                filterStartDate = d;
-                filterEndDate = todayEnd;
-            }
-
-            highlightActivePreset(event.currentTarget);
-            updateDateInputDisplay();
-            renderCalendarGrid();
-            applyCalendarRange();
-        }
-
-        function highlightActivePreset(btnElement) {
-            document.querySelectorAll('.preset-btn').forEach(b => {
-                b.classList.remove('bg-slate-700', 'text-white', 'font-semibold', 'active');
-                b.classList.add('hover:bg-slate-100', 'text-slate-600');
-            });
-            if (btnElement) {
-                btnElement.classList.add('bg-slate-700', 'text-white', 'font-semibold', 'active');
-                btnElement.classList.remove('hover:bg-slate-100', 'text-slate-600');
-            }
-        }
-
-        // FUNÇÃO DE BUSCA DOS DADOS NO GOOGLE DRIVE VIA WEB APP
+        // FUNÇÃO DE BUSCA DOS DADOS NO GOOGLE DRIVE VIA WEB APP (EXATAMENTE COMO FUNCIONA)
         function fetchDatabaseFromDrive() {
             const bannerMsg = document.getElementById('bannerMessage');
             if (bannerMsg) {
@@ -1033,8 +698,9 @@
                             });
                         }
 
+                        // Carrega a planilha mais recente por padrão
                         loadDriveRecord(0);
-                    } else if (historyRecords.status === "error") {
+                    } else if (historyRecords && historyRecords.status === "error") {
                         if (bannerMsg) {
                             bannerMsg.innerHTML = `<span>⚠️ Erro no Apps Script: ${historyRecords.message}</span>`;
                         }
@@ -1066,7 +732,7 @@
             document.getElementById('dbStatusBadge').innerText = `Status DB: Conectado (${rec.data.length} registros)`;
             document.getElementById('dbStatusBadge').className = "text-xs text-emerald-400 font-semibold";
 
-            renderDashboard(activeData);
+            applyGlobalFilters();
         }
 
         function loadFromHistory(selectedVal) {
@@ -1083,26 +749,6 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             initApp();
-
-            window.addEventListener('click', (e) => {
-                const dropdown = document.getElementById('excelFilterDropdown');
-                if (dropdown && !dropdown.classList.contains('hidden')) {
-                    const isClickInside = e.target.closest('#excelFilterDropdown');
-                    const isFilterBtn = e.target.closest('.excel-filter-btn');
-                    if (!isClickInside && !isFilterBtn) {
-                        dropdown.classList.add('hidden');
-                    }
-                }
-
-                const popover = document.getElementById('datePickerPopover');
-                if (popover && !popover.classList.contains('hidden')) {
-                    const isInsidePicker = e.target.closest('#datePickerPopover');
-                    const isClickInput = e.target.closest('#dateRangeInput') || e.target.closest('button[onclick="toggleDatePicker()"]');
-                    if (!isInsidePicker && !isClickInput) {
-                        popover.classList.add('hidden');
-                    }
-                }
-            });
         });
 
         function handleFileUpload(event) {
@@ -1124,7 +770,7 @@
                         '<span><b>📁 Upload Manual Carregado:</b> ' + file.name + ' (' + json.length + ' registros).</span>';
                     activeData = json;
                     currentKPIFilter = 'ALL';
-                    renderDashboard(activeData);
+                    applyGlobalFilters();
                 } else {
                     alert("Não foram encontrados dados válidos na planilha.");
                 }
@@ -1132,6 +778,92 @@
             reader.readAsArrayBuffer(file);
         }
 
+        // LÓGICA DOS FILTROS GLOBAIS (COLUNAS D, L, CALENDÁRIO E KPIS)
+        function applyGlobalFilters() {
+            if (!activeData || !activeData.length) return;
+
+            const termD = (document.getElementById('searchColD').value || '').trim().toLowerCase();
+            const termL = (document.getElementById('searchColL').value || '').trim().toLowerCase();
+            
+            const startVal = document.getElementById('startDateFilter').value;
+            const endVal = document.getElementById('endDateFilter').value;
+            
+            let dtStart = startVal ? new Date(startVal + 'T00:00:00') : null;
+            let dtEnd = endVal ? new Date(endVal + 'T23:59:59') : null;
+
+            const filteredData = activeData.filter(item => {
+                // Filtro por Coluna D
+                if (termD) {
+                    let colD = (item['Tipo da Ordem de Serviço'] || item['Tipo'] || item['Descrição'] || item['D'] || '').toString().toLowerCase();
+                    if (!colD.includes(termD)) return false;
+                }
+
+                // Filtro por Coluna L
+                if (termL) {
+                    let colL = (item['Observação'] || item['Observacao'] || item['Assunto'] || item['Equipamento'] || item['Técnico'] || item['L'] || '').toString().toLowerCase();
+                    if (!colL.includes(termL)) return false;
+                }
+
+                // Filtro por Calendário Duplo (Data de Abertura)
+                if (dtStart || dtEnd) {
+                    let rawDt = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || '';
+                    let dtItem = parseDateSmart(rawDt);
+
+                    if (!dtItem) return false;
+                    if (dtStart && dtItem.getTime() < dtStart.getTime()) return false;
+                    if (dtEnd && dtItem.getTime() > dtEnd.getTime()) return false;
+                }
+
+                return true;
+            });
+
+            renderDashboard(filteredData);
+        }
+
+        function setPresetPeriod(preset) {
+            const now = new Date();
+            let start = new Date();
+            let end = new Date();
+
+            if (preset === 'today') {
+                // Hoje
+            } else if (preset === '7d') {
+                start.setDate(now.getDate() - 7);
+            } else if (preset === '30d') {
+                start.setDate(now.getDate() - 30);
+            } else if (preset === 'thisMonth') {
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            } else if (preset === 'lastMonth') {
+                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                end = new Date(now.getFullYear(), now.getMonth(), 0);
+            }
+
+            const formatDate = (d) => {
+                let month = '' + (d.getMonth() + 1);
+                let day = '' + d.getDate();
+                let year = d.getFullYear();
+                if (month.length < 2) month = '0' + month;
+                if (day.length < 2) day = '0' + day;
+                return [year, month, day].join('-');
+            };
+
+            document.getElementById('startDateFilter').value = formatDate(start);
+            document.getElementById('endDateFilter').value = formatDate(end);
+
+            applyGlobalFilters();
+        }
+
+        function clearSearchFilters() {
+            document.getElementById('searchColD').value = '';
+            document.getElementById('searchColL').value = '';
+            document.getElementById('startDateFilter').value = '';
+            document.getElementById('endDateFilter').value = '';
+            currentKPIFilter = 'ALL';
+            applyGlobalFilters();
+        }
+
+        // FUNÇÃO DE INTERAÇÃO DOS CARDS DE KPI
         function filterByKPI(filterType) {
             if (filterType === 'TECNICOS') {
                 document.getElementById('tableTechSection').scrollIntoView({ behavior: 'smooth' });
@@ -1147,7 +879,7 @@
                 currentKPIFilter = filterType;
             }
 
-            renderDashboard(activeData);
+            applyGlobalFilters();
         }
 
         function scrollToCompSection(sectionId) {
@@ -1195,39 +927,16 @@
         function renderDashboard(rawData) {
             highlightActiveCard();
 
-            // 1. FILTRAGEM DE TÉCNICOS EXCLUÍDOS
-            let displayData = rawData.filter(item => {
+            const validTechData = rawData.filter(item => {
                 let tech = item['Técnico'] || item['Tecnico'] || '';
                 return !isExcludedTech(tech);
             });
 
-            // 2. FILTRAGEM POR TEXTO (BUSCA NAS COLUNAS D E L)
-            if (filterSearchText) {
-                displayData = displayData.filter(item => {
-                    const valD = getColumnValue(item, 'D', 3).toLowerCase();
-                    const valL = getColumnValue(item, 'L', 11).toLowerCase();
-                    return valD.includes(filterSearchText) || valL.includes(filterSearchText);
-                });
-            }
-
-            // 3. FILTRAGEM POR INTERVALO DE DATAS (DATA DE ABERTURA)
-            if (filterStartDate || filterEndDate) {
-                displayData = displayData.filter(item => {
-                    let rawDt = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || item['D'] || '';
-                    let dt = parseDateSmart(rawDt);
-                    if (!dt) return false;
-
-                    if (filterStartDate && dt < filterStartDate) return false;
-                    if (filterEndDate && dt > filterEndDate) return false;
-                    return true;
-                });
-            }
-
-            const totalOS = displayData.length;
+            const totalOS = validTechData.length;
             let corretivaCount = 0;
             let atrasoCount = 0;
 
-            displayData.forEach(item => {
+            validTechData.forEach(item => {
                 if (isSLAOverdue(item)) atrasoCount++;
                 let tipo = item['Tipo da Ordem de Serviço'] || item['Tipo'] || '';
                 if (tipo.toLowerCase().includes('corretiv')) corretivaCount++;
@@ -1236,13 +945,14 @@
             const pctCorretiva = totalOS > 0 ? ((corretivaCount / totalOS) * 100).toFixed(1) : "0";
             const pctAtraso = totalOS > 0 ? ((atrasoCount / totalOS) * 100).toFixed(1) : "0";
 
+            let displayData = validTechData;
             if (currentKPIFilter === 'CORRETIVA') {
-                displayData = displayData.filter(item => {
+                displayData = validTechData.filter(item => {
                     let tipo = item['Tipo da Ordem de Serviço'] || item['Tipo'] || '';
                     return tipo.toLowerCase().includes('corretiv');
                 });
             } else if (currentKPIFilter === 'ATRASO') {
-                displayData = displayData.filter(item => isSLAOverdue(item));
+                displayData = validTechData.filter(item => isSLAOverdue(item));
             }
 
             const statusCount = {};
@@ -1435,26 +1145,6 @@
                 let tech = item['Técnico'] || item['Tecnico'] || '';
                 return !isExcludedTech(tech);
             });
-
-            if (filterSearchText) {
-                activeCompanyData = activeCompanyData.filter(item => {
-                    const valD = getColumnValue(item, 'D', 3).toLowerCase();
-                    const valL = getColumnValue(item, 'L', 11).toLowerCase();
-                    return valD.includes(filterSearchText) || valL.includes(filterSearchText);
-                });
-            }
-
-            if (filterStartDate || filterEndDate) {
-                activeCompanyData = activeCompanyData.filter(item => {
-                    let rawDt = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || item['D'] || '';
-                    let dt = parseDateSmart(rawDt);
-                    if (!dt) return false;
-
-                    if (filterStartDate && dt < filterStartDate) return false;
-                    if (filterEndDate && dt > filterEndDate) return false;
-                    return true;
-                });
-            }
 
             if (currentKPIFilter === 'CORRETIVA') {
                 activeCompanyData = activeCompanyData.filter(item => {
@@ -1760,48 +1450,6 @@
             }
 
             closeObsModal();
-        }
-
-        // LOGICA DE AUTO FILTROS NO CABEÇALHO DAS TABELAS
-        let activeColumnFilters = {}; 
-        let currentSort = { colHeader: null, direction: null }; 
-        let activeDropdownCol = null;
-
-        function openExcelFilterDropdown(event, colHeader) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            activeDropdownCol = colHeader;
-
-            const dropdown = document.getElementById('excelFilterDropdown');
-            document.getElementById('excelFilterColName').innerText = colHeader;
-            document.getElementById('excelFilterSearch').value = '';
-
-            const btn = event ? event.currentTarget : null;
-            if (btn) {
-                const rect = btn.getBoundingClientRect();
-                dropdown.style.top = `${rect.bottom + 4}px`;
-                dropdown.style.left = `${Math.max(10, Math.min(rect.left, window.innerWidth - 270))}px`;
-            }
-
-            dropdown.classList.remove('hidden');
-        }
-
-        function closeExcelFilterDropdown() {
-            document.getElementById('excelFilterDropdown').classList.add('hidden');
-        }
-
-        function applyColumnSort(dir) {
-            closeExcelFilterDropdown();
-        }
-
-        function clearCurrentColumnFilter() {
-            closeExcelFilterDropdown();
-        }
-
-        function confirmExcelColumnFilter() {
-            closeExcelFilterDropdown();
         }
     </script>
 </body>
