@@ -276,7 +276,7 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 </span>
-                <input type="text" id="filtroArquivos" placeholder="Pesquisar arquivos..." class="w-full text-xs pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-semibold">
+                <input type="text" id="filtroArquivos" placeholder="Pesquisar arquivos (ex: 20)..." class="w-full text-xs pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-semibold" oninput="filtrarArquivosDrive(this.value)">
             </div>
         </div>
 
@@ -291,6 +291,7 @@
     const CHAVE_BANCO_NUMERO = 'app_orcamento_ultimo_numero';
     const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbw9sSw41bHALRiDoJvFYDyHVfiA5OhNgaC5harmTg-2pWPbcnsQuZKQkyL1yOZ7eP68qQ/exec";
     const SENHA_AUTORIZACAO = "GF01";
+    const DRIVE_FOLDER_ID = "12p-H152le372P0Nx4C2_vX5hK34caOeS";
 
     let todosOrcamentos = [];
     let statusFiltroAtual = 'PENDENTE';
@@ -344,8 +345,15 @@
         }
     }
 
-    function abrirArquivoOrcamento(numero) {
-        alternarTela('galeria');
+    function filtrarArquivosDrive(termo) {
+        const iframe = document.getElementById('driveFolderIframe');
+        const termoLimpo = termo.trim();
+        // Atualiza o iframe com o parâmetro de busca do Google Drive integrado
+        if (termoLimpo) {
+            iframe.src = `https://drive.google.com/embeddedfolderview?id=${DRIVE_FOLDER_ID}&q=${encodeURIComponent(termoLimpo)}#list`;
+        } else {
+            iframe.src = `https://drive.google.com/embeddedfolderview?id=${DRIVE_FOLDER_ID}#list`;
+        }
     }
 
     function carregarNumeroOrcamento() {
@@ -735,11 +743,7 @@
             const tr = document.createElement('tr');
             tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
             tr.innerHTML = `
-                <td class="p-3 text-center">
-                    <a href="#" onclick="abrirArquivoOrcamento('${item.numero}')" class="font-bold text-indigo-600 hover:text-indigo-800 underline decoration-indigo-300 hover:decoration-indigo-600 transition" title="Abrir arquivo do orçamento ${item.numero}">
-                        ${item.numero}
-                    </a>
-                </td>
+                <td class="p-3 text-center font-bold">${item.numero}</td>
                 <td class="p-3 text-center font-semibold text-indigo-600">${item.sigla}</td>
                 <td class="p-3 whitespace-nowrap">${formatarDataHoraLimpo(item.data, item.hora)}</td>
                 <td class="p-3 font-semibold">${item.tecnico || '-'}</td>
