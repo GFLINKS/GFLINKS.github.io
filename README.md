@@ -114,10 +114,6 @@
                     </select>
                 </div>
 
-                <button onclick="fetchDatabaseFromDrive()" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2" title="Atualizar dados do Drive">
-                    <i class="fa-solid fa-rotate text-base"></i> Sincronizar Drive
-                </button>
-
                 <label for="excelInput" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg cursor-pointer transition shadow flex items-center gap-2">
                     <i class="fa-solid fa-file-excel text-base"></i> Upload Manual
                     <input type="file" id="excelInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFileUpload(event)">
@@ -179,7 +175,7 @@
         <!-- ================= TAB 1: VISÃO GERAL ================= -->
         <div id="tabGeral" class="tab-pane space-y-6">
 
-            <!-- FILTRO DE PERÍODO PERSONALIZADO (APENAS CALENDÁRIO) -->
+            <!-- FILTRO DE PERÍODO PERSONALIZADO -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 no-print space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
                     <div class="flex items-center gap-2">
@@ -495,7 +491,7 @@
                 </div>
             </div>
 
-            <!-- DETAILED COMPARATIVE TABLE -->
+            <!-- DETAILED COMPARATIVE TABLE COM LISTAGEM EXPANSÍVEL DE OSs -->
             <div id="tableCompSection" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -510,6 +506,7 @@
                                 <th class="p-3 bg-slate-800 text-white font-bold border-b border-slate-700 text-right">Qtd. OSs Atendidas</th>
                                 <th class="p-3 bg-slate-800 text-white font-bold border-b border-slate-700 text-right">% do Total Mapeado do Técnico</th>
                                 <th class="p-3 bg-slate-800 text-white font-bold border-b border-slate-700 text-center">Status Mês</th>
+                                <th class="p-3 bg-slate-800 text-white font-bold border-b border-slate-700 text-center">Listar OSs</th>
                             </tr>
                         </thead>
                         <tbody id="tableCompBody" class="divide-y divide-slate-100 text-slate-700">
@@ -1128,7 +1125,7 @@
             });
         }
 
-        // ATUALIZAÇÃO DOS GRÁFICOS DA ABA COMPARATIVO COM FILTRO DE DATAS
+        // ATUALIZAÇÃO DOS GRÁFICOS E TABELA COMPARATIVA
         function updateComparativoCharts() {
             const selectedTech = document.getElementById('selectTecnicoComp').value;
 
@@ -1192,9 +1189,10 @@
                     const mesDisplayLabel = monthNames[mesIdx] + '/' + ano;
 
                     if (!histMensalMap[mesSortKey]) {
-                        histMensalMap[mesSortKey] = { label: mesDisplayLabel, count: 0 };
+                        histMensalMap[mesSortKey] = { label: mesDisplayLabel, count: 0, osList: [] };
                     }
                     histMensalMap[mesSortKey].count += 1;
+                    histMensalMap[mesSortKey].osList.push(item);
 
                     const dayOfWeek = dt.getDay();
                     const distToMon = (dayOfWeek + 6) % 7;
@@ -1309,6 +1307,7 @@
             });
         }
 
+        // RENDERIZAÇÃO DA TABELA COMPARATIVA COM OSs DETALHADAS EXPANSÍVEIS
         function renderTableComp(histMensalMap, totalTechAllOS) {
             const tbody = document.getElementById('tableCompBody');
             tbody.innerHTML = '';
@@ -1316,13 +1315,15 @@
             const keys = Object.keys(histMensalMap).sort();
 
             if (keys.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum atendimento encontrado para os filtros selecionados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum atendimento encontrado para os filtros selecionados.</td></tr>';
                 return;
             }
 
             keys.forEach(k => {
-                const label = histMensalMap[k].label;
-                const count = histMensalMap[k].count;
+                const monthObj = histMensalMap[k];
+                const label = monthObj.label;
+                const count = monthObj.count;
+                const osList = monthObj.osList || [];
                 const pct = totalTechAllOS > 0 ? ((count / totalTechAllOS) * 100).toFixed(1) : "0";
                 
                 let badgeClass = "bg-blue-100 text-blue-800";
@@ -1335,14 +1336,79 @@
                     badgeLabel = "Baixo Volume";
                 }
 
-                tbody.innerHTML += 
-                    '<tr class="hover:bg-slate-50 transition border-b border-slate-100">' +
-                        '<td class="p-3 font-bold text-slate-800">' + label + '</td>' +
-                        '<td class="p-3 text-right font-bold text-blue-600">' + count + ' OSs</td>' +
-                        '<td class="p-3 text-right font-semibold">' + pct + '%</td>' +
-                        '<td class="p-3 text-center"><span class="text-[11px] font-bold px-2.5 py-1 rounded-lg ' + badgeClass + '">' + badgeLabel + '</span></td>' +
-                    '</tr>';
+                const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
+
+                // Montagem da listagem detalhada das OSs deste mês
+                let osRowsHtml = '';
+                osList.forEach((osItem, idx) => {
+                    let numOS = osItem['Número da Ordem de Serviço'] || osItem['Número OS'] || osItem['Nº OS'] || osItem['OS'] || osItem['Ordem de Serviço'] || osItem['A'] || `OS-${idx+1}`;
+                    let dataAbertura = osItem['Data de Abertura'] || osItem['Data_Abertura'] || osItem['Data Abertura'] || osItem['E'] || '-';
+                    let cliente = osItem['Fantasia Cliente'] || osItem['Cliente'] || osItem['Nome Fantasia'] || 'N/A';
+                    let tipoOS = osItem['Tipo da Ordem de Serviço'] || osItem['Tipo'] || 'N/A';
+                    let statusOS = osItem['Status da OS'] || osItem['Status'] || 'N/A';
+
+                    osRowsHtml += `
+                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition text-[11px]">
+                            <td class="p-2.5 font-bold text-indigo-600">${numOS}</td>
+                            <td class="p-2.5 font-medium text-slate-700">${dataAbertura}</td>
+                            <td class="p-2.5 font-semibold text-slate-800">${cliente}</td>
+                            <td class="p-2.5 text-slate-700">${tipoOS}</td>
+                            <td class="p-2.5 font-bold text-slate-800">${statusOS}</td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3 font-bold text-slate-800">${label}</td>
+                        <td class="p-3 text-right font-bold text-blue-600">${count} OSs</td>
+                        <td class="p-3 text-right font-semibold">${pct}%</td>
+                        <td class="p-3 text-center"><span class="text-[11px] font-bold px-2.5 py-1 rounded-lg ${badgeClass}">${badgeLabel}</span></td>
+                        <td class="p-3 text-center">
+                            <button onclick="toggleOSListRow('${safeKey}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold rounded-lg text-xs transition flex items-center gap-1.5 mx-auto shadow-sm">
+                                <i class="fa-solid fa-list-ul text-xs"></i> <span>Ver ${count} OSs</span> <i class="fa-solid fa-chevron-down text-[10px] ml-0.5"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr id="os-row-${safeKey}" class="hidden bg-slate-50 border-b border-slate-200">
+                        <td colspan="5" class="p-4">
+                            <div class="bg-white rounded-xl p-3 border border-slate-200 shadow-sm space-y-2">
+                                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                                    <h4 class="font-bold text-xs text-slate-800 flex items-center gap-2">
+                                        <i class="fa-solid fa-clipboard-list text-indigo-600"></i>
+                                        <span>Ordens de Serviço de ${label} (${count} chamados)</span>
+                                    </h4>
+                                    <span class="text-[11px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded">Técnico Selecionado</span>
+                                </div>
+                                <div class="max-h-60 overflow-y-auto">
+                                    <table class="w-full text-left text-xs border-collapse">
+                                        <thead class="bg-slate-100 text-slate-700 font-bold sticky top-0">
+                                            <tr>
+                                                <th class="p-2 border-b border-slate-200">Nº OS</th>
+                                                <th class="p-2 border-b border-slate-200">Data Abertura</th>
+                                                <th class="p-2 border-b border-slate-200">Cliente / Unidade</th>
+                                                <th class="p-2 border-b border-slate-200">Tipo de OS</th>
+                                                <th class="p-2 border-b border-slate-200">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${osRowsHtml}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             });
+        }
+
+        // ALTERNARA A EXIBIÇÃO DAS OSs NA TABELA DETALHADA
+        function toggleOSListRow(safeKey) {
+            const row = document.getElementById('os-row-' + safeKey);
+            if (row) {
+                row.classList.toggle('hidden');
+            }
         }
 
         // EXPORTAÇÕES PDF E EXCEL
