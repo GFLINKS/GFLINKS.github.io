@@ -263,11 +263,21 @@
 
     <!-- TELA 3: VISUALIZADOR DA PASTA DO DRIVE (ARQUIVOS) -->
     <div id="galeriaPdfSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6 hidden">
-        <div>
-            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <i class="fa-solid fa-folder-tree text-indigo-600"></i> Arquivos e Documentos
-            </h2>
-            <p class="text-xs text-slate-500">Navegue pelos PDFs e subpastas salvos no Google Drive diretamente na página.</p>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-folder-tree text-indigo-600"></i> Arquivos e Documentos
+                </h2>
+                <p class="text-xs text-slate-500">Navegue pelos PDFs e subpastas salvos no Google Drive diretamente na página.</p>
+            </div>
+
+            <!-- Campo de Pesquisa Exclusivo em Arquivos -->
+            <div class="relative w-full sm:w-72">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input type="text" id="filtroArquivos" placeholder="Pesquisar arquivos..." class="w-full text-xs pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-semibold">
+            </div>
         </div>
 
         <div class="border border-slate-200 rounded-xl overflow-hidden">
@@ -335,9 +345,7 @@
     }
 
     function abrirArquivoOrcamento(numero) {
-        // Alterna para a tela de Arquivos
         alternarTela('galeria');
-        // Opcional: Aqui você também pode focar ou realizar alguma busca na pasta do Drive se necessário
     }
 
     function carregarNumeroOrcamento() {
