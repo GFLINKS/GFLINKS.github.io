@@ -1,265 +1,331 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Atendimento Técnico - KPIs & O.S Abertas</title>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS (XLSX) -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- html2pdf.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        @page {
-            size: A3 landscape;
-            margin: 8mm;
-        }
-
-        @media print {
-            .no-print { display: none !important; }
-            body { 
-                background: white !important; 
-                font-size: 9pt !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            main { 
-                max-width: 100% !important; 
-                padding: 0 !important; 
-            }
-            .overflow-x-auto { 
-                overflow: visible !important; 
-                max-height: none !important; 
-            }
-            table { 
-                width: 100% !important; 
-                page-break-inside: auto; 
-            }
-            tr { 
-                page-break-inside: avoid; 
-                page-break-after: auto; 
-            }
-            .print-keep-together {
-                break-inside: avoid !important;
-                page-break-inside: avoid !important;
-            }
-        }
-
-        .nav-tab.active {
-            border-bottom: 3px solid #3b82f6;
-            color: #60a5fa;
-            font-weight: bold;
-        }
-
-        .card-active {
-            ring: 2px solid;
-            transform: scale(1.02);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Web - Chamados & Rotas 2026</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --sidebar-bg: #0f172a;
+      --card-bg: #ffffff;
+      --primary-color: #0284c7;
+    }
+    body { background-color: #f8fafc; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    .sidebar { background-color: var(--sidebar-bg); color: #fff; min-height: 100vh; }
+    .nav-link { color: #94a3b8; font-weight: 500; border-radius: 8px; margin-bottom: 6px; padding: 12px 16px; transition: all 0.2s; }
+    .nav-link:hover, .nav-link.active { background-color: #1e293b; color: #38bdf8; }
+    .card-kpi { background: var(--card-bg); border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; transition: transform 0.2s; }
+    .card-kpi:hover { transform: translateY(-3px); }
+    .card-panel { background: var(--card-bg); border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 24px; }
+    .btn-sync { background-color: var(--primary-color); color: white; font-weight: 600; border-radius: 8px; padding: 12px 16px; border: none; width: 100%; }
+    .btn-sync:hover { background-color: #0369a1; color: white; }
+    .badge-atrasada { background-color: #ef4444; color: white; }
+    .badge-aberta { background-color: #f59e0b; color: white; }
+    .badge-concluida { background-color: #10b981; color: white; }
+    .badge-andamento { background-color: #3b82f6; color: white; }
+    .table thead { background-color: #f1f5f9; }
+    .table-responsive { max-height: 600px; overflow-y: auto; }
+  </style>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen text-slate-800 pb-12">
+<body>
 
-    <!-- MODAL DE OBSERVAÇÃO / TEXTO LONGO -->
-    <div id="obsModal" class="fixed inset-0 bg-slate-900/80 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i>
-                    <span id="obsModalTitle">Visualizar / Editar Observação</span>
-                </h3>
-                <button onclick="closeObsModal()" class="text-slate-400 hover:text-slate-600 text-base">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1">Conteúdo Completo:</label>
-                <textarea id="obsModalTextarea" rows="6" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium leading-relaxed"></textarea>
-            </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="closeObsModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
-                <button onclick="saveObsModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition shadow flex items-center gap-1.5">
-                    <i class="fa-solid fa-floppy-disk text-xs"></i> Aplicar e Salvar
-                </button>
-            </div>
-        </div>
+<div class="container-fluid">
+  <div class="row">
+    
+    <!-- Sidebar / Menu Lateral -->
+    <div class="col-md-3 col-lg-2 sidebar p-3 d-flex flex-column">
+      <div class="d-flex align-items-center my-3 px-2">
+        <i class="fa-solid fa-headset text-info fs-3 me-2"></i>
+        <span class="fs-5 fw-bold text-white">Chamados 2026</span>
+      </div>
+      <hr class="text-secondary">
+      
+      <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+          <a href="#" class="nav-link active" onclick="alternarAba('abertos', this)"><i class="fa-solid fa-folder-open me-2"></i>Chamados Abertos</a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" onclick="alternarAba('rota', this)"><i class="fa-solid fa-route me-2"></i>Agendamento Rota</a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" onclick="alternarAba('finalizados', this)"><i class="fa-solid fa-clock-rotate-left me-2"></i>Histórico Finalizados</a>
+        </li>
+      </ul>
+      
+      <hr class="text-secondary">
+      
+      <button class="btn btn-sync shadow-sm" onclick="sincronizarDrive()">
+        <i class="fa-solid fa-arrows-rotate me-2"></i>Sincronizar Drive
+      </button>
     </div>
 
-    <!-- HEADER NAVBAR ESTILO GF -->
-    <header class="bg-slate-900 text-white shadow-lg no-print">
-        <div class="max-w-[1800px] mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-4">
-                <div class="bg-white/10 p-2 rounded-lg border border-slate-700 flex items-center justify-center min-w-[120px] max-h-[55px] overflow-hidden">
-                    <img id="logoApp" src="logo.png" alt="Logo" class="max-h-10 max-w-[140px] object-contain" onerror="tryNextLogo(this)">
-                </div>
-                <i class="fa-solid fa-screwdriver-wrench text-blue-400 text-2xl"></i>
-                <div>
-                    <h1 class="text-xl font-bold tracking-wide text-blue-400">🛡️ Dashboard de Atendimento Técnico</h1>
-                    <p class="text-xs text-slate-400" id="dbStatusBadge">Status DB: Conectando ao Google Drive...</p>
-                    <p class="text-[11px] text-sky-300 font-medium mt-0.5">📅 Emissão: <span id="appEmissaoDate"></span></p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-3 flex-wrap">
-                <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-xs">
-                    <i class="fa-solid fa-clock-rotate-left text-sky-400"></i>
-                    <span class="text-slate-300">Histórico Drive:</span>
-                    <select id="historySelect" onchange="loadFromHistory(this.value)" class="bg-slate-900 text-sky-300 font-medium rounded p-1 border border-slate-700 focus:outline-none">
-                    </select>
-                </div>
-
-                <label for="excelInput" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg cursor-pointer transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel text-base"></i> Upload Manual
-                    <input type="file" id="excelInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFileUpload(event)">
-                </label>
-
-                <button onclick="exportToPDF()" id="btnPdf" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-file-pdf text-base"></i> Salvar PDF
-                </button>
-
-                <button onclick="exportToExcel()" id="btnExport" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
-                    <i class="fa-solid fa-download text-base"></i> Baixar Excel
-                </button>
-            </div>
-        </div>
-
-        <!-- NAVIGATION TABS -->
-        <div class="bg-slate-950 border-t border-slate-800 px-6">
-            <div class="max-w-[1800px] mx-auto flex gap-6 text-sm overflow-x-auto">
-                <button onclick="switchTab('tabGeral')" id="btnTabGeral" class="nav-tab active py-3 px-2 text-slate-300 hover:text-white transition flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-chart-pie text-indigo-400"></i>
-                    <span>Visão Geral & KPIs</span>
-                </button>
-                <button onclick="switchTab('tabComparativo')" id="btnTabComparativo" class="nav-tab py-3 px-2 text-slate-300 hover:text-white transition flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-calendar-days text-sky-400"></i>
-                    <span>Comparativo Mensal e Semanal</span>
-                </button>
-                <button onclick="switchTab('tabOSAbertas')" id="btnTabOSAbertas" class="nav-tab py-3 px-2 text-slate-300 hover:text-white transition flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-folder-open text-amber-400"></i>
-                    <span>O.S Abertas & Rotas</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- PRINT HEADER -->
-    <div class="print-header px-6 pt-4 hidden">
-        <div class="flex items-center gap-4">
-            <img id="logoPrint" src="logo.png" alt="Logo" class="h-12 w-auto object-contain" onerror="tryNextLogo(this)">
+    <!-- Área de Conteúdo Principal -->
+    <div class="col-md-9 col-lg-10 p-4">
+      
+      <!-- Linha de KPIs (Resumo Geral) -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="card-kpi d-flex align-items-center">
+            <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3 text-primary"><i class="fa-solid fa-list-check fs-3"></i></div>
             <div>
-                <h1 class="text-xl font-bold text-slate-900">Relatório de KPIs - Atendimento Técnico</h1>
-                <p class="text-xs text-slate-600">Segurança Eletrônica | Gestão de Chamados e Produtividade</p>
+              <div class="text-muted small fw-semibold">Chamados Abertos</div>
+              <div class="fs-4 fw-bold text-dark" id="kpi-abertos">0</div>
             </div>
+          </div>
         </div>
-        <div class="text-right text-xs text-slate-700 font-medium">
-            <p class="bg-slate-100 border border-slate-300 px-3 py-1.5 rounded">📅 <strong>Emissão:</strong> <span id="printDate"></span></p>
+        <div class="col-md-3">
+          <div class="card-kpi d-flex align-items-center">
+            <div class="bg-danger bg-opacity-10 p-3 rounded-3 me-3 text-danger"><i class="fa-solid fa-triangle-exclamation fs-3"></i></div>
+            <div>
+              <div class="text-muted small fw-semibold">Em Atraso</div>
+              <div class="fs-4 fw-bold text-danger" id="kpi-atrasados">0</div>
+            </div>
+          </div>
         </div>
+        <div class="col-md-3">
+          <div class="card-kpi d-flex align-items-center">
+            <div class="bg-info bg-opacity-10 p-3 rounded-3 me-3 text-info"><i class="fa-solid fa-truck-fast fs-3"></i></div>
+            <div>
+              <div class="text-muted small fw-semibold">Rotas de Hoje</div>
+              <div class="fs-4 fw-bold text-dark" id="kpi-rota">0</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-kpi d-flex align-items-center">
+            <div class="bg-success bg-opacity-10 p-3 rounded-3 me-3 text-success"><i class="fa-solid fa-circle-check fs-3"></i></div>
+            <div>
+              <div class="text-muted small fw-semibold">Concluídos</div>
+              <div class="fs-4 fw-bold text-success" id="kpi-finalizados">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de Filtro e Busca -->
+      <div class="card-panel mb-4 py-3">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-5">
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+              <input type="text" id="input-busca" class="form-control border-start-0" placeholder="Pesquisar por Cliente, OS ou Técnico..." onkeyup="filtrarTabelas()">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <select id="select-tecnico" class="form-select" onchange="filtrarTabelas()">
+              <option value="">Todos os Técnicos</option>
+            </select>
+          </div>
+          <div class="col-md-3 text-end">
+            <button class="btn btn-outline-secondary w-100" onclick="atualizarPainel()"><i class="fa-solid fa-rotate me-1"></i> Atualizar Tela</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicador de Processamento -->
+      <div id="loader" class="text-center my-5 d-none">
+        <div class="spinner-border text-info" style="width: 3rem; height: 3rem;" role="status"></div>
+        <p class="mt-3 text-secondary fw-semibold">Processando arquivos do Google Drive e calculando rotas...</p>
+      </div>
+
+      <!-- Seção: Chamados Abertos -->
+      <div id="secao-abertos" class="secao-aba">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold text-dark">Chamados em Aberto</h4>
+        </div>
+        <div class="card-panel">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tb-abertos">
+              <thead>
+                <tr>
+                  <th>Nº OS</th><th>Status</th><th>Cliente</th><th>Data Abertura</th><th>Técnico</th><th>Tipo OS</th><th>Data/Hora Prevista</th><th>Observações</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção: Rota / Agendamento -->
+      <div id="secao-rota" class="secao-aba d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold text-dark"><i class="fa-solid fa-calendar-days text-info me-2"></i>Agendamento de Rota</h4>
+        </div>
+        <div class="card-panel">
+          <div class="table-responsive">
+            <table class="table table-striped align-middle" id="tb-rota">
+              <thead>
+                <tr>
+                  <th>Data/Hora Prevista</th><th>Técnico</th><th>Nº OS</th><th>Cliente</th><th>Tipo Serviço</th><th>Status</th><th>Motivo/Defeito</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção: Finalizados -->
+      <div id="secao-finalizados" class="secao-aba d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold text-dark"><i class="fa-solid fa-box-archive text-secondary me-2"></i>Histórico de Concluídos</h4>
+        </div>
+        <div class="card-panel">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tb-finalizados">
+              <thead>
+                <tr>
+                  <th>Nº OS</th><th>Status</th><th>Cliente</th><th>Data Abertura</th><th>Técnico</th><th>Tipo OS</th><th>Motivo</th><th>Data Arquivamento</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
+</div>
 
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-[1800px] mx-auto px-6 py-6 space-y-6" id="pdfContent">
+<script>
+  let cacheDados = null;
 
-        <!-- BANNER DE STATUS DE CARREGAMENTO -->
-        <div id="statusBanner" class="bg-sky-50 border-l-4 border-sky-500 text-sky-900 p-4 rounded-xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-2 no-print">
-            <div class="text-xs font-medium flex items-center gap-2" id="bannerMessage">
-                <i class="fa-solid fa-cloud-arrow-down text-sky-600 text-base"></i>
-                <span>Conectando com o banco de dados do Google Drive...</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span id="bannerTag" class="text-xs bg-sky-200 text-sky-800 font-semibold px-2.5 py-1 rounded-lg">Google Drive Online</span>
-            </div>
-        </div>
+  window.onload = function() {
+    atualizarPainel();
+  };
 
-        <!-- ================= TAB 1: VISÃO GERAL ================= -->
-        <div id="tabGeral" class="tab-pane space-y-6">
+  function alternarAba(nomeAba, elemento) {
+    document.querySelectorAll('.secao-aba').forEach(el => el.classList.add('d-none'));
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    document.getElementById('secao-' + nomeAba).classList.remove('d-none');
+    elemento.classList.add('active');
+  }
 
-            <!-- FILTRO DE PERÍODO PERSONALIZADO -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 no-print space-y-4">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-days text-indigo-600 text-base"></i>
-                        <h3 class="text-sm font-bold text-slate-800">Filtro de Período Personalizado (Abertura)</h3>
-                    </div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <button onclick="setPresetPeriod('today', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Hoje</button>
-                        <button onclick="setPresetPeriod('7d', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 7 dias</button>
-                        <button onclick="setPresetPeriod('30d', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Últimos 30 dias</button>
-                        <button onclick="setPresetPeriod('thisMonth', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Atual</button>
-                        <button onclick="setPresetPeriod('lastMonth', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Mês Anterior</button>
-                        <button onclick="clearDateFilters('geral')" class="text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1 rounded-lg border border-rose-200 transition flex items-center gap-1">
-                            <i class="fa-solid fa-rotate-left"></i> Limpar Datas
-                        </button>
-                    </div>
-                </div>
+  function atualizarPainel() {
+    google.script.run.withSuccessHandler(renderizarDados).obterDadosPainel();
+  }
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div>
-                        <label for="startDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Inicial:</label>
-                        <input type="date" id="startDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
-                    </div>
+  function renderizarDados(dados) {
+    cacheDados = dados;
+    
+    // Atualiza KPIs
+    if (dados.kpis) {
+      document.getElementById('kpi-abertos').innerText = dados.kpis.totalAbertos;
+      document.getElementById('kpi-atrasados').innerText = dados.kpis.totalAtrasados;
+      document.getElementById('kpi-finalizados').innerText = dados.kpis.totalFinalizados;
+      document.getElementById('kpi-rota').innerText = dados.kpis.rotaHoje;
+    }
 
-                    <div>
-                        <label for="endDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Final:</label>
-                        <input type="date" id="endDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
-                    </div>
-                </div>
-            </div>
+    // Preenche combo de técnicos
+    preencherComboTecnicos(dados.abertos);
 
-            <!-- INDICADOR DE FILTRO DE CARD ATIVO -->
-            <div id="activeFilterBadge" class="hidden bg-amber-50 border-l-4 border-amber-500 text-amber-900 p-3.5 rounded-xl shadow-sm flex justify-between items-center no-print">
-                <div class="text-xs flex items-center gap-2">
-                    <i class="fa-solid fa-filter text-amber-600 text-sm"></i>
-                    <span class="font-bold">Filtro de Card Ativo:</span>
-                    <span id="activeFilterText" class="font-semibold text-amber-800">Nenhum</span>
-                </div>
-                <button onclick="filterByKPI('ALL')" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-900 px-3 py-1 rounded-lg font-bold border border-amber-400 transition">
-                    ✕ Limpar Filtro
-                </button>
-            </div>
+    // Desenha tabelas
+    desenharTabela('tb-abertos', dados.abertos);
+    desenharTabela('tb-rota', dados.rota);
+    desenharTabela('tb-finalizados', dados.finalizados);
+  }
 
-            <!-- INTERACTIVE KPI SUMMARY CARDS -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <!-- CARD 1: TOTAL DE CHAMADOS -->
-                <div id="cardTotalOS" onclick="filterByKPI('ALL')" 
-                     class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
-                    <div class="flex justify-between items-start pointer-events-none">
-                        <div>
-                            <p class="text-[11px] font-bold text-blue-600 uppercase tracking-wide">Total de Chamados</p>
-                            <h3 id="kpiTotalOS" class="text-3xl font-extrabold text-slate-800 mt-1">0</h3>
-                        </div>
-                        <div class="bg-blue-100 p-3 rounded-lg text-blue-600 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-list-check text-xl"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs font-bold text-blue-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Clique para ver todas as OSs</span>
-                    </p>
-                </div>
+  function preencherComboTecnicos(matriz) {
+    const select = document.getElementById('select-tecnico');
+    select.innerHTML = '<option value="">Todos os Técnicos</option>';
+    if (!matriz || matriz.length <= 1) return;
 
-                <!-- CARD 2: MANUTENÇÃO CORRETIVA -->
-                <div id="cardCorretiva" onclick="filterByKPI('CORRETIVA')" 
-                     class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
-                    <div class="flex justify-between items-start pointer-events-none">
-                        <div>
-                            <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wide">% Manut. Corretiva</p>
-                            <h3 id="kpiCorretiva" class="text-3xl font-extrabold text-amber-600 mt-1">0%</h3>
-                        </div>
-                        <div class="bg-amber-100 p-3 rounded-lg text-amber-600 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs font-bold text-amber-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Clique para filtrar emergências</span>
-                    </p>
-                </div>
+    const tecnicos = new Set();
+    for (let i = 1; i < matriz.length; i++) {
+      const tec = matriz[i][4];
+      if (tec && tec.trim() !== "") tecnicos.add(tec.trim());
+    }
 
-                <!-- CARD 3: ATRASO SLA -->
-                <div id="cardAtraso" onclick="filterByKPI('ATRASO')" 
-                     class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-rose-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden
+    tecnicos.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.innerText = t;
+      select.appendChild(opt);
+    });
+  }
+
+  function formatarBadgeStatus(val) {
+    if (!val) return '';
+    const txt = String(val).trim();
+    const st = txt.toLowerCase();
+    
+    let classe = 'badge-aberta';
+    if (st.includes('atrasad')) classe = 'badge-atrasada';
+    else if (st.includes('conclu') || st.includes('finaliz')) classe = 'badge-concluida';
+    else if (st.includes('andamento')) classe = 'badge-andamento';
+
+    return `<span class="badge ${classe}">${txt}</span>`;
+  }
+
+  function desenharTabela(idTabela, matriz) {
+    const tbody = document.getElementById(idTabela).querySelector('tbody');
+    tbody.innerHTML = '';
+
+    if (!matriz || matriz.length <= 1) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">Nenhum registro encontrado.</td></tr>';
+      return;
+    }
+
+    for (let i = 1; i < matriz.length; i++) {
+      const tr = document.createElement('tr');
+      const linha = matriz[i];
+
+      linha.forEach((col, idx) => {
+        const td = document.createElement('td');
+        // Se for coluna de Status (índice 1 no padrão)
+        if (idx === 1 && idTabela !== 'tb-rota') {
+          td.innerHTML = formatarBadgeStatus(col);
+        } else if (idx === 5 && idTabela === 'tb-rota') {
+          td.innerHTML = formatarBadgeStatus(col);
+        } else {
+          td.innerText = col !== undefined ? col : '';
+        }
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    }
+  }
+
+  function filtrarTabelas() {
+    const busca = document.getElementById('input-busca').value.toLowerCase();
+    const tecnico = document.getElementById('select-tecnico').value.toLowerCase();
+
+    ['tb-abertos', 'tb-rota', 'tb-finalizados'].forEach(idTb => {
+      const linhas = document.getElementById(idTb).querySelectorAll('tbody tr');
+      linhas.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const atendeBusca = !busca || text.includes(busca);
+        const atendeTecnico = !tecnico || text.includes(tecnico);
+        row.style.display = (atendeBusca && atendeTecnico) ? '' : 'none';
+      });
+    });
+  }
+
+  function sincronizarDrive() {
+    document.getElementById('loader').classList.remove('d-none');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        document.getElementById('loader').classList.add('d-none');
+        if (res.status === "sucesso") {
+          alert(res.mensagem);
+          atualizarPainel();
+        } else {
+          alert("Atenção: " + res.mensagem);
+        }
+      })
+      .withFailureHandler(function(err) {
+        document.getElementById('loader').classList.add('d-none');
+        alert("Erro na execução: " + err.message);
+      })
+      .sincronizarChamados();
+  }
+</script>
+</body>
+</html>
