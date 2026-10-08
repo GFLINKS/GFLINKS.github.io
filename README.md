@@ -175,7 +175,7 @@
         <!-- ================= TAB 1: VISÃO GERAL ================= -->
         <div id="tabGeral" class="tab-pane space-y-6">
 
-            <!-- FILTRO DE PERÍODO PERSONALIZADO (BASEADO NA COLUNA J: DATA DO FECHAMENTO) -->
+            <!-- FILTRO DE PERÍODO PERSONALIZADO -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 no-print space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
                     <div class="flex items-center gap-2">
@@ -377,7 +377,7 @@
         <!-- ================= TAB 2: COMPARATIVO MENSAL E SEMANAL ================= -->
         <div id="tabComparativo" class="tab-pane hidden space-y-6">
 
-            <!-- CONTROLES COM CALENDÁRIO EMBUTIDO NA ABA COMPARATIVO -->
+            <!-- CONTROLES ABA COMPARATIVO -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
                 <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
                     <div>
@@ -566,72 +566,97 @@
             return parseDateSmart(raw);
         }
 
-        // HELPER CORRIGIDO PARA EXTRAIR O TEMPO DE EXECUÇÃO EXATO DA COLUNA M (ÍNDICE FÍSICO DA 13ª COLUNA)
+        // HELPER ULTRA-ROBUSTO PARA LEITURA DA COLUNA M (INCLUINDO CABEÇALHO EM BRANCO "")
         function parseTempoToMinutes(item) {
             if (!item) return 0;
             
-            let rawTempo = undefined;
+            let rawVal = undefined;
 
-            // 1. Busca por nomes de chave conhecidos
-            const possibleKeys = [
+            // 1. Procura por chaves conhecidas (incluindo chave vazia '' e '__EMPTY')
+            const keysToTry = [
                 'Tempo de Execução', 'Tempo Execucao', 'Tempo de Execucao', 'Tempo de Atendimento', 
-                'Tempo', 'Duração', 'Duracao', 'M', '__EMPTY_12', '__EMPTY_11', '__EMPTY_10', '__EMPTY_13'
+                'Tempo', 'Duração', 'Duracao', 'M', '', '__EMPTY', '__EMPTY_12', '__EMPTY_11', '__EMPTY_13'
             ];
-            
-            for (let key of possibleKeys) {
-                if (item[key] !== undefined && item[key] !== null && item[key] !== '') {
-                    rawTempo = item[key];
+
+            for (let k of keysToTry) {
+                if (item[k] !== undefined && item[k] !== null && item[k] !== '') {
+                    rawVal = item[k];
                     break;
                 }
             }
 
-            // 2. Caso não tenha nome de cabeçalho (linha 1 em branco na Coluna M), acessa diretamente pelo índice 12 (13ª coluna)
-            if (rawTempo === undefined || rawTempo === null || rawTempo === '') {
+            // 2. Se não encontrou pelas chaves acima, pega diretamente o 13º valor do objeto (índice 12)
+            if (rawVal === undefined || rawVal === null || rawVal === '') {
                 const keys = Object.keys(item);
                 if (keys.length >= 13) {
-                    rawTempo = item[keys[12]];
+                    rawVal = item[keys[12]];
                 }
             }
 
-            if (rawTempo === undefined || rawTempo === null || rawTempo === '') return 0;
-
-            // 3. Se o Excel enviou como número decimal (fração do dia)
-            if (typeof rawTempo === 'number') {
-                if (rawTempo < 1) {
-                    return rawTempo * 24 * 60; // Converte fração do dia para minutos
+            // 3. Se ainda não achou, procura qualquer valor que pareça tempo de execução
+            if (rawVal === undefined || rawVal === null || rawVal === '') {
+                for (let k in item) {
+                    let v = item[k];
+                    if (v !== null && v !== undefined && v !== '') {
+                        let vStr = v.toString();
+                        if (vStr.includes('1899') || vStr.includes('1900') || (vStr.includes(':') && !vStr.includes('/'))) {
+                            if (!k.toLowerCase().includes('abertura') && !k.toLowerCase().includes('fechamento') && !k.toLowerCase().includes('prevista')) {
+                                rawVal = v;
+                                break;
+                            }
+                        }
+                    }
                 }
-                return rawTempo;
             }
 
-            let str = rawTempo.toString().trim();
+            if (rawVal === undefined || rawVal === null || rawVal === '') return 0;
+
+            // --- CONVERSÃO DE TEMPO PARA MINUTOS ---
+
+            // Se for número decimal do Excel (fração de dia)
+            if (typeof rawVal === 'number') {
+                if (rawVal < 1) {
+                    return rawVal * 24 * 60; // Converte fração do dia para minutos
+                }
+                return rawVal;
+            }
+
+            let str = rawVal.toString().trim();
             if (!str) return 0;
 
-            // 4. Se for String de Data no formato ISO (ex: "1899-12-30T00:06:50.000Z")
-            if (str.includes('T') && str.includes('Z')) {
-                let d = new Date(str);
-                if (!isNaN(d.getTime())) {
-                    return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+            // Se for String ISO de Data do Apps Script / JSON (ex: "1899-12-30T03:06:50.000Z")
+            if (str.includes('1899') || str.includes('1900') || str.includes('T')) {
+                let isoMatch = str.match(/T(\d{2}):(\d{2}):(\d{2})/);
+                if (isoMatch) {
+                    let m = parseFloat(isoMatch[2]) || 0;
+                    let s = parseFloat(isoMatch[3]) || 0;
+                    let h = parseFloat(isoMatch[1]) || 0;
+                    if (h === 3) h = 0; // Corrige fuso UTC-3 de 1899 do Apps Script
+                    return h * 60 + m + s / 60;
                 }
             }
 
-            // 5. Se for String de hora no formato "0:06:50" ou "06:50"
-            let parts = str.split(':');
-            if (parts.length === 3) {
-                let h = parseFloat(parts[0]) || 0;
-                let m = parseFloat(parts[1]) || 0;
-                let s = parseFloat(parts[2]) || 0;
-                return h * 60 + m + s / 60;
-            } else if (parts.length === 2) {
-                let m = parseFloat(parts[0]) || 0;
-                let s = parseFloat(parts[1]) || 0;
-                return m + s / 60;
+            // Se for string "0:06:50" ou "0:02:31" ou "06:50"
+            let timeMatch = str.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
+            if (timeMatch) {
+                let part1 = parseFloat(timeMatch[1]) || 0;
+                let part2 = parseFloat(timeMatch[2]) || 0;
+                let part3 = timeMatch[3] !== undefined ? (parseFloat(timeMatch[3]) || 0) : null;
+
+                if (part3 !== null) {
+                    // Formato HH:MM:SS (ex: 0:06:50)
+                    return part1 * 60 + part2 + part3 / 60;
+                } else {
+                    // Formato MM:SS (ex: 06:50)
+                    return part1 + part2 / 60;
+                }
             }
 
             let num = parseFloat(str);
             return !isNaN(num) ? num : 0;
         }
 
-        // FORMATADOR DE MINUTOS PARA EXIBIÇÃO NO FORMATO MM:SS OU HH:MM
+        // FORMATADOR DE MINUTOS PARA EXIBIÇÃO EM MM:SS OU HH:MM
         function formatMinutesToDisplay(totalMinutes) {
             if (!totalMinutes || isNaN(totalMinutes) || totalMinutes <= 0) return "00:00 min";
             
@@ -1444,7 +1469,7 @@
             });
         }
 
-        // RENDERIZAÇÃO DA TABELA DETALHADA COM DATA DO FECHAMENTO E TEMPO CORRETO DA COLUNA M
+        // RENDERIZAÇÃO DA TABELA DETALHADA
         function renderTableComp(histMensalMap, totalTechAllOS) {
             const tbody = document.getElementById('tableCompBody');
             tbody.innerHTML = '';
