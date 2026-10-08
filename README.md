@@ -91,7 +91,7 @@
         </div>
     </div>
 
-    <!-- HEADER NAVBAR ESTILO GF -->
+    <!-- HEADER NAVBAR -->
     <header class="bg-slate-900 text-white shadow-lg no-print">
         <div class="max-w-[1800px] mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-4">
@@ -180,7 +180,7 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-calendar-days text-indigo-600 text-base"></i>
-                        <h3 class="text-sm font-bold text-slate-800">Filtro de Período Personalizado (Filtrado pela Data do Fechamento - Coluna J)</h3>
+                        <h3 class="text-sm font-bold text-slate-800">Filtro de Período Personalizado (Data do Fechamento - Coluna J)</h3>
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <button onclick="setPresetPeriod('today', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Hoje</button>
@@ -219,10 +219,9 @@
                 </button>
             </div>
 
-            <!-- INTERACTIVE KPI SUMMARY CARDS (INCLUINDO CARD DE TEMPO DE EXECUÇÃO) -->
+            <!-- KPI SUMMARY CARDS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 
-                <!-- CARD 1: TOTAL DE CHAMADOS -->
                 <div id="cardTotalOS" onclick="filterByKPI('ALL')" 
                      class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
                     <div class="flex justify-between items-start pointer-events-none">
@@ -239,7 +238,6 @@
                     </p>
                 </div>
 
-                <!-- CARD 2: MANUTENÇÃO CORRETIVA -->
                 <div id="cardCorretiva" onclick="filterByKPI('CORRETIVA')" 
                      class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
                     <div class="flex justify-between items-start pointer-events-none">
@@ -256,7 +254,6 @@
                     </p>
                 </div>
 
-                <!-- CARD 3: ATRASO SLA -->
                 <div id="cardAtraso" onclick="filterByKPI('ATRASO')" 
                      class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-rose-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
                     <div class="flex justify-between items-start pointer-events-none">
@@ -273,24 +270,23 @@
                     </p>
                 </div>
 
-                <!-- CARD 4: CARD DO TEMPO DE EXECUÇÃO (COLUNA M) -->
+                <!-- CARD CORRIGIDO DE TEMPO DE EXECUÇÃO -->
                 <div id="cardTempoExecucao" 
                      class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-purple-500 transition-all hover:scale-[1.02] hover:shadow-md select-none relative overflow-hidden group">
                     <div class="flex justify-between items-start pointer-events-none">
                         <div>
                             <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Tempo Médio de Execução</p>
-                            <h3 id="kpiTempoExecucao" class="text-3xl font-extrabold text-purple-600 mt-1">00:00</h3>
+                            <h3 id="kpiTempoExecucao" class="text-3xl font-extrabold text-purple-600 mt-1">00:00 min</h3>
                         </div>
                         <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
                             <i class="fa-solid fa-stopwatch text-xl"></i>
                         </div>
                     </div>
                     <p class="text-xs font-bold text-purple-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>⏱️ Média Gasta (Coluna M)</span>
+                        <span>⏱️ Média do Filtro (Coluna M)</span>
                     </p>
                 </div>
 
-                <!-- CARD 5: TÉCNICOS ATIVOS -->
                 <div id="cardTecnicos" onclick="filterByKPI('TECNICOS')" 
                      class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
                     <div class="flex justify-between items-start pointer-events-none">
@@ -423,7 +419,7 @@
                 </div>
             </div>
 
-            <!-- CARDS INTERATIVOS DA TAB COMPARATIVO -->
+            <!-- CARDS TAB COMPARATIVO -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 
                 <div id="cardCompTotalOS" onclick="scrollToCompSection('tableCompSection')" 
@@ -445,7 +441,7 @@
                     <div class="flex justify-between items-start pointer-events-none">
                         <div>
                             <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Tempo Médio de Execução</p>
-                            <h3 id="compTempoExecucao" class="text-3xl font-extrabold text-purple-600 mt-1">00:00</h3>
+                            <h3 id="compTempoExecucao" class="text-3xl font-extrabold text-purple-600 mt-1">00:00 min</h3>
                         </div>
                         <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
                             <i class="fa-solid fa-stopwatch text-xl"></i>
@@ -552,7 +548,6 @@
 
     <!-- EMBEDDED JAVASCRIPT LOGIC -->
     <script>
-        // URL DO SEU GOOGLE APPS SCRIPT WEB APP
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCQgoB_cP3V3BAhFOGmqs1rCxW3Ae7l_a6aLXBWaV1FKkV2iuOGsXmSKTOp2FsckuRAw/exec";
 
         let driveHistoryData = [];
@@ -571,48 +566,87 @@
             return parseDateSmart(raw);
         }
 
-        // HELPER PARA LER O TEMPO DE EXECUÇÃO (COLUNA M) EM MINUTOS
+        // HELPER CORRIGIDO PARA EXTRAIR O TEMPO DE EXECUÇÃO EXATO DA COLUNA M (ÍNDICE FÍSICO DA 13ª COLUNA)
         function parseTempoToMinutes(item) {
-            let rawTempo = item['Tempo'] || item['Tempo de Atendimento'] || item['Tempo de Execução'] || item['Tempo Execução'] || item['Duração'] || item['Duracao'] || item['M'] || '';
-            if (rawTempo !== null && rawTempo !== undefined && rawTempo !== '') {
-                if (typeof rawTempo === 'number') {
-                    if (rawTempo < 1) return rawTempo * 24 * 60; // Fração decimal do Excel
-                    return rawTempo;
+            if (!item) return 0;
+            
+            let rawTempo = undefined;
+
+            // 1. Busca por nomes de chave conhecidos
+            const possibleKeys = [
+                'Tempo de Execução', 'Tempo Execucao', 'Tempo de Execucao', 'Tempo de Atendimento', 
+                'Tempo', 'Duração', 'Duracao', 'M', '__EMPTY_12', '__EMPTY_11', '__EMPTY_10', '__EMPTY_13'
+            ];
+            
+            for (let key of possibleKeys) {
+                if (item[key] !== undefined && item[key] !== null && item[key] !== '') {
+                    rawTempo = item[key];
+                    break;
                 }
-                let str = rawTempo.toString().trim();
-                let parts = str.split(':');
-                if (parts.length >= 2) {
-                    let h = parseFloat(parts[0]) || 0;
-                    let m = parseFloat(parts[1]) || 0;
-                    let s = parts[2] ? (parseFloat(parts[2]) || 0) : 0;
-                    return h * 60 + m + s / 60;
-                }
-                let num = parseFloat(str);
-                if (!isNaN(num)) return num;
             }
 
-            // Cálculo reserva caso a Coluna M não exista: diferença entre Término e Início
-            let dtIni = getInicioDate(item);
-            let dtEnd = getTerminoDate(item);
-            if (dtIni && dtEnd && dtEnd >= dtIni) {
-                return (dtEnd.getTime() - dtIni.getTime()) / 60000;
+            // 2. Caso não tenha nome de cabeçalho (linha 1 em branco na Coluna M), acessa diretamente pelo índice 12 (13ª coluna)
+            if (rawTempo === undefined || rawTempo === null || rawTempo === '') {
+                const keys = Object.keys(item);
+                if (keys.length >= 13) {
+                    rawTempo = item[keys[12]];
+                }
             }
-            return 0;
+
+            if (rawTempo === undefined || rawTempo === null || rawTempo === '') return 0;
+
+            // 3. Se o Excel enviou como número decimal (fração do dia)
+            if (typeof rawTempo === 'number') {
+                if (rawTempo < 1) {
+                    return rawTempo * 24 * 60; // Converte fração do dia para minutos
+                }
+                return rawTempo;
+            }
+
+            let str = rawTempo.toString().trim();
+            if (!str) return 0;
+
+            // 4. Se for String de Data no formato ISO (ex: "1899-12-30T00:06:50.000Z")
+            if (str.includes('T') && str.includes('Z')) {
+                let d = new Date(str);
+                if (!isNaN(d.getTime())) {
+                    return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+                }
+            }
+
+            // 5. Se for String de hora no formato "0:06:50" ou "06:50"
+            let parts = str.split(':');
+            if (parts.length === 3) {
+                let h = parseFloat(parts[0]) || 0;
+                let m = parseFloat(parts[1]) || 0;
+                let s = parseFloat(parts[2]) || 0;
+                return h * 60 + m + s / 60;
+            } else if (parts.length === 2) {
+                let m = parseFloat(parts[0]) || 0;
+                let s = parseFloat(parts[1]) || 0;
+                return m + s / 60;
+            }
+
+            let num = parseFloat(str);
+            return !isNaN(num) ? num : 0;
         }
 
-        // FORMATADOR DE MINUTOS PARA EXIBIÇÃO NO FORMATO HH:MM
+        // FORMATADOR DE MINUTOS PARA EXIBIÇÃO NO FORMATO MM:SS OU HH:MM
         function formatMinutesToDisplay(totalMinutes) {
-            if (!totalMinutes || isNaN(totalMinutes) || totalMinutes <= 0) return "00:00";
-            let hours = Math.floor(totalMinutes / 60);
-            let mins = Math.round(totalMinutes % 60);
-            if (mins >= 60) {
-                hours += 1;
-                mins = 0;
+            if (!totalMinutes || isNaN(totalMinutes) || totalMinutes <= 0) return "00:00 min";
+            
+            let totalSeconds = Math.round(totalMinutes * 60);
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600) / 60);
+            let seconds = totalSeconds % 60;
+
+            if (hours > 0) {
+                return String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
             }
-            return String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
+            return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0') + ' min';
         }
 
-        // SMART DATE PARSER (SUPORTA FORMATO BR, ISO, EXCEL E COM HORA ANTES)
+        // SMART DATE PARSER
         function parseDateSmart(val) {
             if (val === null || val === undefined || val === '') return null;
             if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
@@ -865,7 +899,7 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // 1. APLICAÇÃO DOS FILTROS POR DATAS - BASEADO NA COLUNA J (DATA DO FECHAMENTO)
+        // APLICAÇÃO DOS FILTROS POR DATAS - BASEADO NA COLUNA J (DATA DO FECHAMENTO)
         function applyGlobalFilters() {
             if (!activeData || !activeData.length) return;
 
@@ -877,7 +911,7 @@
 
             const filteredData = activeData.filter(item => {
                 if (dtStart || dtEnd) {
-                    let dtItem = getTerminoDate(item); // Filtro executado pela Coluna J (Data do Fechamento)
+                    let dtItem = getTerminoDate(item);
 
                     if (!dtItem) return false;
                     if (dtStart && dtItem.getTime() < dtStart.getTime()) return false;
@@ -889,7 +923,6 @@
             renderDashboard(filteredData);
         }
 
-        // PRESETS DE DATAS PARA ATALHO (GERAL OU COMPARATIVO)
         function setPresetPeriod(preset, target) {
             const now = new Date();
             let start = new Date();
@@ -1006,7 +1039,6 @@
             }
         }
 
-        // RENDERIZAÇÃO DO DASHBOARD E CÁLCULO DO TEMPO MÉDIO (CARD COLUNA M)
         function renderDashboard(rawData) {
             highlightActiveCard();
 
@@ -1225,7 +1257,7 @@
             });
         }
 
-        // ATUALIZAÇÃO DOS GRÁFICOS E TABELA COMPARATIVA (FILTRADO PELA DATA DO FECHAMENTO - COLUNA J)
+        // ATUALIZAÇÃO DOS GRÁFICOS E TABELA COMPARATIVA
         function updateComparativoCharts() {
             const selectedTech = document.getElementById('selectTecnicoComp').value;
 
@@ -1240,7 +1272,7 @@
                 if (isExcludedTech(tech)) return false;
 
                 if (dtStart || dtEnd) {
-                    let dtItem = getTerminoDate(item); // Filtro executado pela Coluna J (Data do Fechamento)
+                    let dtItem = getTerminoDate(item);
 
                     if (!dtItem) return false;
                     if (dtStart && dtItem.getTime() < dtStart.getTime()) return false;
@@ -1279,7 +1311,7 @@
             let sumTempoCompMin = 0;
 
             techAllData.forEach(item => {
-                let dt = getTerminoDate(item); // Agrupamento por mês/semana baseado na Data do Fechamento (Coluna J)
+                let dt = getTerminoDate(item);
                 let tempoMin = parseTempoToMinutes(item);
                 sumTempoCompMin += tempoMin;
 
@@ -1412,7 +1444,7 @@
             });
         }
 
-        // 2. RENDERIZAÇÃO DA TABELA DETALHADA INCLUINDO A DATA DO FECHAMENTO (COLUNA J) E TEMPO DE EXECUÇÃO (COLUNA M)
+        // RENDERIZAÇÃO DA TABELA DETALHADA COM DATA DO FECHAMENTO E TEMPO CORRETO DA COLUNA M
         function renderTableComp(histMensalMap, totalTechAllOS) {
             const tbody = document.getElementById('tableCompBody');
             tbody.innerHTML = '';
@@ -1443,18 +1475,17 @@
 
                 const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
 
-                // Montagem da listagem detalhada das OSs
                 let osRowsHtml = '';
                 osList.forEach((osItem, idx) => {
                     let numOS = osItem['Número da Ordem de Serviço'] || osItem['Número OS'] || osItem['Nº OS'] || osItem['OS'] || osItem['Ordem de Serviço'] || osItem['A'] || `OS-${idx+1}`;
                     
                     let dataAberturaRaw = getInicioDate(osItem);
-                    let dataFechamentoRaw = getTerminoDate(osItem); // Coluna J: Data do Fechamento
+                    let dataFechamentoRaw = getTerminoDate(osItem);
                     
                     let dataAberturaStr = dataAberturaRaw ? dataAberturaRaw.toLocaleDateString('pt-BR') : (osItem['Data de Abertura'] || osItem['E'] || '-');
                     let dataFechamentoStr = dataFechamentoRaw ? dataFechamentoRaw.toLocaleDateString('pt-BR') : (osItem['Data do Fechamento'] || osItem['J'] || '-');
 
-                    let tempoMin = parseTempoToMinutes(osItem); // Coluna M: Tempo de Execução
+                    let tempoMin = parseTempoToMinutes(osItem);
                     let tempoDisplay = formatMinutesToDisplay(tempoMin);
 
                     let cliente = osItem['Fantasia Cliente'] || osItem['Cliente'] || osItem['Nome Fantasia'] || 'N/A';
@@ -1521,7 +1552,6 @@
             });
         }
 
-        // ALTERNA A EXIBIÇÃO DAS OSs NA TABELA DETALHADA
         function toggleOSListRow(safeKey) {
             const row = document.getElementById('os-row-' + safeKey);
             if (row) {
@@ -1529,7 +1559,6 @@
             }
         }
 
-        // EXPORTAÇÕES PDF E EXCEL
         function exportToExcel() {
             if (!activeData.length) return;
             const ws = XLSX.utils.json_to_sheet(activeData);
@@ -1571,7 +1600,6 @@
             }
         }
 
-        // MODAL DE OBSERVAÇÃO
         let activeObsInputId = null;
 
         function openObsModal(inputId, headerName) {
