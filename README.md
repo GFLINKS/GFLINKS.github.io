@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -180,7 +181,7 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-calendar-days text-indigo-600 text-base"></i>
-                        <h3 class="text-sm font-bold text-slate-800">Filtro de Período Personalizado (Filtrado por Data de Término)</h3>
+                        <h3 class="text-sm font-bold text-slate-800">Filtro de Período Personalizado (Abertura)</h3>
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <button onclick="setPresetPeriod('today', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Hoje</button>
@@ -196,12 +197,12 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div>
-                        <label for="startDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Inicial (Término):</label>
+                        <label for="startDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Inicial:</label>
                         <input type="date" id="startDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
                     </div>
 
                     <div>
-                        <label for="endDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Final (Término):</label>
+                        <label for="endDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Final:</label>
                         <input type="date" id="endDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
                     </div>
                 </div>
@@ -220,7 +221,7 @@
             </div>
 
             <!-- INTERACTIVE KPI SUMMARY CARDS -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 
                 <!-- CARD 1: TOTAL DE CHAMADOS -->
                 <div id="cardTotalOS" onclick="filterByKPI('ALL')" 
@@ -235,7 +236,7 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-blue-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Ver todas as OSs</span>
+                        <span>🖱️ Clique para ver todas as OSs</span>
                     </p>
                 </div>
 
@@ -252,7 +253,7 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-amber-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Filtrar emergências</span>
+                        <span>🖱️ Clique para filtrar emergências</span>
                     </p>
                 </div>
 
@@ -269,28 +270,11 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-rose-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ OSs fora do prazo</span>
+                        <span>🖱️ Clique para ver OSs fora do prazo</span>
                     </p>
                 </div>
 
-                <!-- CARD 4: NOVO CARD SLA TEMPO MÉDIO -->
-                <div id="cardTempoMedio" 
-                     class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-purple-500 transition-all hover:scale-[1.02] hover:shadow-md select-none relative overflow-hidden group">
-                    <div class="flex justify-between items-start pointer-events-none">
-                        <div>
-                            <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Tempo Médio SLA</p>
-                            <h3 id="kpiTempoMedio" class="text-3xl font-extrabold text-purple-600 mt-1">00:00</h3>
-                        </div>
-                        <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-stopwatch text-xl"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs font-bold text-purple-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>⏱️ Média de Duração / OS</span>
-                    </p>
-                </div>
-
-                <!-- CARD 5: TÉCNICOS ATIVOS -->
+                <!-- CARD 4: TÉCNICOS ATIVOS -->
                 <div id="cardTecnicos" onclick="filterByKPI('TECNICOS')" 
                      class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
                     <div class="flex justify-between items-start pointer-events-none">
@@ -303,7 +287,7 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-emerald-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Ir para a tabela</span>
+                        <span>🖱️ Clique para ir para a tabela</span>
                     </p>
                 </div>
 
@@ -388,7 +372,7 @@
                         <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-chart-line text-blue-600"></i> Análise Comparativa de Atendimentos
                         </h2>
-                        <p class="text-xs text-slate-500">Selecione o técnico e o período (Filtrado por Data de Término) para comparar a produtividade real.</p>
+                        <p class="text-xs text-slate-500">Selecione o técnico e o período para comparar a produtividade real.</p>
                     </div>
 
                     <div class="flex items-center gap-2 flex-wrap">
@@ -412,19 +396,19 @@
                     </div>
 
                     <div>
-                        <label for="startDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Inicial (Término):</label>
+                        <label for="startDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Inicial:</label>
                         <input type="date" id="startDateComp" onchange="updateComparativoCharts()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 font-medium">
                     </div>
 
                     <div>
-                        <label for="endDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Final (Término):</label>
+                        <label for="endDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Final:</label>
                         <input type="date" id="endDateComp" onchange="updateComparativoCharts()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 font-medium">
                     </div>
                 </div>
             </div>
 
             <!-- CARDS INTERATIVOS DA TAB COMPARATIVO -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 
                 <div id="cardCompTotalOS" onclick="scrollToCompSection('tableCompSection')" 
                      class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
@@ -438,20 +422,6 @@
                         </div>
                     </div>
                     <p id="compTecnicoLabel" class="text-xs font-bold text-slate-400 mt-2 pointer-events-none">Todos os Técnicos Ativos</p>
-                </div>
-
-                <div id="cardCompTempoMedio" 
-                     class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-purple-500 transition-all hover:scale-[1.02] hover:shadow-md select-none relative overflow-hidden group">
-                    <div class="flex justify-between items-start pointer-events-none">
-                        <div>
-                            <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Tempo Médio SLA</p>
-                            <h3 id="compTempoMedio" class="text-3xl font-extrabold text-purple-600 mt-1">00:00</h3>
-                        </div>
-                        <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
-                            <i class="fa-solid fa-stopwatch text-xl"></i>
-                        </div>
-                    </div>
-                    <p class="text-xs font-bold text-slate-400 mt-2 pointer-events-none">Média no Período Selecionado</p>
                 </div>
 
                 <div id="cardCompMediaMes" onclick="scrollToCompSection('chartMensalSection')" 
@@ -559,70 +529,12 @@
         let activeData = [];
         let currentKPIFilter = 'ALL';
 
-        // HELPER PARA MAPEAR O TÉCNICO/RESPONSÁVEL
-        function getTechName(item) {
-            return item['Responsável'] || item['Responsavel'] || item['Técnico'] || item['Tecnico'] || item['Técnico Responsável'] || 'Não Atribuído';
-        }
-
-        // HELPER PARA MAPEAR A DATA DE TÉRMINO (FECHAMENTO DA OS)
-        function getTerminoDate(item) {
-            let raw = item['Término'] || item['Termino'] || item['Data do Fechamento'] || item['Data_Fechamento'] || item['Data Fechamento'] || item['Data de Fechamento'] || item['J'] || item['Início'] || item['Inicio'] || item['Data de Abertura'] || '';
-            return parseDateSmart(raw);
-        }
-
-        // HELPER PARA MAPEAR A DATA DE INÍCIO
-        function getInicioDate(item) {
-            let raw = item['Início'] || item['Inicio'] || item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || '';
-            return parseDateSmart(raw);
-        }
-
-        // HELPER PARA EXTRAIR O TEMPO DA OS EM MINUTOS
-        function parseTempoToMinutes(item) {
-            let rawTempo = item['Tempo'] || item['Tempo de Atendimento'] || item['Duração'] || item['Duracao'] || '';
-            if (rawTempo !== null && rawTempo !== undefined && rawTempo !== '') {
-                if (typeof rawTempo === 'number') {
-                    if (rawTempo < 1) return rawTempo * 24 * 60; // fração de dia do Excel
-                    return rawTempo;
-                }
-                let str = rawTempo.toString().trim();
-                let parts = str.split(':');
-                if (parts.length >= 2) {
-                    let h = parseFloat(parts[0]) || 0;
-                    let m = parseFloat(parts[1]) || 0;
-                    let s = parts[2] ? (parseFloat(parts[2]) || 0) : 0;
-                    return h * 60 + m + s / 60;
-                }
-                let num = parseFloat(str);
-                if (!isNaN(num)) return num;
-            }
-
-            // Cálculo reserva caso a coluna Tempo esteja ausente: diferença entre Término e Início
-            let dtIni = getInicioDate(item);
-            let dtEnd = getTerminoDate(item);
-            if (dtIni && dtEnd && dtEnd >= dtIni) {
-                return (dtEnd.getTime() - dtIni.getTime()) / 60000;
-            }
-            return 0;
-        }
-
-        // FORMATADOR DE MINUTOS PARA FORMATO HH:MM
-        function formatMinutesToDisplay(totalMinutes) {
-            if (!totalMinutes || isNaN(totalMinutes) || totalMinutes <= 0) return "00:00";
-            let hours = Math.floor(totalMinutes / 60);
-            let mins = Math.round(totalMinutes % 60);
-            if (mins >= 60) {
-                hours += 1;
-                mins = 0;
-            }
-            return String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
-        }
-
-        // SMART DATE PARSER (SUPORTA FORMATO 15:14 05/10/2026, EXCEL E ISO)
+        // SMART DATE PARSER
         function parseDateSmart(val) {
             if (val === null || val === undefined || val === '') return null;
             if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
             
-            if (typeof val === 'number' || (!isNaN(val) && !val.toString().includes('/') && !val.toString().includes('-') && !val.toString().includes(':'))) {
+            if (typeof val === 'number' || (!isNaN(val) && !val.toString().includes('/') && !val.toString().includes('-'))) {
                 let num = parseFloat(val);
                 if (num > 20000 && num < 60000) {
                     let dateObj = new Date(Math.round((num - 25569) * 86400 * 1000));
@@ -635,5 +547,949 @@
             let str = val.toString().trim();
             if (!str) return null;
 
-            // Formato com Hora antes da Data: "15:14 05/10/2026" ou "15:14:00 05/10/2026"
-            let timeFirstRegex = /^(\d{1,2}):(\d{1,2})(?
+            let brRegex = /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/;
+            let matchBr = str.match(brRegex);
+            if (matchBr) {
+                let day = parseInt(matchBr[1], 10);
+                let month = parseInt(matchBr[2], 10) - 1;
+                let year = parseInt(matchBr[3], 10);
+                let hour = matchBr[4] ? parseInt(matchBr[4], 10) : 0;
+                let min = matchBr[5] ? parseInt(matchBr[5], 10) : 0;
+                let sec = matchBr[6] ? parseInt(matchBr[6], 10) : 0;
+                let d = new Date(year, month, day, hour, min, sec);
+                return isNaN(d.getTime()) || d.getFullYear() < 2000 ? null : d;
+            }
+
+            let isoRegex = /^(\d{4})[\/\.-](\d{1,2})[\/\.-](\d{1,2})(?:[T\s]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/;
+            let matchIso = str.match(isoRegex);
+            if (matchIso) {
+                let year = parseInt(matchIso[1], 10);
+                let month = parseInt(matchIso[2], 10) - 1;
+                let day = parseInt(matchIso[3], 10);
+                let hour = matchIso[4] ? parseInt(matchIso[4], 10) : 0;
+                let min = matchIso[5] ? parseInt(matchIso[5], 10) : 0;
+                let sec = matchIso[6] ? parseInt(matchIso[6], 10) : 0;
+                let d = new Date(year, month, day, hour, min, sec);
+                return isNaN(d.getTime()) || d.getFullYear() < 2000 ? null : d;
+            }
+
+            let standard = new Date(str);
+            if (!isNaN(standard.getTime()) && standard.getFullYear() >= 2000) {
+                return standard;
+            }
+
+            return null;
+        }
+
+        // CÁLCULO DE ATRASO SLA
+        function isSLAOverdue(item) {
+            let rawPrevista = item['Data/Hora Prevista de Atendimento'] || item['Data/Hora Prevista'] || item['Data Prevista de Atendimento'] || item['Data Prevista'] || item['I'] || '';
+            let rawFechamento = item['Data do Fechamento'] || item['Data_Fechamento'] || item['Data Fechamento'] || item['Data de Fechamento'] || item['J'] || '';
+
+            let dtPrevista = parseDateSmart(rawPrevista);
+            let dtFechamento = parseDateSmart(rawFechamento);
+
+            if (dtPrevista) {
+                if (dtFechamento) {
+                    return dtFechamento.getTime() > dtPrevista.getTime();
+                } else {
+                    let now = new Date();
+                    return now.getTime() > dtPrevista.getTime();
+                }
+            }
+
+            let status = (item['Status da OS'] || item['Status'] || '').toString().toLowerCase();
+            return status.includes('atrasad');
+        }
+
+        // TÉCNICOS EXCLUÍDOS
+        const EXCLUDED_TECHS = [
+            'wesley mendonça silva',
+            'alex sandro da silva pedrosa',
+            'técnico padrão',
+            'tecnico padrão',
+            'técnico são paulo',
+            'tecnico são paulo'
+        ];
+
+        function isExcludedTech(techName) {
+            if (!techName) return false;
+            const normalized = techName.toString().trim().toLowerCase();
+            return EXCLUDED_TECHS.some(ex => normalized.includes(ex));
+        }
+
+        // LOGO FALLBACKS
+        const logoVariants = ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo.svg', 'logo', 'LOGO.png', 'LOGO.JPG', 'LOGO.PNG'];
+        let logoAttemptIndex = 0;
+
+        function tryNextLogo(imgElement) {
+            logoAttemptIndex++;
+            if (logoAttemptIndex < logoVariants.length) {
+                imgElement.src = logoVariants[logoAttemptIndex];
+            } else {
+                imgElement.style.display = 'none';
+                if (imgElement.parentElement && imgElement.parentElement.classList.contains('min-w-[120px]')) {
+                    imgElement.parentElement.classList.add('hidden');
+                }
+            }
+        }
+
+        function updateEmissaoDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('pt-BR');
+            const timeStr = now.toLocaleTimeString('pt-BR');
+            const fullStr = dateStr + ' às ' + timeStr;
+            
+            document.getElementById('appEmissaoDate').innerText = fullStr;
+            document.getElementById('printDate').innerText = fullStr;
+        }
+
+        function switchTab(tabId) {
+            document.getElementById('tabGeral').classList.add('hidden');
+            document.getElementById('tabComparativo').classList.add('hidden');
+            
+            document.getElementById('btnTabGeral').classList.remove('active');
+            document.getElementById('btnTabComparativo').classList.remove('active');
+
+            if (tabId === 'tabGeral') {
+                document.getElementById('tabGeral').classList.remove('hidden');
+                document.getElementById('btnTabGeral').classList.add('active');
+            } else if (tabId === 'tabComparativo') {
+                document.getElementById('tabComparativo').classList.remove('hidden');
+                document.getElementById('btnTabComparativo').classList.add('active');
+                updateComparativoCharts();
+            }
+        }
+
+        let chartStatusObj = null;
+        let chartTecnicosObj = null;
+        let chartLojasObj = null;
+        let chartEquipamentosObj = null;
+
+        let chartMensalObj = null;
+        let chartSemanalObj = null;
+
+        // BUSCA NO DRIVE VIA APPS SCRIPT
+        function fetchDatabaseFromDrive() {
+            const bannerMsg = document.getElementById('bannerMessage');
+            if (bannerMsg) {
+                bannerMsg.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin text-sky-600"></i> <b>Sincronizando:</b> Conectando com a pasta do Google Drive...</span>';
+            }
+
+            fetch(GOOGLE_SCRIPT_URL)
+                .then(response => response.json())
+                .then(historyRecords => {
+                    if (Array.isArray(historyRecords) && historyRecords.length > 0) {
+                        driveHistoryData = historyRecords;
+                        const select = document.getElementById('historySelect');
+                        if (select) {
+                            select.innerHTML = '';
+                            historyRecords.forEach((rec, index) => {
+                                const opt = document.createElement('option');
+                                opt.value = index;
+                                opt.innerText = `${rec.fileName} (${rec.timestamp})`;
+                                select.appendChild(opt);
+                            });
+                        }
+
+                        loadDriveRecord(0);
+                    } else if (historyRecords && historyRecords.status === "error") {
+                        if (bannerMsg) {
+                            bannerMsg.innerHTML = `<span>⚠️ Erro no Apps Script: ${historyRecords.message}</span>`;
+                        }
+                    } else {
+                        if (bannerMsg) {
+                            bannerMsg.innerHTML = '<span>⚠️ Nenhuma planilha encontrada na pasta do Google Drive.</span>';
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro ao conectar com a API do Google Drive:", err);
+                    if (bannerMsg) {
+                        bannerMsg.innerHTML = '<span>⚠️ Falha na sincronização online com o Google Drive. Verifique a URL do App.</span>';
+                    }
+                });
+        }
+
+        function loadDriveRecord(index) {
+            if (!driveHistoryData || !driveHistoryData[index]) return;
+            const rec = driveHistoryData[index];
+            activeData = rec.data;
+            currentKPIFilter = 'ALL';
+            
+            const bannerMsg = document.getElementById('bannerMessage');
+            if (bannerMsg) {
+                bannerMsg.innerHTML = `<span><b>⚡ Conectado ao Drive:</b> Exibindo <b>${rec.fileName}</b> (${rec.data.length} registros - Atualizado em ${rec.timestamp}).</span>`;
+            }
+
+            document.getElementById('dbStatusBadge').innerText = `Status DB: Conectado (${rec.data.length} registros)`;
+            document.getElementById('dbStatusBadge').className = "text-xs text-emerald-400 font-semibold";
+
+            applyGlobalFilters();
+        }
+
+        function loadFromHistory(selectedVal) {
+            const idx = parseInt(selectedVal, 10);
+            if (!isNaN(idx)) {
+                loadDriveRecord(idx);
+            }
+        }
+
+        function initApp() {
+            updateEmissaoDateTime();
+            fetchDatabaseFromDrive();
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            initApp();
+        });
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array', cellDates: true});
+
+                let osSheetName = workbook.SheetNames.find(s => s.toLowerCase().includes('ordem') || s.toLowerCase().includes('os')) || workbook.SheetNames[0];
+                let sheet = workbook.Sheets[osSheetName];
+                let json = XLSX.utils.sheet_to_json(sheet);
+
+                if (json.length > 0) {
+                    updateEmissaoDateTime();
+                    document.getElementById('bannerMessage').innerHTML = 
+                        '<span><b>📁 Upload Manual Carregado:</b> ' + file.name + ' (' + json.length + ' registros).</span>';
+                    activeData = json;
+                    currentKPIFilter = 'ALL';
+                    applyGlobalFilters();
+                } else {
+                    alert("Não foram encontrados dados válidos na planilha.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // APLICAÇÃO DOS FILTROS POR DATAS (VISÃO GERAL)
+        function applyGlobalFilters() {
+            if (!activeData || !activeData.length) return;
+
+            const startVal = document.getElementById('startDateFilter').value;
+            const endVal = document.getElementById('endDateFilter').value;
+            
+            let dtStart = startVal ? new Date(startVal + 'T00:00:00') : null;
+            let dtEnd = endVal ? new Date(endVal + 'T23:59:59') : null;
+
+            const filteredData = activeData.filter(item => {
+                if (dtStart || dtEnd) {
+                    let rawDt = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || '';
+                    let dtItem = parseDateSmart(rawDt);
+
+                    if (!dtItem) return false;
+                    if (dtStart && dtItem.getTime() < dtStart.getTime()) return false;
+                    if (dtEnd && dtItem.getTime() > dtEnd.getTime()) return false;
+                }
+                return true;
+            });
+
+            renderDashboard(filteredData);
+        }
+
+        // PRESETS DE DATAS PARA ATALHO (GERAL OU COMPARATIVO)
+        function setPresetPeriod(preset, target) {
+            const now = new Date();
+            let start = new Date();
+            let end = new Date();
+
+            if (preset === 'today') {
+                // Hoje
+            } else if (preset === '7d') {
+                start.setDate(now.getDate() - 7);
+            } else if (preset === '30d') {
+                start.setDate(now.getDate() - 30);
+            } else if (preset === 'thisMonth') {
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            } else if (preset === 'lastMonth') {
+                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                end = new Date(now.getFullYear(), now.getMonth(), 0);
+            }
+
+            const formatDate = (d) => {
+                let month = '' + (d.getMonth() + 1);
+                let day = '' + d.getDate();
+                let year = d.getFullYear();
+                if (month.length < 2) month = '0' + month;
+                if (day.length < 2) day = '0' + day;
+                return [year, month, day].join('-');
+            };
+
+            const startId = target === 'comp' ? 'startDateComp' : 'startDateFilter';
+            const endId = target === 'comp' ? 'endDateComp' : 'endDateFilter';
+
+            document.getElementById(startId).value = formatDate(start);
+            document.getElementById(endId).value = formatDate(end);
+
+            if (target === 'comp') {
+                updateComparativoCharts();
+            } else {
+                applyGlobalFilters();
+            }
+        }
+
+        function clearDateFilters(target) {
+            const startId = target === 'comp' ? 'startDateComp' : 'startDateFilter';
+            const endId = target === 'comp' ? 'endDateComp' : 'endDateFilter';
+
+            document.getElementById(startId).value = '';
+            document.getElementById(endId).value = '';
+
+            if (target === 'comp') {
+                updateComparativoCharts();
+            } else {
+                currentKPIFilter = 'ALL';
+                applyGlobalFilters();
+            }
+        }
+
+        function filterByKPI(filterType) {
+            if (filterType === 'TECNICOS') {
+                document.getElementById('tableTechSection').scrollIntoView({ behavior: 'smooth' });
+                const tableElem = document.getElementById('tableTechSection');
+                tableElem.classList.add('ring-4', 'ring-emerald-400');
+                setTimeout(() => tableElem.classList.remove('ring-4', 'ring-emerald-400'), 2000);
+                return;
+            }
+
+            if (currentKPIFilter === filterType && filterType !== 'ALL') {
+                currentKPIFilter = 'ALL';
+            } else {
+                currentKPIFilter = filterType;
+            }
+
+            applyGlobalFilters();
+        }
+
+        function scrollToCompSection(sectionId) {
+            const elem = document.getElementById(sectionId);
+            if (elem) {
+                elem.scrollIntoView({ behavior: 'smooth' });
+                elem.classList.add('ring-4', 'ring-blue-400');
+                setTimeout(() => elem.classList.remove('ring-4', 'ring-blue-400'), 2000);
+            }
+        }
+
+        function resetTecnicoSelect() {
+            const select = document.getElementById('selectTecnicoComp');
+            if (select) {
+                select.value = "TODOS";
+                updateComparativoCharts();
+                scrollToCompSection('tableCompSection');
+            }
+        }
+
+        function highlightActiveCard() {
+            const cards = ['cardTotalOS', 'cardCorretiva', 'cardAtraso', 'cardTecnicos'];
+            cards.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('ring-2', 'ring-blue-500', 'ring-amber-500', 'ring-rose-500', 'bg-blue-50/40', 'bg-amber-50/40', 'bg-rose-50/40');
+            });
+
+            const badge = document.getElementById('activeFilterBadge');
+            const badgeText = document.getElementById('activeFilterText');
+
+            if (currentKPIFilter === 'CORRETIVA') {
+                document.getElementById('cardCorretiva').classList.add('ring-2', 'ring-amber-500', 'bg-amber-50/40');
+                badge.classList.remove('hidden');
+                badgeText.innerText = "Exibindo apenas Manutenção Corretiva (Emergencial)";
+            } else if (currentKPIFilter === 'ATRASO') {
+                document.getElementById('cardAtraso').classList.add('ring-2', 'ring-rose-500', 'bg-rose-50/40');
+                badge.classList.remove('hidden');
+                badgeText.innerText = "Exibindo apenas Ordens de Serviço Atrasadas / Fora do SLA";
+            } else {
+                document.getElementById('cardTotalOS').classList.add('ring-2', 'ring-blue-500', 'bg-blue-50/40');
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderDashboard(rawData) {
+            highlightActiveCard();
+
+            const validTechData = rawData.filter(item => {
+                let tech = item['Técnico'] || item['Tecnico'] || '';
+                return !isExcludedTech(tech);
+            });
+
+            const totalOS = validTechData.length;
+            let corretivaCount = 0;
+            let atrasoCount = 0;
+
+            validTechData.forEach(item => {
+                if (isSLAOverdue(item)) atrasoCount++;
+                let tipo = item['Tipo da Ordem de Serviço'] || item['Tipo'] || '';
+                if (tipo.toLowerCase().includes('corretiv')) corretivaCount++;
+            });
+
+            const pctCorretiva = totalOS > 0 ? ((corretivaCount / totalOS) * 100).toFixed(1) : "0";
+            const pctAtraso = totalOS > 0 ? ((atrasoCount / totalOS) * 100).toFixed(1) : "0";
+
+            let displayData = validTechData;
+            if (currentKPIFilter === 'CORRETIVA') {
+                displayData = validTechData.filter(item => {
+                    let tipo = item['Tipo da Ordem de Serviço'] || item['Tipo'] || '';
+                    return tipo.toLowerCase().includes('corretiv');
+                });
+            } else if (currentKPIFilter === 'ATRASO') {
+                displayData = validTechData.filter(item => isSLAOverdue(item));
+            }
+
+            const statusCount = {};
+            const techCount = {};
+            const lojaCount = {};
+
+            displayData.forEach(item => {
+                let status = item['Status da OS'] || item['Status'] || 'Outros';
+                statusCount[status] = (statusCount[status] || 0) + 1;
+
+                let tech = item['Técnico'] || item['Tecnico'] || 'Não Atribuído';
+                techCount[tech] = (techCount[tech] || 0) + 1;
+
+                let loja = item['Fantasia Cliente'] || item['Cliente'] || 'Desconhecido';
+                lojaCount[loja] = (lojaCount[loja] || 0) + 1;
+            });
+
+            const techList = Object.keys(techCount);
+
+            document.getElementById('kpiTotalOS').innerText = totalOS;
+            document.getElementById('kpiCorretiva').innerText = pctCorretiva + '%';
+            document.getElementById('kpiAtraso').innerText = pctAtraso + '%';
+            document.getElementById('kpiTecnicos').innerText = techList.length;
+
+            renderChartStatus(statusCount);
+            renderChartTecnicos(techCount);
+            renderChartLojas(lojaCount);
+            renderChartEquipamentos();
+            renderTechTable(techCount, displayData.length);
+
+            populateTecnicoSelect(techCount);
+            updateComparativoCharts();
+        }
+
+        function populateTecnicoSelect(techCount) {
+            const select = document.getElementById('selectTecnicoComp');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="TODOS">Todos os Técnicos (Ativos)</option>';
+
+            const sortedTechs = Object.keys(techCount).sort();
+            sortedTechs.forEach(tech => {
+                const opt = document.createElement('option');
+                opt.value = tech;
+                opt.innerText = tech + ' (' + techCount[tech] + ' OSs)';
+                select.appendChild(opt);
+            });
+
+            if (sortedTechs.includes(currentVal)) {
+                select.value = currentVal;
+            } else {
+                select.value = "TODOS";
+            }
+        }
+
+        function renderChartStatus(statusCount) {
+            const ctx = document.getElementById('chartStatus').getContext('2d');
+            if (chartStatusObj) chartStatusObj.destroy();
+
+            chartStatusObj = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCount),
+                    datasets: [{
+                        data: Object.values(statusCount),
+                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        function renderChartTecnicos(techCount) {
+            const ctx = document.getElementById('chartTecnicos').getContext('2d');
+            if (chartTecnicosObj) chartTecnicosObj.destroy();
+
+            const sorted = Object.entries(techCount).sort((a,b) => b[1] - a[1]).slice(0, 7);
+
+            chartTecnicosObj = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(i => i[0]),
+                    datasets: [{
+                        label: 'Qtd. OSs',
+                        data: sorted.map(i => i[1]),
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderChartLojas(lojaCount) {
+            const ctx = document.getElementById('chartLojas').getContext('2d');
+            if (chartLojasObj) chartLojasObj.destroy();
+
+            const sorted = Object.entries(lojaCount).sort((a,b) => b[1] - a[1]).slice(0, 8);
+
+            chartLojasObj = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(i => i[0].length > 20 ? i[0].substring(0,20)+'...' : i[0]),
+                    datasets: [{
+                        label: 'OSs Reincidentes',
+                        data: sorted.map(i => i[1]),
+                        backgroundColor: '#8b5cf6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderChartEquipamentos() {
+            const ctx = document.getElementById('chartEquipamentos').getContext('2d');
+            if (chartEquipamentosObj) chartEquipamentosObj.destroy();
+
+            const equipData = {
+                'Câmera Dome VIP 1220': 509,
+                'Monitor Padrão': 105,
+                'Nobreak ATIV 600': 57,
+                'HD Interno 4 TB': 52,
+                'Switch 24P PoE': 35,
+                'Gravador NVD 3316-P': 15
+            };
+
+            chartEquipamentosObj = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(equipData),
+                    datasets: [{
+                        label: 'Unidades Utilizadas',
+                        data: Object.values(equipData),
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderTechTable(techCount, totalOS) {
+            const tbody = document.getElementById('tableTechBody');
+            tbody.innerHTML = '';
+
+            const sorted = Object.entries(techCount).sort((a,b) => b[1] - a[1]);
+
+            sorted.forEach(([tech, count]) => {
+                const pct = totalOS > 0 ? ((count / totalOS) * 100).toFixed(1) : "0";
+                
+                let badgeClass = "bg-blue-100 text-blue-800";
+                let badgeLabel = "Carga Normal";
+                if (parseFloat(pct) > 40) {
+                    badgeClass = "bg-rose-100 text-rose-800";
+                    badgeLabel = "Alta Concentração";
+                } else if (parseFloat(pct) < 5) {
+                    badgeClass = "bg-amber-100 text-amber-800";
+                    badgeLabel = "Carga Baixa";
+                }
+
+                tbody.innerHTML += 
+                    '<tr class="hover:bg-slate-50 transition border-b border-slate-100">' +
+                        '<td class="p-3 font-bold text-slate-800">' + tech + '</td>' +
+                        '<td class="p-3 text-right font-bold text-blue-600">' + count + ' OSs</td>' +
+                        '<td class="p-3 text-right font-semibold">' + pct + '%</td>' +
+                        '<td class="p-3 text-center"><span class="text-[11px] font-bold px-2.5 py-1 rounded-lg ' + badgeClass + '">' + badgeLabel + '</span></td>' +
+                    '</tr>';
+            });
+        }
+
+        // ATUALIZAÇÃO DOS GRÁFICOS E TABELA COMPARATIVA
+        function updateComparativoCharts() {
+            const selectedTech = document.getElementById('selectTecnicoComp').value;
+
+            const startVal = document.getElementById('startDateComp').value;
+            const endVal = document.getElementById('endDateComp').value;
+
+            let dtStart = startVal ? new Date(startVal + 'T00:00:00') : null;
+            let dtEnd = endVal ? new Date(endVal + 'T23:59:59') : null;
+
+            let activeCompanyData = activeData.filter(item => {
+                let tech = item['Técnico'] || item['Tecnico'] || '';
+                if (isExcludedTech(tech)) return false;
+
+                if (dtStart || dtEnd) {
+                    let rawDt = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || '';
+                    let dtItem = parseDateSmart(rawDt);
+
+                    if (!dtItem) return false;
+                    if (dtStart && dtItem.getTime() < dtStart.getTime()) return false;
+                    if (dtEnd && dtItem.getTime() > dtEnd.getTime()) return false;
+                }
+
+                return true;
+            });
+
+            if (currentKPIFilter === 'CORRETIVA') {
+                activeCompanyData = activeCompanyData.filter(item => {
+                    let tipo = item['Tipo da Ordem de Serviço'] || item['Tipo'] || '';
+                    return tipo.toLowerCase().includes('corretiv');
+                });
+            } else if (currentKPIFilter === 'ATRASO') {
+                activeCompanyData = activeCompanyData.filter(item => isSLAOverdue(item));
+            }
+
+            const totalCompanyOS = activeCompanyData.length;
+
+            let techAllData = activeCompanyData;
+            if (selectedTech !== "TODOS") {
+                techAllData = activeCompanyData.filter(item => {
+                    let tech = item['Técnico'] || item['Tecnico'] || '';
+                    return tech === selectedTech;
+                });
+                document.getElementById('compTecnicoLabel').innerText = selectedTech;
+            } else {
+                document.getElementById('compTecnicoLabel').innerText = "Todos os Técnicos Ativos";
+            }
+
+            const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            
+            const histMensalMap = {};
+            const histSemanalMap = {};
+
+            techAllData.forEach(item => {
+                let rawDt = item['Data_Abertura_Str'] || item['Data de Abertura'] || item['Data Abertura'] || item['Data/Hora Prevista de Atendimento'] || '';
+                let dt = parseDateSmart(rawDt);
+
+                if (dt) {
+                    const ano = dt.getFullYear();
+                    const mesIdx = dt.getMonth();
+                    const mesSortKey = ano + '-' + String(mesIdx + 1).padStart(2, '0');
+                    const mesDisplayLabel = monthNames[mesIdx] + '/' + ano;
+
+                    if (!histMensalMap[mesSortKey]) {
+                        histMensalMap[mesSortKey] = { label: mesDisplayLabel, count: 0, osList: [] };
+                    }
+                    histMensalMap[mesSortKey].count += 1;
+                    histMensalMap[mesSortKey].osList.push(item);
+
+                    const dayOfWeek = dt.getDay();
+                    const distToMon = (dayOfWeek + 6) % 7;
+                    const monday = new Date(dt);
+                    monday.setDate(dt.getDate() - distToMon);
+
+                    const sunday = new Date(monday);
+                    sunday.setDate(monday.getDate() + 6);
+
+                    const weekKey = monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
+                    const weekLabel = String(monday.getDate()).padStart(2,'0') + '/' + monthNames[monday.getMonth()] + ' a ' + String(sunday.getDate()).padStart(2,'0') + '/' + monthNames[sunday.getMonth()];
+
+                    if (!histSemanalMap[weekKey]) {
+                        histSemanalMap[weekKey] = { label: weekLabel, count: 0, sortDate: monday.getTime() };
+                    }
+                    histSemanalMap[weekKey].count += 1;
+                }
+            });
+
+            const numHistMeses = Object.keys(histMensalMap).length || 1;
+            const numHistSemanas = Object.keys(histSemanalMap).length || 1;
+
+            const totalTechAllOS = techAllData.length;
+            const mediaHistMes = (totalTechAllOS / numHistMeses).toFixed(1);
+            const mediaHistSemana = (totalTechAllOS / numHistSemanas).toFixed(1);
+            const pctShareTotal = totalCompanyOS > 0 ? ((totalTechAllOS / totalCompanyOS) * 100).toFixed(1) : "0";
+
+            let sortedSemKeys = Object.keys(histSemanalMap).sort((a,b) => histSemanalMap[a].sortDate - histSemanalMap[b].sortDate);
+
+            document.getElementById('compTotalOS').innerText = totalTechAllOS;
+            document.getElementById('compMediaMes').innerText = mediaHistMes;
+            document.getElementById('compMediaSemana').innerText = mediaHistSemana;
+            document.getElementById('compPctTotal').innerText = pctShareTotal + '%';
+
+            const sortedMesKeys = Object.keys(histMensalMap).sort();
+            const mensalLabels = sortedMesKeys.map(k => histMensalMap[k].label);
+            const mensalValues = sortedMesKeys.map(k => histMensalMap[k].count);
+
+            renderChartMensal(mensalLabels, mensalValues);
+
+            const semanalLabels = sortedSemKeys.map(k => histSemanalMap[k].label);
+            const semanalValues = sortedSemKeys.map(k => histSemanalMap[k].count);
+
+            renderChartSemanal(semanalLabels, semanalValues);
+
+            renderTableComp(histMensalMap, totalTechAllOS);
+        }
+
+        function renderChartMensal(labels, values) {
+            const ctx = document.getElementById('chartMensal').getContext('2d');
+            if (chartMensalObj) chartMensalObj.destroy();
+
+            chartMensalObj = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Atendimentos no Mês',
+                        data: values,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#1d4ed8',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        function renderChartSemanal(labels, values) {
+            const ctx = document.getElementById('chartSemanal').getContext('2d');
+            if (chartSemanalObj) chartSemanalObj.destroy();
+
+            chartSemanalObj = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'OSs na Semana',
+                        data: values,
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: true, position: 'top' }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: { size: 10 },
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        },
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        // RENDERIZAÇÃO DA TABELA COMPARATIVA COM OSs DETALHADAS EXPANSÍVEIS
+        function renderTableComp(histMensalMap, totalTechAllOS) {
+            const tbody = document.getElementById('tableCompBody');
+            tbody.innerHTML = '';
+
+            const keys = Object.keys(histMensalMap).sort();
+
+            if (keys.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum atendimento encontrado para os filtros selecionados.</td></tr>';
+                return;
+            }
+
+            keys.forEach(k => {
+                const monthObj = histMensalMap[k];
+                const label = monthObj.label;
+                const count = monthObj.count;
+                const osList = monthObj.osList || [];
+                const pct = totalTechAllOS > 0 ? ((count / totalTechAllOS) * 100).toFixed(1) : "0";
+                
+                let badgeClass = "bg-blue-100 text-blue-800";
+                let badgeLabel = "Produção Normal";
+                if (count > 50) {
+                    badgeClass = "bg-emerald-100 text-emerald-800";
+                    badgeLabel = "Pico de Atendimentos";
+                } else if (count < 5) {
+                    badgeClass = "bg-amber-100 text-amber-800";
+                    badgeLabel = "Baixo Volume";
+                }
+
+                const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
+
+                // Montagem da listagem detalhada das OSs deste mês
+                let osRowsHtml = '';
+                osList.forEach((osItem, idx) => {
+                    let numOS = osItem['Número da Ordem de Serviço'] || osItem['Número OS'] || osItem['Nº OS'] || osItem['OS'] || osItem['Ordem de Serviço'] || osItem['A'] || `OS-${idx+1}`;
+                    let dataAbertura = osItem['Data de Abertura'] || osItem['Data_Abertura'] || osItem['Data Abertura'] || osItem['E'] || '-';
+                    let cliente = osItem['Fantasia Cliente'] || osItem['Cliente'] || osItem['Nome Fantasia'] || 'N/A';
+                    let tipoOS = osItem['Tipo da Ordem de Serviço'] || osItem['Tipo'] || 'N/A';
+                    let statusOS = osItem['Status da OS'] || osItem['Status'] || 'N/A';
+
+                    osRowsHtml += `
+                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition text-[11px]">
+                            <td class="p-2.5 font-bold text-indigo-600">${numOS}</td>
+                            <td class="p-2.5 font-medium text-slate-700">${dataAbertura}</td>
+                            <td class="p-2.5 font-semibold text-slate-800">${cliente}</td>
+                            <td class="p-2.5 text-slate-700">${tipoOS}</td>
+                            <td class="p-2.5 font-bold text-slate-800">${statusOS}</td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3 font-bold text-slate-800">${label}</td>
+                        <td class="p-3 text-right font-bold text-blue-600">${count} OSs</td>
+                        <td class="p-3 text-right font-semibold">${pct}%</td>
+                        <td class="p-3 text-center"><span class="text-[11px] font-bold px-2.5 py-1 rounded-lg ${badgeClass}">${badgeLabel}</span></td>
+                        <td class="p-3 text-center">
+                            <button onclick="toggleOSListRow('${safeKey}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-semibold rounded-lg text-xs transition flex items-center gap-1.5 mx-auto shadow-sm">
+                                <i class="fa-solid fa-list-ul text-xs"></i> <span>Ver ${count} OSs</span> <i class="fa-solid fa-chevron-down text-[10px] ml-0.5"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr id="os-row-${safeKey}" class="hidden bg-slate-50 border-b border-slate-200">
+                        <td colspan="5" class="p-4">
+                            <div class="bg-white rounded-xl p-3 border border-slate-200 shadow-sm space-y-2">
+                                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                                    <h4 class="font-bold text-xs text-slate-800 flex items-center gap-2">
+                                        <i class="fa-solid fa-clipboard-list text-indigo-600"></i>
+                                        <span>Ordens de Serviço de ${label} (${count} chamados)</span>
+                                    </h4>
+                                    <span class="text-[11px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded">Técnico Selecionado</span>
+                                </div>
+                                <div class="max-h-60 overflow-y-auto">
+                                    <table class="w-full text-left text-xs border-collapse">
+                                        <thead class="bg-slate-100 text-slate-700 font-bold sticky top-0">
+                                            <tr>
+                                                <th class="p-2 border-b border-slate-200">Nº OS</th>
+                                                <th class="p-2 border-b border-slate-200">Data Abertura</th>
+                                                <th class="p-2 border-b border-slate-200">Cliente / Unidade</th>
+                                                <th class="p-2 border-b border-slate-200">Tipo de OS</th>
+                                                <th class="p-2 border-b border-slate-200">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${osRowsHtml}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ALTERNARA A EXIBIÇÃO DAS OSs NA TABELA DETALHADA
+        function toggleOSListRow(safeKey) {
+            const row = document.getElementById('os-row-' + safeKey);
+            if (row) {
+                row.classList.toggle('hidden');
+            }
+        }
+
+        // EXPORTAÇÕES PDF E EXCEL
+        function exportToExcel() {
+            if (!activeData.length) return;
+            const ws = XLSX.utils.json_to_sheet(activeData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Atendimento Tecnico");
+            XLSX.writeFile(wb, "Relatorio_Atendimento_Tecnico.xlsx");
+        }
+
+        function exportToPDF() {
+            const btnPdf = document.getElementById('btnPdf');
+            const originalText = btnPdf.innerHTML;
+            btnPdf.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-base"></i> Gerando PDF...';
+            btnPdf.disabled = true;
+
+            window.scrollTo(0, 0);
+
+            const element = document.getElementById('pdfContent');
+            const opt = {
+                margin:       [0.2, 0.2, 0.2, 0.2],
+                filename:     'Relatorio_Atendimento_Tecnico_KPIs.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+                jsPDF:        { unit: 'in', format: 'a3', orientation: 'landscape' }
+            };
+
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    btnPdf.innerHTML = originalText;
+                    btnPdf.disabled = false;
+                }).catch(err => {
+                    btnPdf.innerHTML = originalText;
+                    btnPdf.disabled = false;
+                    window.print();
+                });
+            } else {
+                btnPdf.innerHTML = originalText;
+                btnPdf.disabled = false;
+                window.print();
+            }
+        }
+
+        // MODAL DE OBSERVAÇÃO
+        let activeObsInputId = null;
+
+        function openObsModal(inputId, headerName) {
+            const inputEl = document.getElementById(inputId);
+            if (!inputEl) return;
+
+            activeObsInputId = inputId;
+            document.getElementById('obsModalTitle').innerText = `Editar ${headerName || 'Observação'}`;
+            document.getElementById('obsModalTextarea').value = inputEl.value;
+            document.getElementById('obsModal').classList.remove('hidden');
+            
+            setTimeout(() => {
+                const txt = document.getElementById('obsModalTextarea');
+                txt.focus();
+                txt.select();
+            }, 50);
+        }
+
+        function closeObsModal() {
+            activeObsInputId = null;
+            document.getElementById('obsModal').classList.add('hidden');
+        }
+
+        function saveObsModal() {
+            if (!activeObsInputId) return;
+
+            const inputEl = document.getElementById(activeObsInputId);
+            if (inputEl) {
+                const newVal = document.getElementById('obsModalTextarea').value;
+                inputEl.value = newVal;
+                inputEl.title = newVal;
+            }
+
+            closeObsModal();
+        }
+    </script>
+</body>
+</html>
