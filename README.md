@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -176,12 +175,12 @@
         <!-- ================= TAB 1: VISÃO GERAL ================= -->
         <div id="tabGeral" class="tab-pane space-y-6">
 
-            <!-- FILTRO DE PERÍODO PERSONALIZADO -->
+            <!-- FILTRO DE PERÍODO PERSONALIZADO (BASEADO NA COLUNA J: DATA DO FECHAMENTO) -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 no-print space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-calendar-days text-indigo-600 text-base"></i>
-                        <h3 class="text-sm font-bold text-slate-800">Filtro de Período Personalizado (Abertura)</h3>
+                        <h3 class="text-sm font-bold text-slate-800">Filtro de Período Personalizado (Filtrado pela Data do Fechamento - Coluna J)</h3>
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <button onclick="setPresetPeriod('today', 'geral')" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-300 transition">Hoje</button>
@@ -197,12 +196,12 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div>
-                        <label for="startDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Inicial:</label>
+                        <label for="startDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Inicial (Fechamento):</label>
                         <input type="date" id="startDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
                     </div>
 
                     <div>
-                        <label for="endDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Final:</label>
+                        <label for="endDateFilter" class="block font-bold text-slate-700 mb-1">📅 Data Final (Fechamento):</label>
                         <input type="date" id="endDateFilter" onchange="applyGlobalFilters()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-medium">
                     </div>
                 </div>
@@ -220,8 +219,8 @@
                 </button>
             </div>
 
-            <!-- INTERACTIVE KPI SUMMARY CARDS -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- INTERACTIVE KPI SUMMARY CARDS (INCLUINDO CARD DE TEMPO DE EXECUÇÃO) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 
                 <!-- CARD 1: TOTAL DE CHAMADOS -->
                 <div id="cardTotalOS" onclick="filterByKPI('ALL')" 
@@ -236,7 +235,7 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-blue-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Clique para ver todas as OSs</span>
+                        <span>🖱️ Ver todas as OSs</span>
                     </p>
                 </div>
 
@@ -253,7 +252,7 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-amber-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Clique para filtrar emergências</span>
+                        <span>🖱️ Filtrar emergências</span>
                     </p>
                 </div>
 
@@ -270,11 +269,28 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-rose-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Clique para ver OSs fora do prazo</span>
+                        <span>🖱️ OSs fora do prazo</span>
                     </p>
                 </div>
 
-                <!-- CARD 4: TÉCNICOS ATIVOS -->
+                <!-- CARD 4: CARD DO TEMPO DE EXECUÇÃO (COLUNA M) -->
+                <div id="cardTempoExecucao" 
+                     class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-purple-500 transition-all hover:scale-[1.02] hover:shadow-md select-none relative overflow-hidden group">
+                    <div class="flex justify-between items-start pointer-events-none">
+                        <div>
+                            <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Tempo Médio de Execução</p>
+                            <h3 id="kpiTempoExecucao" class="text-3xl font-extrabold text-purple-600 mt-1">00:00</h3>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-stopwatch text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs font-bold text-purple-600 mt-2 pointer-events-none flex items-center gap-1">
+                        <span>⏱️ Média Gasta (Coluna M)</span>
+                    </p>
+                </div>
+
+                <!-- CARD 5: TÉCNICOS ATIVOS -->
                 <div id="cardTecnicos" onclick="filterByKPI('TECNICOS')" 
                      class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
                     <div class="flex justify-between items-start pointer-events-none">
@@ -287,7 +303,7 @@
                         </div>
                     </div>
                     <p class="text-xs font-bold text-emerald-600 mt-2 pointer-events-none flex items-center gap-1">
-                        <span>🖱️ Clique para ir para a tabela</span>
+                        <span>🖱️ Ir para a tabela</span>
                     </p>
                 </div>
 
@@ -372,7 +388,7 @@
                         <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-chart-line text-blue-600"></i> Análise Comparativa de Atendimentos
                         </h2>
-                        <p class="text-xs text-slate-500">Selecione o técnico e o período para comparar a produtividade real.</p>
+                        <p class="text-xs text-slate-500">Selecione o técnico e o período (Filtrado por Data de Fechamento - Coluna J) para comparar a produtividade real.</p>
                     </div>
 
                     <div class="flex items-center gap-2 flex-wrap">
@@ -396,19 +412,19 @@
                     </div>
 
                     <div>
-                        <label for="startDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Inicial:</label>
+                        <label for="startDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Inicial (Fechamento):</label>
                         <input type="date" id="startDateComp" onchange="updateComparativoCharts()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 font-medium">
                     </div>
 
                     <div>
-                        <label for="endDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Final:</label>
+                        <label for="endDateComp" class="block font-bold text-slate-700 mb-1">📅 Data Final (Fechamento):</label>
                         <input type="date" id="endDateComp" onchange="updateComparativoCharts()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-slate-50 font-medium">
                     </div>
                 </div>
             </div>
 
             <!-- CARDS INTERATIVOS DA TAB COMPARATIVO -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 
                 <div id="cardCompTotalOS" onclick="scrollToCompSection('tableCompSection')" 
                      class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 select-none relative overflow-hidden group">
@@ -422,6 +438,20 @@
                         </div>
                     </div>
                     <p id="compTecnicoLabel" class="text-xs font-bold text-slate-400 mt-2 pointer-events-none">Todos os Técnicos Ativos</p>
+                </div>
+
+                <div id="cardCompTempoExecucao" 
+                     class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-purple-500 transition-all hover:scale-[1.02] hover:shadow-md select-none relative overflow-hidden group">
+                    <div class="flex justify-between items-start pointer-events-none">
+                        <div>
+                            <p class="text-[11px] font-bold text-purple-600 uppercase tracking-wide">Tempo Médio de Execução</p>
+                            <h3 id="compTempoExecucao" class="text-3xl font-extrabold text-purple-600 mt-1">00:00</h3>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-lg text-purple-600 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-stopwatch text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs font-bold text-slate-400 mt-2 pointer-events-none">Média do Filtro (Coluna M)</p>
                 </div>
 
                 <div id="cardCompMediaMes" onclick="scrollToCompSection('chartMensalSection')" 
@@ -529,12 +559,65 @@
         let activeData = [];
         let currentKPIFilter = 'ALL';
 
-        // SMART DATE PARSER
+        // HELPER PARA MAPEAR A DATA DO FECHAMENTO (COLUNA J)
+        function getTerminoDate(item) {
+            let raw = item['Data do Fechamento'] || item['Data_Fechamento'] || item['Data Fechamento'] || item['Data de Fechamento'] || item['Término'] || item['Termino'] || item['J'] || item['Data de Abertura'] || item['E'] || '';
+            return parseDateSmart(raw);
+        }
+
+        // HELPER PARA MAPEAR A DATA DE ABERTURA
+        function getInicioDate(item) {
+            let raw = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['Início'] || item['Inicio'] || item['E'] || '';
+            return parseDateSmart(raw);
+        }
+
+        // HELPER PARA LER O TEMPO DE EXECUÇÃO (COLUNA M) EM MINUTOS
+        function parseTempoToMinutes(item) {
+            let rawTempo = item['Tempo'] || item['Tempo de Atendimento'] || item['Tempo de Execução'] || item['Tempo Execução'] || item['Duração'] || item['Duracao'] || item['M'] || '';
+            if (rawTempo !== null && rawTempo !== undefined && rawTempo !== '') {
+                if (typeof rawTempo === 'number') {
+                    if (rawTempo < 1) return rawTempo * 24 * 60; // Fração decimal do Excel
+                    return rawTempo;
+                }
+                let str = rawTempo.toString().trim();
+                let parts = str.split(':');
+                if (parts.length >= 2) {
+                    let h = parseFloat(parts[0]) || 0;
+                    let m = parseFloat(parts[1]) || 0;
+                    let s = parts[2] ? (parseFloat(parts[2]) || 0) : 0;
+                    return h * 60 + m + s / 60;
+                }
+                let num = parseFloat(str);
+                if (!isNaN(num)) return num;
+            }
+
+            // Cálculo reserva caso a Coluna M não exista: diferença entre Término e Início
+            let dtIni = getInicioDate(item);
+            let dtEnd = getTerminoDate(item);
+            if (dtIni && dtEnd && dtEnd >= dtIni) {
+                return (dtEnd.getTime() - dtIni.getTime()) / 60000;
+            }
+            return 0;
+        }
+
+        // FORMATADOR DE MINUTOS PARA EXIBIÇÃO NO FORMATO HH:MM
+        function formatMinutesToDisplay(totalMinutes) {
+            if (!totalMinutes || isNaN(totalMinutes) || totalMinutes <= 0) return "00:00";
+            let hours = Math.floor(totalMinutes / 60);
+            let mins = Math.round(totalMinutes % 60);
+            if (mins >= 60) {
+                hours += 1;
+                mins = 0;
+            }
+            return String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
+        }
+
+        // SMART DATE PARSER (SUPORTA FORMATO BR, ISO, EXCEL E COM HORA ANTES)
         function parseDateSmart(val) {
             if (val === null || val === undefined || val === '') return null;
             if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
             
-            if (typeof val === 'number' || (!isNaN(val) && !val.toString().includes('/') && !val.toString().includes('-'))) {
+            if (typeof val === 'number' || (!isNaN(val) && !val.toString().includes('/') && !val.toString().includes('-') && !val.toString().includes(':'))) {
                 let num = parseFloat(val);
                 if (num > 20000 && num < 60000) {
                     let dateObj = new Date(Math.round((num - 25569) * 86400 * 1000));
@@ -546,6 +629,19 @@
             
             let str = val.toString().trim();
             if (!str) return null;
+
+            let timeFirstRegex = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?\s+(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/;
+            let matchTF = str.match(timeFirstRegex);
+            if (matchTF) {
+                let hour = parseInt(matchTF[1], 10);
+                let min = parseInt(matchTF[2], 10);
+                let sec = matchTF[3] ? parseInt(matchTF[3], 10) : 0;
+                let day = parseInt(matchTF[4], 10);
+                let month = parseInt(matchTF[5], 10) - 1;
+                let year = parseInt(matchTF[6], 10);
+                let d = new Date(year, month, day, hour, min, sec);
+                return isNaN(d.getTime()) || d.getFullYear() < 2000 ? null : d;
+            }
 
             let brRegex = /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/;
             let matchBr = str.match(brRegex);
@@ -584,10 +680,8 @@
         // CÁLCULO DE ATRASO SLA
         function isSLAOverdue(item) {
             let rawPrevista = item['Data/Hora Prevista de Atendimento'] || item['Data/Hora Prevista'] || item['Data Prevista de Atendimento'] || item['Data Prevista'] || item['I'] || '';
-            let rawFechamento = item['Data do Fechamento'] || item['Data_Fechamento'] || item['Data Fechamento'] || item['Data de Fechamento'] || item['J'] || '';
-
+            let dtFechamento = getTerminoDate(item);
             let dtPrevista = parseDateSmart(rawPrevista);
-            let dtFechamento = parseDateSmart(rawFechamento);
 
             if (dtPrevista) {
                 if (dtFechamento) {
@@ -771,7 +865,7 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // APLICAÇÃO DOS FILTROS POR DATAS (VISÃO GERAL)
+        // 1. APLICAÇÃO DOS FILTROS POR DATAS - BASEADO NA COLUNA J (DATA DO FECHAMENTO)
         function applyGlobalFilters() {
             if (!activeData || !activeData.length) return;
 
@@ -783,8 +877,7 @@
 
             const filteredData = activeData.filter(item => {
                 if (dtStart || dtEnd) {
-                    let rawDt = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || '';
-                    let dtItem = parseDateSmart(rawDt);
+                    let dtItem = getTerminoDate(item); // Filtro executado pela Coluna J (Data do Fechamento)
 
                     if (!dtItem) return false;
                     if (dtStart && dtItem.getTime() < dtStart.getTime()) return false;
@@ -913,26 +1006,31 @@
             }
         }
 
+        // RENDERIZAÇÃO DO DASHBOARD E CÁLCULO DO TEMPO MÉDIO (CARD COLUNA M)
         function renderDashboard(rawData) {
             highlightActiveCard();
 
             const validTechData = rawData.filter(item => {
-                let tech = item['Técnico'] || item['Tecnico'] || '';
+                let tech = item['Técnico'] || item['Tecnico'] || item['Responsável'] || item['Responsavel'] || '';
                 return !isExcludedTech(tech);
             });
 
             const totalOS = validTechData.length;
             let corretivaCount = 0;
             let atrasoCount = 0;
+            let totalTempoMin = 0;
 
             validTechData.forEach(item => {
                 if (isSLAOverdue(item)) atrasoCount++;
                 let tipo = item['Tipo da Ordem de Serviço'] || item['Tipo'] || '';
                 if (tipo.toLowerCase().includes('corretiv')) corretivaCount++;
+                totalTempoMin += parseTempoToMinutes(item);
             });
 
             const pctCorretiva = totalOS > 0 ? ((corretivaCount / totalOS) * 100).toFixed(1) : "0";
             const pctAtraso = totalOS > 0 ? ((atrasoCount / totalOS) * 100).toFixed(1) : "0";
+            const avgTempoMin = totalOS > 0 ? (totalTempoMin / totalOS) : 0;
+            const displayTempoMedio = formatMinutesToDisplay(avgTempoMin);
 
             let displayData = validTechData;
             if (currentKPIFilter === 'CORRETIVA') {
@@ -952,7 +1050,7 @@
                 let status = item['Status da OS'] || item['Status'] || 'Outros';
                 statusCount[status] = (statusCount[status] || 0) + 1;
 
-                let tech = item['Técnico'] || item['Tecnico'] || 'Não Atribuído';
+                let tech = item['Técnico'] || item['Tecnico'] || item['Responsável'] || item['Responsavel'] || 'Não Atribuído';
                 techCount[tech] = (techCount[tech] || 0) + 1;
 
                 let loja = item['Fantasia Cliente'] || item['Cliente'] || 'Desconhecido';
@@ -964,6 +1062,7 @@
             document.getElementById('kpiTotalOS').innerText = totalOS;
             document.getElementById('kpiCorretiva').innerText = pctCorretiva + '%';
             document.getElementById('kpiAtraso').innerText = pctAtraso + '%';
+            document.getElementById('kpiTempoExecucao').innerText = displayTempoMedio;
             document.getElementById('kpiTecnicos').innerText = techList.length;
 
             renderChartStatus(statusCount);
@@ -1126,7 +1225,7 @@
             });
         }
 
-        // ATUALIZAÇÃO DOS GRÁFICOS E TABELA COMPARATIVA
+        // ATUALIZAÇÃO DOS GRÁFICOS E TABELA COMPARATIVA (FILTRADO PELA DATA DO FECHAMENTO - COLUNA J)
         function updateComparativoCharts() {
             const selectedTech = document.getElementById('selectTecnicoComp').value;
 
@@ -1137,12 +1236,11 @@
             let dtEnd = endVal ? new Date(endVal + 'T23:59:59') : null;
 
             let activeCompanyData = activeData.filter(item => {
-                let tech = item['Técnico'] || item['Tecnico'] || '';
+                let tech = item['Técnico'] || item['Tecnico'] || item['Responsável'] || item['Responsavel'] || '';
                 if (isExcludedTech(tech)) return false;
 
                 if (dtStart || dtEnd) {
-                    let rawDt = item['Data de Abertura'] || item['Data_Abertura'] || item['Data Abertura'] || item['E'] || '';
-                    let dtItem = parseDateSmart(rawDt);
+                    let dtItem = getTerminoDate(item); // Filtro executado pela Coluna J (Data do Fechamento)
 
                     if (!dtItem) return false;
                     if (dtStart && dtItem.getTime() < dtStart.getTime()) return false;
@@ -1166,7 +1264,7 @@
             let techAllData = activeCompanyData;
             if (selectedTech !== "TODOS") {
                 techAllData = activeCompanyData.filter(item => {
-                    let tech = item['Técnico'] || item['Tecnico'] || '';
+                    let tech = item['Técnico'] || item['Tecnico'] || item['Responsável'] || item['Responsavel'] || '';
                     return tech === selectedTech;
                 });
                 document.getElementById('compTecnicoLabel').innerText = selectedTech;
@@ -1178,10 +1276,12 @@
             
             const histMensalMap = {};
             const histSemanalMap = {};
+            let sumTempoCompMin = 0;
 
             techAllData.forEach(item => {
-                let rawDt = item['Data_Abertura_Str'] || item['Data de Abertura'] || item['Data Abertura'] || item['Data/Hora Prevista de Atendimento'] || '';
-                let dt = parseDateSmart(rawDt);
+                let dt = getTerminoDate(item); // Agrupamento por mês/semana baseado na Data do Fechamento (Coluna J)
+                let tempoMin = parseTempoToMinutes(item);
+                sumTempoCompMin += tempoMin;
 
                 if (dt) {
                     const ano = dt.getFullYear();
@@ -1221,9 +1321,13 @@
             const mediaHistSemana = (totalTechAllOS / numHistSemanas).toFixed(1);
             const pctShareTotal = totalCompanyOS > 0 ? ((totalTechAllOS / totalCompanyOS) * 100).toFixed(1) : "0";
 
+            const avgTempoCompMin = totalTechAllOS > 0 ? (sumTempoCompMin / totalTechAllOS) : 0;
+            const displayCompTempoMedio = formatMinutesToDisplay(avgTempoCompMin);
+
             let sortedSemKeys = Object.keys(histSemanalMap).sort((a,b) => histSemanalMap[a].sortDate - histSemanalMap[b].sortDate);
 
             document.getElementById('compTotalOS').innerText = totalTechAllOS;
+            document.getElementById('compTempoExecucao').innerText = displayCompTempoMedio;
             document.getElementById('compMediaMes').innerText = mediaHistMes;
             document.getElementById('compMediaSemana').innerText = mediaHistSemana;
             document.getElementById('compPctTotal').innerText = pctShareTotal + '%';
@@ -1308,7 +1412,7 @@
             });
         }
 
-        // RENDERIZAÇÃO DA TABELA COMPARATIVA COM OSs DETALHADAS EXPANSÍVEIS
+        // 2. RENDERIZAÇÃO DA TABELA DETALHADA INCLUINDO A DATA DO FECHAMENTO (COLUNA J) E TEMPO DE EXECUÇÃO (COLUNA M)
         function renderTableComp(histMensalMap, totalTechAllOS) {
             const tbody = document.getElementById('tableCompBody');
             tbody.innerHTML = '';
@@ -1339,11 +1443,20 @@
 
                 const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
 
-                // Montagem da listagem detalhada das OSs deste mês
+                // Montagem da listagem detalhada das OSs
                 let osRowsHtml = '';
                 osList.forEach((osItem, idx) => {
                     let numOS = osItem['Número da Ordem de Serviço'] || osItem['Número OS'] || osItem['Nº OS'] || osItem['OS'] || osItem['Ordem de Serviço'] || osItem['A'] || `OS-${idx+1}`;
-                    let dataAbertura = osItem['Data de Abertura'] || osItem['Data_Abertura'] || osItem['Data Abertura'] || osItem['E'] || '-';
+                    
+                    let dataAberturaRaw = getInicioDate(osItem);
+                    let dataFechamentoRaw = getTerminoDate(osItem); // Coluna J: Data do Fechamento
+                    
+                    let dataAberturaStr = dataAberturaRaw ? dataAberturaRaw.toLocaleDateString('pt-BR') : (osItem['Data de Abertura'] || osItem['E'] || '-');
+                    let dataFechamentoStr = dataFechamentoRaw ? dataFechamentoRaw.toLocaleDateString('pt-BR') : (osItem['Data do Fechamento'] || osItem['J'] || '-');
+
+                    let tempoMin = parseTempoToMinutes(osItem); // Coluna M: Tempo de Execução
+                    let tempoDisplay = formatMinutesToDisplay(tempoMin);
+
                     let cliente = osItem['Fantasia Cliente'] || osItem['Cliente'] || osItem['Nome Fantasia'] || 'N/A';
                     let tipoOS = osItem['Tipo da Ordem de Serviço'] || osItem['Tipo'] || 'N/A';
                     let statusOS = osItem['Status da OS'] || osItem['Status'] || 'N/A';
@@ -1351,7 +1464,9 @@
                     osRowsHtml += `
                         <tr class="border-b border-slate-100 hover:bg-slate-50 transition text-[11px]">
                             <td class="p-2.5 font-bold text-indigo-600">${numOS}</td>
-                            <td class="p-2.5 font-medium text-slate-700">${dataAbertura}</td>
+                            <td class="p-2.5 font-medium text-slate-700">${dataAberturaStr}</td>
+                            <td class="p-2.5 font-bold text-emerald-700 bg-emerald-50/50 rounded">${dataFechamentoStr}</td>
+                            <td class="p-2.5 font-bold text-purple-600 bg-purple-50/50 rounded">${tempoDisplay}</td>
                             <td class="p-2.5 font-semibold text-slate-800">${cliente}</td>
                             <td class="p-2.5 text-slate-700">${tipoOS}</td>
                             <td class="p-2.5 font-bold text-slate-800">${statusOS}</td>
@@ -1387,6 +1502,8 @@
                                             <tr>
                                                 <th class="p-2 border-b border-slate-200">Nº OS</th>
                                                 <th class="p-2 border-b border-slate-200">Data Abertura</th>
+                                                <th class="p-2 border-b border-slate-200">Data Fechamento (Col J)</th>
+                                                <th class="p-2 border-b border-slate-200">Tempo Execução (Col M)</th>
                                                 <th class="p-2 border-b border-slate-200">Cliente / Unidade</th>
                                                 <th class="p-2 border-b border-slate-200">Tipo de OS</th>
                                                 <th class="p-2 border-b border-slate-200">Status</th>
@@ -1404,7 +1521,7 @@
             });
         }
 
-        // ALTERNARA A EXIBIÇÃO DAS OSs NA TABELA DETALHADA
+        // ALTERNA A EXIBIÇÃO DAS OSs NA TABELA DETALHADA
         function toggleOSListRow(safeKey) {
             const row = document.getElementById('os-row-' + safeKey);
             if (row) {
