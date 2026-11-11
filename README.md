@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Links GF - Automação Temporizada (5 min)</title>
+    <title>Painel Links GF </title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS (XLSX) -->
@@ -50,25 +50,77 @@
 </head>
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800">
 
-    <!-- MODAL DE OBSERVAÇÃO / EDIÇÃO EXPANDIDA -->
-    <div id="observationModal" class="fixed inset-0 bg-slate-900/80 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <!-- MODAL DE OBSERVAÇÃO / TEXTO LONGO -->
+    <div id="obsModal" class="fixed inset-0 bg-slate-900/80 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Edição de Campo Detalhado
+                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i>
+                    <span id="obsModalTitle">Visualizar / Editar Observação</span>
                 </h3>
-                <button onclick="fecharModalObservacao()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div>
-                <label id="obsModalLabel" class="block text-xs font-bold text-slate-600 mb-1">Conteúdo do Campo:</label>
-                <textarea id="obsModalTextarea" rows="6" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium bg-slate-50 text-slate-800"></textarea>
-            </div>
-            <div class="flex gap-2 justify-end">
-                <button onclick="fecharModalObservacao()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg text-xs transition">Cancelar</button>
-                <button onclick="aplicarAlteracaoObservacao()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow flex items-center gap-1.5">
-                    <i class="fa-solid fa-floppy-disk"></i> Aplicar e Salvar Registro
+                <button onclick="closeObsModal()" class="text-slate-400 hover:text-slate-600 text-base">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Conteúdo Completo (Parágrafos organizados com data automática):</label>
+                <textarea id="obsModalTextarea" rows="7" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium leading-relaxed whitespace-pre-wrap"></textarea>
+            </div>
+            <!-- Rodapé com Metadados da Linha e Alteração (Problema 3) -->
+            <div id="obsModalFooterMeta" class="bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 text-[11px] text-slate-500 flex items-center justify-between">
+                <span><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> Linha Excel: <b id="obsMetaRow">-</b></span>
+                <span><i class="fa-solid fa-clock-rotate-left text-emerald-500 mr-1"></i> Status: <span id="obsMetaStatus">Pronto para edição</span></span>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeObsModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
+                <button onclick="saveObsModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk text-xs"></i> Aplicar e Salvar no Drive
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU FLUTUANTE DE FILTRO ESTILO EXCEL -->
+    <div id="excelFilterDropdown" class="fixed hidden z-[100] bg-white border border-slate-300 shadow-2xl rounded-xl p-3 w-64 text-xs font-sans text-slate-700" onclick="event.stopPropagation()">
+        <!-- Ações de Ordenação -->
+        <div class="space-y-1 pb-2 border-b border-slate-200">
+            <button onclick="applyColumnSort('asc')" class="w-full text-left px-2.5 py-1.5 hover:bg-slate-100 rounded-md flex items-center gap-2 font-semibold text-slate-700 transition">
+                <i class="fa-solid fa-arrow-down-a-z text-indigo-600 text-sm"></i> Classificar de A a Z
+            </button>
+            <button onclick="applyColumnSort('desc')" class="w-full text-left px-2.5 py-1.5 hover:bg-slate-100 rounded-md flex items-center gap-2 font-semibold text-slate-700 transition">
+                <i class="fa-solid fa-arrow-up-z-a text-indigo-600 text-sm"></i> Classificar de Z a A
+            </button>
+        </div>
+
+        <!-- Limpar Filtro -->
+        <div class="py-1.5 border-b border-slate-200">
+            <button onclick="clearCurrentColumnFilter()" class="w-full text-left px-2.5 py-1.5 hover:bg-rose-50 rounded-md text-rose-600 flex items-center gap-2 font-semibold transition">
+                <i class="fa-solid fa-filter-circle-xmark text-sm"></i> Limpar Filtro de "<span id="excelFilterColName"></span>"
+            </button>
+        </div>
+
+        <!-- Seleção de Valores Únicos -->
+        <div class="pt-2 space-y-2">
+            <div class="relative">
+                <input type="text" id="excelFilterSearch" oninput="filterExcelUniqueList()" placeholder="Pesquisar..." class="w-full pl-7 pr-2 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-[10px]"></i>
+            </div>
+
+            <div class="p-1 border border-slate-200 rounded-lg bg-slate-50">
+                <label class="flex items-center gap-2 px-2 py-1 border-b border-slate-200 font-bold text-slate-800 cursor-pointer hover:bg-slate-200/60 rounded">
+                    <input type="checkbox" id="excelSelectAllCb" onchange="toggleSelectAllExcelList(this.checked)" class="rounded text-indigo-600 focus:ring-indigo-500">
+                    <span>(Selecionar Tudo)</span>
+                </label>
+                <div id="excelFilterList" class="max-h-40 overflow-y-auto space-y-1 p-1 text-[11px]"></div>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex justify-end gap-2 pt-2.5 border-t border-slate-200 mt-2">
+            <button onclick="closeExcelFilterDropdown()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
+            <button onclick="confirmExcelColumnFilter()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition shadow flex items-center gap-1">
+                <i class="fa-solid fa-check text-[10px]"></i> OK
+            </button>
         </div>
     </div>
 
@@ -80,7 +132,7 @@
             </div>
             <div>
                 <h3 class="text-lg font-bold text-slate-800">Confirmar Alterações Modificadas</h3>
-                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação dos registros no Google Drive, digite o código de confirmação:</p>
+                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação dos registros alterados no Google Drive, digite o código de confirmação:</p>
             </div>
             <div>
                 <input type="text" id="confirmCodeInput" placeholder="Digite gf01..." class="w-full text-sm px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold tracking-wider bg-slate-50 uppercase">
@@ -95,7 +147,7 @@
         </div>
     </div>
 
-    <!-- TELA DE LOGIN / BLOQUEIO POR SENHA -->
+    <!-- TELA DE LOGIN / BLOQUEIO POR SENHA FUNCIONAL -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-5 border border-slate-200">
             <img src="logo.png" alt="Logo GF Links" class="h-12 w-auto mx-auto object-contain" onerror="this.style.display='none'">
@@ -106,7 +158,7 @@
                 <h2 class="text-xl font-bold text-slate-800">Acesso Restrito</h2>
                 <p class="text-xs text-slate-500 mt-1">Informe a senha de acesso para visualizar o Painel Links GF</p>
             </div>
-            <form onsubmit="checkPassword(event); return false;" class="space-y-4">
+            <form onsubmit="checkPassword(event)" class="space-y-4">
                 <div>
                     <input type="password" id="accessPassword" placeholder="Digite a senha..." class="w-full text-sm px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-semibold tracking-wider bg-slate-50">
                     <p id="loginError" class="text-xs text-rose-600 font-semibold mt-2 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i>Senha incorreta. Tente novamente.</p>
@@ -168,7 +220,7 @@
                 <i class="fa-solid fa-circle-notch fa-spin text-sky-600 text-xl"></i>
                 <div>
                     <p class="text-xs font-bold">Sincronizando com o Google Drive...</p>
-                    <p class="text-[11px] text-sky-600">Buscando atualizações da planilha na nuvem (Atualização automática a cada 5 min).</p>
+                    <p class="text-[11px] text-sky-600">Buscando atualizações da planilha na nuvem.</p>
                 </div>
             </div>
         </div>
@@ -217,7 +269,7 @@
             <img src="logo.png" alt="Logo GF Links" class="h-16 w-auto mx-auto mb-3 object-contain opacity-80" onerror="this.style.display='none'">
             <i class="fa-solid fa-cloud-arrow-up text-5xl text-indigo-500 mb-3"></i>
             <h3 class="text-lg font-bold text-slate-700">Clique para carregar uma planilha local ou use a sincronização do Drive</h3>
-            <p class="text-xs text-slate-500 mt-1">Os dados do Painel Links GF são atualizados e salvos automaticamente a cada 5 minutos.</p>
+            <p class="text-xs text-slate-500 mt-1">Os dados do Painel Links GF são atualizados e salvos ao confirmar alterações.</p>
         </div>
 
         <!-- Dashboard -->
@@ -244,7 +296,17 @@
                     </h3>
                     <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-hand-pointer mr-1"></i>Clique no banner para filtrar</span>
                 </div>
-                <div id="cobrancaCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+                
+                <!-- CONTAINER GERAL DOS CARDS DE COBRANÇA -->
+                <div id="cobrancaCardsContainer" class="space-y-4"></div>
+
+                <!-- BOTÃO DE EXPANSÃO / RECOLHIMENTO -->
+                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-center no-print">
+                    <button id="btnToggleCobrancaCards" onclick="toggleCobrancaCards()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition flex items-center gap-2 border border-indigo-200 shadow-sm">
+                        <i id="toggleCobrancaIcon" class="fa-solid fa-chevron-down text-xs"></i>
+                        <span id="toggleCobrancaText">Ver outros cards de cobrança</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Gráficos -->
@@ -273,10 +335,11 @@
                 <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-50/50">
                     <div>
                         <h3 class="text-sm font-bold text-slate-800">Tabela Geral de Registros - Painel Links GF</h3>
-                        <p class="text-xs text-slate-500">Edite as colunas diretamente na tabela. Apenas os campos modificados serão salvos.</p>
+                        <p class="text-xs text-slate-500">Clique nos ícones de filtro nos cabeçalhos das colunas para ordenar (A-Z) e selecionar valores únicos.</p>
                     </div>
 
                     <div class="flex flex-wrap gap-2 items-center w-full lg:w-auto justify-end no-print">
+                        <!-- INDICADOR VISUAL DA ÚLTIMA ALTERAÇÃO NO BD -->
                         <span id="lastSaveIndicator" class="text-[11px] font-medium px-2.5 py-1.5 rounded-lg border bg-slate-100 text-slate-600 border-slate-200 flex items-center gap-1.5 transition-all">
                             <i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>
                             <span>Última alteração no BD: Nunca</span>
@@ -288,8 +351,9 @@
 
                         <input type="text" id="tableSearchInput" onkeyup="filterTable()" placeholder="Buscar..." class="text-xs px-3 py-2 border border-slate-300 rounded-lg bg-white">
                         <select id="filterCisNumNI" onchange="filterTable()" class="text-xs bg-amber-50 border border-amber-300 text-amber-900 rounded-lg px-3 py-2 font-bold">
-                            <option value="">Filtro CIS Numérica: Todos</option>
-                            <option value="ONLY_NUMERIC_NI">Apenas CIS Numérica + Cobrança N/I</option>
+                            <option value="">Filtro Especial: Todos</option>
+                            <option value="ONLY_NUMERIC_NI">CIS Numérica + Cobrança N/I</option>
+                            <option value="ONLY_DUPLICATED_CIS">Duplicidade de Link na CIS (Apenas Números)</option>
                         </select>
                         <select id="filterStatusColF" onchange="filterTable()" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700">
                             <option value="">STATUS: Todos</option>
@@ -304,7 +368,7 @@
                 <div class="overflow-x-auto overflow-y-auto max-h-[600px] w-full">
                     <table class="min-w-max w-full text-left border-collapse text-[11px]">
                         <thead>
-                            <tr id="tableHeader" class="bg-slate-800 text-white font-semibold sticky top-0 z-10"></tr>
+                            <tr id="tableHeader" class="bg-slate-800 text-white font-semibold sticky top-0 z-20"></tr>
                         </thead>
                         <tbody id="ativosTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
                     </table>
@@ -331,9 +395,17 @@
         const DB_KEY_AUX_DATA = 'APP_BD_AUXILIAR_DATA';
         const DB_KEY_LAST_SAVE = 'GF_LAST_BD_SAVE_TIMESTAMP';
 
-        // LISTAS OFICIAIS DE VALIDAÇÃO DO GOOGLE SHEETS
-        const OPCOES_COBRANCA = ["ATIVA", "SUSPENSA", "N/I", "GUARDIAN", "CORPORATIVO", "ESTOQUE"];
-        const OPCOES_STATUS = ["OK", "CANCELADA", "SUSPENSA", "EM ANALISE", "DUPLICIDADE", "EM CANCELAMENTO", "MANUTENCAO", "TRANSFERENCIA CNPJ", "TRANSFERENCIA ENDERECO"];
+        // LISTAS OFICIAIS ATUALIZADAS E CORRIGIDAS CONFORME REGRAS DO GOOGLE SHEETS
+        const OPCOES_COBRANCA = [
+            "ATIVA", "SUSPENSA", "N/I", "GUARDIAN", "CORPORATIVO", "ESTOQUE", 
+            "CANCELADA", "INATIVO", "DESATIVADA", "COBRANDO", "COBRAR NA PROXIMA MEDIÇÃO", "NÃO COBRANDO",
+            "STORAGE", "TÉCNICO MARCELO"
+        ];
+        const OPCOES_STATUS = [
+            "OK", "CANCELADA", "SUSPENSA", "EM ANALISE", "DUPLICIDADE", "EM CANCELAMENTO", 
+            "MANUTENCAO", "TRANSFERENCIA CNPJ", "TRANSFERENCIA ENDERECO", "SUBSTITUIÇÃO", 
+            "PENDENTE*", "DESATIVADOS", "TÉCNICO MARCELO", "CHAMADO EM ABERTO", "EQUIPAMENTO PERDIDO"
+        ];
         const OPCOES_OPERADORA = ["VIVO", "CLARO", "TIM", "OI", "ALGAR", "OUTROS", "N/I"];
 
         let rawAtivosData = [];
@@ -344,48 +416,166 @@
         let chartStatusObj, chartCobrancaObj;
         let statusColName = "";
         let cobrancaColName = "";
-        let driveTimer = null;
 
         let pendingEdit = null;
-        let currentObsTarget = null;
+
+        // ESTADOS DOS AUTOFILTROS ESTILO EXCEL
+        let activeColumnFilters = {}; 
+        let currentSort = { colHeader: null, direction: null }; 
+        let activeDropdownCol = null;
+
+        // ESTADO DO MODAL DE OBSERVAÇÃO
+        let activeObsInputId = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem(AUTH_KEY) === 'true') {
                 document.getElementById('loginOverlay').classList.add('hidden');
                 initApp();
             }
+
+            window.addEventListener('click', (e) => {
+                const dropdown = document.getElementById('excelFilterDropdown');
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    const isClickInside = e.target.closest('#excelFilterDropdown');
+                    const isFilterBtn = e.target.closest('.excel-filter-btn');
+                    if (!isClickInside && !isFilterBtn) {
+                        dropdown.classList.add('hidden');
+                    }
+                }
+            });
         });
 
+        // FUNÇÃO DE EXPANSAO / RECOLHIMENTO DOS CARDS SECUNDÁRIOS DE COBRANÇA
+        function toggleCobrancaCards() {
+            const secondaryContainer = document.getElementById('cobrancaSecondaryCardsContainer');
+            const icon = document.getElementById('toggleCobrancaIcon');
+            const text = document.getElementById('toggleCobrancaText');
+
+            if (!secondaryContainer) return;
+
+            if (secondaryContainer.classList.contains('hidden')) {
+                secondaryContainer.classList.remove('hidden');
+                if (icon) icon.className = 'fa-solid fa-chevron-up text-xs';
+                if (text) text.innerText = 'Ocultar outros cards de cobrança';
+            } else {
+                secondaryContainer.classList.add('hidden');
+                if (icon) icon.className = 'fa-solid fa-chevron-down text-xs';
+                if (text) text.innerText = 'Ver outros cards de cobrança';
+            }
+        }
+
+        // LÓGICA DO MODAL DE OBSERVAÇÃO COM DATA AUTOMÁTICA E PARÁGRAFO (Problemas 1, 2 e 3)
+        function openObsModal(inputId, headerName) {
+            const inputEl = document.getElementById(inputId);
+            if (!inputEl) return;
+
+            activeObsInputId = inputId;
+            document.getElementById('obsModalTitle').innerText = `Editar ${headerName || 'Observação'}`;
+            
+            const existingText = inputEl.value.trim();
+            const today = new Date();
+            const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+            
+            let newContent = "";
+            if (existingText) {
+                // Adiciona um novo parágrafo com a data automática no final se já houver texto
+                newContent = existingText + `\n\n[${dateStr}] - `;
+            } else {
+                // Se estiver vazio, inicia com a data
+                newContent = `[${dateStr}] - `;
+            }
+
+            document.getElementById('obsModalTextarea').value = newContent;
+
+            // Atualiza rodapé de metadados com a linha do Excel e status
+            const tr = inputEl.closest('tr');
+            if (tr) {
+                const excelRowIndex = tr.dataset.excelRowIndex || "-";
+                document.getElementById('obsMetaRow').innerText = excelRowIndex;
+            }
+            document.getElementById('obsMetaStatus').innerText = "Editando com data automática";
+
+            document.getElementById('obsModal').classList.remove('hidden');
+            
+            setTimeout(() => {
+                const txt = document.getElementById('obsModalTextarea');
+                txt.focus();
+                // Posiciona o cursor no final do texto para digitação imediata
+                txt.setSelectionRange(txt.value.length, txt.value.length);
+            }, 50);
+        }
+
+        function closeObsModal() {
+            activeObsInputId = null;
+            document.getElementById('obsModal').classList.add('hidden');
+        }
+
+        // SALVAMENTO INDIVIDUAL COM CONFIRMAÇÃO (GF01)
+        function saveObsModal() {
+            if (!activeObsInputId) return;
+
+            const inputEl = document.getElementById(activeObsInputId);
+            if (!inputEl) {
+                closeObsModal();
+                return;
+            }
+
+            const newVal = document.getElementById('obsModalTextarea').value;
+            const originalVal = inputEl.dataset.original || "";
+
+            // Atualiza o valor visual na célula da tabela com quebras preservadas
+            inputEl.value = newVal;
+            inputEl.title = newVal;
+
+            // Se houve alteração no conteúdo, solicita senha e grava individualmente no Drive
+            if (newVal !== originalVal) {
+                const tr = inputEl.closest('tr');
+                if (tr) {
+                    const excelRowIndex = parseInt(tr.dataset.excelRowIndex, 10);
+                    const parts = activeObsInputId.split('_col_');
+                    const colIdx = parseInt(parts[1], 10);
+                    const header = excelHeaders[colIdx];
+
+                    if (!isNaN(excelRowIndex) && !isNaN(colIdx) && header) {
+                        const batch = [{
+                            rowIndex: excelRowIndex,
+                            changes: [{
+                                colIndex: colIdx + 1,
+                                header: header,
+                                value: newVal
+                            }]
+                        }];
+
+                        pendingEdit = { batch: batch };
+
+                        closeObsModal();
+
+                        // Abre o modal de confirmação por senha (gf01)
+                        document.getElementById('confirmCodeInput').value = '';
+                        document.getElementById('confirmError').classList.add('hidden');
+                        document.getElementById('confirmModal').classList.remove('hidden');
+                        document.getElementById('confirmCodeInput').focus();
+                        return;
+                    }
+                }
+            }
+
+            closeObsModal();
+        }
+
         function checkPassword(e) {
-            if (e) {
-                e.preventDefault();
-                if (typeof e.stopPropagation === 'function') {
-                    e.stopPropagation();
-                }
+            e.preventDefault();
+            const input = document.getElementById('accessPassword').value.trim();
+            const error = document.getElementById('loginError');
+
+            if (input === TARGET_PASSWORD) {
+                sessionStorage.setItem(AUTH_KEY, 'true');
+                document.getElementById('loginOverlay').classList.add('hidden');
+                error.classList.add('hidden');
+                initApp();
+            } else {
+                error.classList.remove('hidden');
             }
-
-            try {
-                const inputEl = document.getElementById('accessPassword');
-                const errorEl = document.getElementById('loginError');
-                const overlayEl = document.getElementById('loginOverlay');
-
-                if (!inputEl) return false;
-
-                const input = inputEl.value.trim();
-
-                if (input === TARGET_PASSWORD) {
-                    sessionStorage.setItem(AUTH_KEY, 'true');
-                    if (overlayEl) overlayEl.classList.add('hidden');
-                    if (errorEl) errorEl.classList.add('hidden');
-                    initApp();
-                } else {
-                    if (errorEl) errorEl.classList.remove('hidden');
-                }
-            } catch (err) {
-                console.error("Erro durante a autenticação:", err);
-            }
-
-            return false;
         }
 
         function updateSyncTimestamp() {
@@ -414,15 +604,9 @@
             if (storedLastSave) {
                 updateSaveIndicator(`Última alteração no BD: ${storedLastSave}`, "fa-circle-check text-emerald-600", "bg-emerald-50 text-emerald-800 border-emerald-300");
             }
-
-            if (driveTimer) clearInterval(driveTimer);
-            driveTimer = setInterval(() => {
-                syncDriveData();
-            }, 300000);
         }
 
         function logout() {
-            if (driveTimer) clearInterval(driveTimer);
             sessionStorage.removeItem(AUTH_KEY);
             document.getElementById('accessPassword').value = '';
             document.getElementById('loginOverlay').classList.remove('hidden');
@@ -609,6 +793,8 @@
                 bdAuxiliarMap.clear();
                 bdAuxiliarHeaders = [];
                 bdAuxiliarData = [];
+                activeColumnFilters = {};
+                currentSort = { colHeader: null, direction: null };
 
                 document.getElementById('dashboardSection').classList.add('hidden');
                 document.getElementById('dropZone').classList.remove('hidden');
@@ -649,14 +835,10 @@
         function parseWorkbook(workbook) {
             let sheetAtivos = null, sheetBD = null;
 
-            // Busca EXCLUSIVAMENTE nas abas ATIVOS_VIVO_CLARO e BD_AUXILIAR (Aba LINK desconsiderada)
             workbook.SheetNames.forEach(name => {
                 const norm = name.trim().toUpperCase();
-                if (norm.includes("ATIVO") || norm.includes("VIVO") || norm.includes("CLARO")) {
-                    sheetAtivos = workbook.Sheets[name];
-                } else if (norm.includes("BD") || norm.includes("AUXILIAR") || norm.includes("CADASTRO")) {
-                    sheetBD = workbook.Sheets[name];
-                }
+                if (norm.includes("ATIVO") || norm.includes("VIVO") || norm.includes("CLARO") || norm.includes("LINK")) sheetAtivos = workbook.Sheets[name];
+                else if (norm.includes("BD") || norm.includes("AUXILIAR") || norm.includes("CADASTRO")) sheetBD = workbook.Sheets[name];
             });
 
             if (!sheetAtivos) sheetAtivos = workbook.Sheets[workbook.SheetNames[0]];
@@ -766,16 +948,148 @@
             filterTable();
         }
 
+        // CABEÇALHOS COM BOTÕES DE FILTRO/ORDENAÇÃO ESTILO EXCEL
         function renderTableHeaders() {
             const headerRow = document.getElementById('tableHeader');
             headerRow.innerHTML = '';
 
-            excelHeaders.forEach(h => {
+            excelHeaders.forEach((h) => {
                 const th = document.createElement('th');
-                th.className = 'p-3 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700';
-                th.innerText = h.toUpperCase();
+                const isFiltered = activeColumnFilters[h] && activeColumnFilters[h].size > 0;
+                const isSorted = currentSort.colHeader === h;
+
+                th.className = `p-3 whitespace-nowrap bg-slate-800 text-white font-bold border-b border-slate-700 select-none ${isFiltered ? 'bg-slate-700' : ''}`;
+                
+                let sortBadge = "";
+                if (isSorted) {
+                    sortBadge = currentSort.direction === 'asc' ? '<i class="fa-solid fa-arrow-down-a-z text-amber-400 ml-1"></i>' : '<i class="fa-solid fa-arrow-up-z-a text-amber-400 ml-1"></i>';
+                }
+
+                let filterBtnClass = isFiltered ? "text-emerald-400 bg-emerald-950/60" : "text-slate-400 hover:text-white hover:bg-slate-700";
+
+                th.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <span>${h.toUpperCase()}${sortBadge}</span>
+                        <button onclick="openExcelFilterDropdown(event, '${h.replace(/'/g, "\\'")}')" class="excel-filter-btn p-1.5 rounded transition ${filterBtnClass}" title="Filtrar/Ordenar ${h}">
+                            <i class="fa-solid fa-filter text-xs"></i>
+                        </button>
+                    </div>
+                `;
                 headerRow.appendChild(th);
             });
+        }
+
+        function openExcelFilterDropdown(event, colHeader) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            activeDropdownCol = colHeader;
+
+            const dropdown = document.getElementById('excelFilterDropdown');
+            document.getElementById('excelFilterColName').innerText = colHeader;
+            document.getElementById('excelFilterSearch').value = '';
+
+            const btn = event ? event.currentTarget : null;
+            if (btn) {
+                const rect = btn.getBoundingClientRect();
+                dropdown.style.top = `${rect.bottom + 4}px`;
+                dropdown.style.left = `${Math.max(10, Math.min(rect.left, window.innerWidth - 270))}px`;
+            }
+
+            const uniqueSet = new Set();
+            rawAtivosData.forEach(item => {
+                const val = String(item.originalRow[colHeader] || "-").trim();
+                uniqueSet.add(val || "-");
+            });
+
+            const uniqueList = Array.from(uniqueSet).sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+
+            const selectedSet = activeColumnFilters[colHeader];
+            const listContainer = document.getElementById('excelFilterList');
+            listContainer.innerHTML = '';
+
+            let allChecked = !selectedSet;
+
+            uniqueList.forEach((val) => {
+                const isChecked = !selectedSet || selectedSet.has(val);
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-2 px-2 py-1 hover:bg-slate-200/60 rounded cursor-pointer text-slate-700 excel-item-label';
+                label.dataset.val = val.toLowerCase();
+                label.innerHTML = `
+                    <input type="checkbox" value="${val.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''} class="excel-val-cb rounded text-indigo-600 focus:ring-indigo-500">
+                    <span class="truncate">${val}</span>
+                `;
+                listContainer.appendChild(label);
+            });
+
+            document.getElementById('excelSelectAllCb').checked = allChecked || (selectedSet && selectedSet.size === uniqueList.length);
+            dropdown.classList.remove('hidden');
+        }
+
+        function closeExcelFilterDropdown() {
+            document.getElementById('excelFilterDropdown').classList.add('hidden');
+        }
+
+        function filterExcelUniqueList() {
+            const query = document.getElementById('excelFilterSearch').value.toLowerCase();
+            const labels = document.querySelectorAll('#excelFilterList .excel-item-label');
+            labels.forEach(label => {
+                if (label.dataset.val.includes(query)) {
+                    label.classList.remove('hidden');
+                } else {
+                    label.classList.add('hidden');
+                }
+            });
+        }
+
+        function toggleSelectAllExcelList(checked) {
+            const checkboxes = document.querySelectorAll('#excelFilterList .excel-val-cb');
+            checkboxes.forEach(cb => {
+                if (!cb.parentElement.classList.contains('hidden')) {
+                    cb.checked = checked;
+                }
+            });
+        }
+
+        function applyColumnSort(dir) {
+            if (!activeDropdownCol) return;
+            currentSort = { colHeader: activeDropdownCol, direction: dir };
+            renderTableHeaders();
+            filterTable();
+            closeExcelFilterDropdown();
+        }
+
+        function clearCurrentColumnFilter() {
+            if (!activeDropdownCol) return;
+            delete activeColumnFilters[activeDropdownCol];
+            renderTableHeaders();
+            filterTable();
+            closeExcelFilterDropdown();
+        }
+
+        function confirmExcelColumnFilter() {
+            if (!activeDropdownCol) return;
+
+            const checkboxes = document.querySelectorAll('#excelFilterList .excel-val-cb');
+            const totalBoxes = checkboxes.length;
+            const selectedValues = new Set();
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selectedValues.add(cb.value);
+                }
+            });
+
+            if (selectedValues.size === totalBoxes) {
+                delete activeColumnFilters[activeDropdownCol];
+            } else {
+                activeColumnFilters[activeDropdownCol] = selectedValues;
+            }
+
+            renderTableHeaders();
+            filterTable();
+            closeExcelFilterDropdown();
         }
 
         function renderBdSearchResultHeaders() {
@@ -871,59 +1185,6 @@
             resultBox.classList.remove('hidden');
         }
 
-        function abrirModalObservacao(inputId, headerName, excelRowIndex, colIdx) {
-            const inputEl = document.getElementById(inputId);
-            if (!inputEl) return;
-
-            currentObsTarget = {
-                inputId: inputId,
-                headerName: headerName,
-                excelRowIndex: excelRowIndex,
-                colIdx: colIdx
-            };
-
-            document.getElementById('obsModalLabel').innerText = `Edição do Campo: ${headerName}`;
-            document.getElementById('obsModalTextarea').value = inputEl.value;
-            document.getElementById('observationModal').classList.remove('hidden');
-        }
-
-        function fecharModalObservacao() {
-            currentObsTarget = null;
-            document.getElementById('observationModal').classList.add('hidden');
-        }
-
-        function aplicarAlteracaoObservacao() {
-            if (!currentObsTarget) return;
-
-            const inputEl = document.getElementById(currentObsTarget.inputId);
-            const textVal = document.getElementById('obsModalTextarea').value;
-
-            if (inputEl) {
-                inputEl.value = textVal;
-            }
-
-            const changes = [{
-                colIndex: currentObsTarget.colIdx + 1,
-                header: currentObsTarget.headerName,
-                value: textVal
-            }];
-
-            pendingEdit = {
-                type: 'single',
-                batch: [{
-                    rowIndex: currentObsTarget.excelRowIndex,
-                    changes: changes
-                }]
-            };
-
-            fecharModalObservacao();
-
-            document.getElementById('confirmCodeInput').value = '';
-            document.getElementById('confirmError').classList.add('hidden');
-            document.getElementById('confirmModal').classList.remove('hidden');
-            document.getElementById('confirmCodeInput').focus();
-        }
-
         function solicitarSalvarEmMassa() {
             const startIdx = getEnderecoStartIndex();
             const batch = [];
@@ -975,7 +1236,7 @@
                 return;
             }
 
-            pendingEdit = { type: 'batch', batch: batch };
+            pendingEdit = { batch: batch };
 
             document.getElementById('confirmCodeInput').value = '';
             document.getElementById('confirmError').classList.add('hidden');
@@ -1037,6 +1298,7 @@
             }
         }
 
+        // RENDERIZAÇÃO DA TABELA COM BOTÃO DE EXPANSÃO PARA INPUTS DE TEXTO
         function renderTableBody(data) {
             const tbody = document.getElementById('ativosTableBody');
             tbody.innerHTML = '';
@@ -1070,12 +1332,12 @@
                                 <input type="date" id="${inputId}" data-original="${formattedIsoDate}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
                             `;
                         } else {
-                            const isLongField = header.toUpperCase().includes("OBS") || header.toUpperCase().includes("ENDEREÇO") || header.toUpperCase().includes("ENDERECO");
-                            const safeHeader = header.replace(/'/g, "\\'");
                             td.innerHTML = `
-                                <div class="flex items-center gap-1">
-                                    <input type="text" id="${inputId}" data-original="${rawVal}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full min-w-[150px]">
-                                    ${isLongField ? `<button onclick="abrirModalObservacao('${inputId}', '${safeHeader}', ${item.excelRowIndex}, ${colIdx})" class="text-slate-400 hover:text-indigo-600 p-1 rounded" title="Expandir edição"><i class="fa-solid fa-expand text-xs"></i></button>` : ''}
+                                <div class="flex items-center gap-1 min-w-[170px]">
+                                    <input type="text" id="${inputId}" data-original="${rawVal}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full" title="${rawVal}">
+                                    <button type="button" onclick="openObsModal('${inputId}', '${header.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-indigo-600 p-1.5 rounded hover:bg-slate-100 transition" title="Expandir para leitura e edição">
+                                        <i class="fa-solid fa-expand text-xs"></i>
+                                    </button>
                                 </div>
                             `;
                         }
@@ -1123,6 +1385,8 @@
                 setSelectOption(selCobranca, value);
             } else if (type === 'CIS_NUM_NI') {
                 if (selCisNum) selCisNum.value = 'ONLY_NUMERIC_NI';
+            } else if (type === 'DUPLICIDADE_CIS') {
+                if (selCisNum) selCisNum.value = 'ONLY_DUPLICATED_CIS';
             }
 
             filterTable();
@@ -1138,7 +1402,22 @@
             const statusCounts = {}, cobrancaCounts = {};
             let cisNumCobrancaNI = 0;
 
+            const cisFrequency = {};
             rawAtivosData.forEach(item => {
+                const cleanCis = cleanStr(item.ci).toUpperCase();
+                if (isNumericCIS(cleanCis)) {
+                    cisFrequency[cleanCis] = (cisFrequency[cleanCis] || 0) + 1;
+                }
+            });
+
+            let totalDuplicadosCis = 0;
+            rawAtivosData.forEach(item => {
+                const cleanCis = cleanStr(item.ci).toUpperCase();
+                item.isCisDuplicated = (isNumericCIS(cleanCis) && cisFrequency[cleanCis] > 1);
+                if (item.isCisDuplicated) {
+                    totalDuplicadosCis++;
+                }
+
                 statusCounts[item.statusColF] = (statusCounts[item.statusColF] || 0) + 1;
                 cobrancaCounts[item.cobrancaColE] = (cobrancaCounts[item.cobrancaColE] || 0) + 1;
                 if (item.isCisNumeric && item.cobrancaColE === "N/I") cisNumCobrancaNI++;
@@ -1148,19 +1427,93 @@
             statusContainer.innerHTML = '';
             statusContainer.appendChild(createMetricCard("TOTAL DE ATIVOS", total, "100%", "fa-list-check", () => triggerCardFilter('RESET', '')));
 
+            const pctDup = total ? ((totalDuplicadosCis / total) * 100).toFixed(1) + "%" : "0.0%";
+            const dupCard = createCardElement("DUPLICIDADE DE LINK NA CIS", totalDuplicadosCis, pctDup, {
+                bg: "border-l-rose-500", text: "text-rose-700", badge: "bg-rose-100", icon: "fa-copy"
+            }, () => triggerCardFilter('DUPLICIDADE_CIS', 'ONLY_DUPLICATED_CIS'));
+            statusContainer.appendChild(dupCard);
+
             populateCards(statusContainer, statusCounts, total, 'filterStatusColF', 'STATUS', 'STATUS');
 
             const cobrancaContainer = document.getElementById('cobrancaCardsContainer');
             cobrancaContainer.innerHTML = '';
-            cobrancaContainer.appendChild(createMetricCard("TOTAL DE REGISTROS", total, "100%", "fa-receipt", () => triggerCardFilter('RESET', '')));
+
+            const cobrancaMainGrid = document.createElement('div');
+            cobrancaMainGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full';
+
+            const cobrancaSecondaryGrid = document.createElement('div');
+            cobrancaSecondaryGrid.id = 'cobrancaSecondaryCardsContainer';
+            cobrancaSecondaryGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full hidden mt-4 pt-4 border-t border-slate-100';
+
+            cobrancaContainer.appendChild(cobrancaMainGrid);
+            cobrancaContainer.appendChild(cobrancaSecondaryGrid);
+
+            cobrancaMainGrid.appendChild(createMetricCard("TOTAL DE REGISTROS", total, "100%", "fa-receipt", () => triggerCardFilter('RESET', '')));
+
+            const mainKeysOrder = ["NÃO COBRANDO", "COBRANDO", "SUSPENSA", "COBRAR NA PROXIMA MEDIÇÃO"];
+
+            const selectCobranca = document.getElementById('filterCobrancaColE');
+            if (selectCobranca) selectCobranca.innerHTML = `<option value="">COBRANÇA: Todas</option>`;
+
+            const colorPalette = [
+                { bg: "border-l-sky-500", text: "text-sky-600", badge: "bg-sky-100", icon: "fa-magnifying-glass-chart" },
+                { bg: "border-l-emerald-500", text: "text-emerald-600", badge: "bg-emerald-100", icon: "fa-circle-check" },
+                { bg: "border-l-amber-500", text: "text-amber-600", badge: "bg-amber-100", icon: "fa-triangle-exclamation" },
+                { bg: "border-l-indigo-500", text: "text-indigo-600", badge: "bg-indigo-100", icon: "fa-sliders" }
+            ];
+
+            const allKeys = Object.keys(cobrancaCounts).sort();
+            const renderedMainKeys = new Set();
+
+            function isMainKey(k) {
+                const u = String(k || '').toUpperCase().trim();
+                return u === "NÃO COBRANDO" || u === "NAO COBRANDO" || u === "COBRANDO" || u.includes("SUSPENS") || u.includes("COBRAR NA PROXIMA");
+            }
+
+            mainKeysOrder.forEach((targetLabel, idx) => {
+                const realKey = allKeys.find(k => {
+                    const u = k.toUpperCase().trim();
+                    if (targetLabel === "NÃO COBRANDO") return u === "NÃO COBRANDO" || u === "NAO COBRANDO";
+                    if (targetLabel === "COBRANDO") return u === "COBRANDO";
+                    if (targetLabel === "SUSPENSA") return u.includes("SUSPENS");
+                    if (targetLabel === "COBRAR NA PROXIMA MEDIÇÃO") return u.includes("COBRAR NA PROXIMA");
+                    return false;
+                }) || targetLabel;
+
+                const count = cobrancaCounts[realKey] || 0;
+                const pct = total ? ((count / total) * 100).toFixed(1) + "%" : "0.0%";
+                let palette = colorPalette[idx % colorPalette.length];
+
+                const card = createCardElement(realKey, count, pct, palette, () => triggerCardFilter('COBRANÇA', realKey));
+                cobrancaMainGrid.appendChild(card);
+                renderedMainKeys.add(realKey);
+            });
 
             const pctCisNI = total ? ((cisNumCobrancaNI / total) * 100).toFixed(1) + "%" : "0.0%";
             const extraCard = createCardElement("CIS NUMÉRICA N/I", cisNumCobrancaNI, pctCisNI, {
                 bg: "border-l-amber-500", text: "text-amber-700", badge: "bg-amber-100", icon: "fa-triangle-exclamation"
             }, () => triggerCardFilter('CIS_NUM_NI', 'ONLY_NUMERIC_NI'));
-            cobrancaContainer.appendChild(extraCard);
+            cobrancaSecondaryGrid.appendChild(extraCard);
 
-            populateCards(cobrancaContainer, cobrancaCounts, total, 'filterCobrancaColE', 'COBRANÇA', 'COBRANÇA');
+            let secondaryIdx = 1;
+            allKeys.forEach(key => {
+                if (!renderedMainKeys.has(key) && !isMainKey(key)) {
+                    const count = cobrancaCounts[key];
+                    const pct = total ? ((count / total) * 100).toFixed(1) + "%" : "0.0%";
+                    let palette = colorPalette[secondaryIdx % colorPalette.length];
+
+                    const card = createCardElement(key, count, pct, palette, () => triggerCardFilter('COBRANÇA', key));
+                    cobrancaSecondaryGrid.appendChild(card);
+                    secondaryIdx++;
+                }
+
+                if (selectCobranca) {
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.textContent = `${key} (${cobrancaCounts[key]})`;
+                    selectCobranca.appendChild(opt);
+                }
+            });
 
             renderCharts(statusCounts, cobrancaCounts);
         }
@@ -1271,17 +1624,44 @@
             const q = document.getElementById('tableSearchInput').value.toLowerCase();
             const selectedStatus = document.getElementById('filterStatusColF').value;
             const selectedCobranca = document.getElementById('filterCobrancaColE').value;
-            const onlyNumericNI = document.getElementById('filterCisNumNI').value;
+            const specialFilter = document.getElementById('filterCisNumNI').value;
 
-            const filtered = rawAtivosData.filter(item => {
+            let filtered = rawAtivosData.filter(item => {
                 const allValues = Object.values(item.originalRow).map(v => String(v).toLowerCase()).join(' ');
                 const matchQuery = !q || allValues.includes(q);
                 const matchStatus = !selectedStatus || item.statusColF.toUpperCase() === selectedStatus.toUpperCase();
                 const matchCobranca = !selectedCobranca || item.cobrancaColE.toUpperCase() === selectedCobranca.toUpperCase();
-                const matchCisNumNI = !onlyNumericNI || (item.isCisNumeric && item.cobrancaColE === "N/I");
+                
+                let matchSpecial = true;
+                if (specialFilter === "ONLY_NUMERIC_NI") {
+                    matchSpecial = item.isCisNumeric && item.cobrancaColE === "N/I";
+                } else if (specialFilter === "ONLY_DUPLICATED_CIS") {
+                    matchSpecial = item.isCisDuplicated === true;
+                }
 
-                return matchQuery && matchStatus && matchCobranca && matchCisNumNI;
+                let matchColFilters = true;
+                for (const [colHeader, allowedSet] of Object.entries(activeColumnFilters)) {
+                    if (allowedSet && allowedSet.size > 0) {
+                        const cellVal = String(item.originalRow[colHeader] || "-").trim();
+                        if (!allowedSet.has(cellVal)) {
+                            matchColFilters = false;
+                            break;
+                        }
+                    }
+                }
+
+                return matchQuery && matchStatus && matchCobranca && matchSpecial && matchColFilters;
             });
+
+            if (currentSort.colHeader) {
+                const h = currentSort.colHeader;
+                const dir = currentSort.direction === 'asc' ? 1 : -1;
+                filtered.sort((a, b) => {
+                    const valA = String(a.originalRow[h] || '').toLowerCase();
+                    const valB = String(b.originalRow[h] || '').toLowerCase();
+                    return valA.localeCompare(valB, 'pt-BR', { numeric: true }) * dir;
+                });
+            }
 
             renderTableBody(filtered);
         }
@@ -1291,6 +1671,11 @@
             document.getElementById('filterStatusColF').value = '';
             document.getElementById('filterCobrancaColE').value = '';
             document.getElementById('filterCisNumNI').value = '';
+
+            activeColumnFilters = {};
+            currentSort = { colHeader: null, direction: null };
+
+            renderTableHeaders();
             filterTable();
         }
 
