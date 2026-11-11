@@ -64,7 +64,7 @@
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-500 mb-1">Conteúdo Completo (Parágrafos organizados e formatados):</label>
-                <!-- Textarea com quebra de linha rigorosa para o texto antigo não ficar aglutinado -->
+                <!-- Textarea com quebra de linha rigorosa e formatação automática de blocos -->
                 <textarea id="obsModalTextarea" rows="7" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium leading-relaxed whitespace-pre-wrap break-words"></textarea>
             </div>
             <!-- Rodapé com Metadados da Linha e Última Data Extraída do Texto -->
@@ -465,7 +465,7 @@
             }
         }
 
-        // LÓGICA DO MODAL DE OBSERVAÇÃO COM LEITURA UNIVERSAL DE DATA E FORMATAÇÃO DE PARÁGRAFOS
+        // LÓGICA DO MODAL DE OBSERVAÇÃO COM FORMATAÇÃO AUTOMÁTICA DE PARÁGRAFOS E LEITURA UNIVERSAL
         function openObsModal(inputId, headerName) {
             const inputEl = document.getElementById(inputId);
             if (!inputEl) return;
@@ -479,11 +479,16 @@
                 excelRowIndex = tr.dataset.excelRowIndex || "-";
             }
 
-            const existingText = inputEl.value.trim();
+            let existingText = inputEl.value.trim();
             const today = new Date();
             const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
             
-            // Varre o texto inteiro em busca da última data registrada no formato [DD/MM/YYYY] para exibir em qualquer PC
+            // Organiza o texto antigo: insere quebras de linha automáticas antes de cada data [DD/MM/AAAA] encontrada
+            if (existingText) {
+                existingText = existingText.replace(/([^\n])\s*(\[\d{2}\/\d{2}\/\d{4}\])/g, '$1\n\n$2');
+            }
+
+            // Varre o texto inteiro em busca da última data registrada no formato [DD/MM/YYYY] para exibir universalmente em qualquer PC
             let ultimaDataExibida = "Nenhuma data registrada";
             if (existingText) {
                 const matches = existingText.match(/\[(\d{2}\/\d{2}\/\d{4})\]/g);
@@ -494,7 +499,6 @@
 
             let newContent = "";
             if (existingText) {
-                // Garante que o texto antigo receba quebra de linha organizada e adicione o novo parágrafo com data
                 newContent = existingText + `\n\n[${dateStr}] - `;
             } else {
                 newContent = `[${dateStr}] - `;
@@ -502,7 +506,7 @@
 
             document.getElementById('obsModalTextarea').value = newContent;
 
-            // Atualiza rodapé com a linha e a última data extraída direto do texto universal
+            // Atualiza o rodapé com a Linha do Excel e a última data extraída do texto
             document.getElementById('obsMetaRow').innerText = excelRowIndex;
             document.getElementById('obsMetaStatus').innerHTML = `Última alt.: <b class="text-indigo-600">${ultimaDataExibida}</b>`;
 
