@@ -63,13 +63,14 @@
                 </button>
             </div>
             <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1">Conteúdo Completo (Parágrafos organizados com data automática):</label>
-                <textarea id="obsModalTextarea" rows="7" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium leading-relaxed whitespace-pre-wrap"></textarea>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Conteúdo Completo (Parágrafos organizados e formatados):</label>
+                <!-- Textarea com quebra de linha rigorosa para o texto antigo não ficar aglutinado -->
+                <textarea id="obsModalTextarea" rows="7" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium leading-relaxed whitespace-pre-wrap break-words"></textarea>
             </div>
-            <!-- Rodapé com Metadados da Linha e Última Alteração -->
+            <!-- Rodapé com Metadados da Linha e Última Data Extraída do Texto -->
             <div id="obsModalFooterMeta" class="bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 text-[11px] text-slate-500 flex items-center justify-between">
                 <span><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> Linha Excel: <b id="obsMetaRow">-</b></span>
-                <span><i class="fa-solid fa-clock-rotate-left text-emerald-500 mr-1"></i> <span id="obsMetaStatus">Pronto para edição</span></span>
+                <span><i class="fa-solid fa-clock-rotate-left text-emerald-500 mr-1"></i> <span id="obsMetaStatus">Última alt.: -</span></span>
             </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button onclick="closeObsModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
@@ -464,7 +465,7 @@
             }
         }
 
-        // LÓGICA DO MODAL DE OBSERVAÇÃO COM HISTÓRICO DE ALTERAÇÃO DA LINHA
+        // LÓGICA DO MODAL DE OBSERVAÇÃO COM LEITURA UNIVERSAL DE DATA E FORMATAÇÃO DE PARÁGRAFOS
         function openObsModal(inputId, headerName) {
             const inputEl = document.getElementById(inputId);
             if (!inputEl) return;
@@ -474,24 +475,26 @@
             
             const tr = inputEl.closest('tr');
             let excelRowIndex = "-";
-            let ultimaAltLinha = "Nunca alterada localmente";
-
             if (tr) {
                 excelRowIndex = tr.dataset.excelRowIndex || "-";
-                
-                // Recupera a última data de alteração salva para esta linha específica no LocalStorage
-                const savedHistories = JSON.parse(localStorage.getItem('GF_ROW_LAST_UPDATES') || '{}');
-                if (savedHistories[excelRowIndex]) {
-                    ultimaAltLinha = savedHistories[excelRowIndex];
-                }
             }
 
             const existingText = inputEl.value.trim();
             const today = new Date();
             const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
             
+            // Varre o texto inteiro em busca da última data registrada no formato [DD/MM/YYYY] para exibir em qualquer PC
+            let ultimaDataExibida = "Nenhuma data registrada";
+            if (existingText) {
+                const matches = existingText.match(/\[(\d{2}\/\d{2}\/\d{4})\]/g);
+                if (matches && matches.length > 0) {
+                    ultimaDataExibida = matches[matches.length - 1].replace(/[\[\]]/g, '');
+                }
+            }
+
             let newContent = "";
             if (existingText) {
+                // Garante que o texto antigo receba quebra de linha organizada e adicione o novo parágrafo com data
                 newContent = existingText + `\n\n[${dateStr}] - `;
             } else {
                 newContent = `[${dateStr}] - `;
@@ -499,9 +502,9 @@
 
             document.getElementById('obsModalTextarea').value = newContent;
 
-            // Atualiza o rodapé com a Linha do Excel e a data da última alteração da linha
+            // Atualiza rodapé com a linha e a última data extraída direto do texto universal
             document.getElementById('obsMetaRow').innerText = excelRowIndex;
-            document.getElementById('obsMetaStatus').innerHTML = `Última alt. da linha: <b class="text-indigo-600">${ultimaAltLinha}</b>`;
+            document.getElementById('obsMetaStatus').innerHTML = `Última alt.: <b class="text-indigo-600">${ultimaDataExibida}</b>`;
 
             document.getElementById('obsModal').classList.remove('hidden');
             
@@ -1287,13 +1290,6 @@
                 const dateStr = now.toLocaleDateString('pt-BR');
                 const timeStr = now.toLocaleTimeString('pt-BR');
                 const timestampStr = `${dateStr} às ${timeStr}`;
-
-                // Salva o histórico de alteração por linha no localStorage
-                let savedHistories = JSON.parse(localStorage.getItem('GF_ROW_LAST_UPDATES') || '{}');
-                batch.forEach(item => {
-                    savedHistories[item.rowIndex] = timestampStr;
-                });
-                localStorage.setItem('GF_ROW_LAST_UPDATES', JSON.stringify(savedHistories));
 
                 localStorage.setItem(DB_KEY_LAST_SAVE, timestampStr);
 
