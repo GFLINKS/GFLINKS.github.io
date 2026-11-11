@@ -66,10 +66,10 @@
                 <label class="block text-xs font-semibold text-slate-500 mb-1">Conteúdo Completo (Parágrafos organizados com data automática):</label>
                 <textarea id="obsModalTextarea" rows="7" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium leading-relaxed whitespace-pre-wrap"></textarea>
             </div>
-            <!-- Rodapé com Metadados da Linha e Alteração (Problema 3) -->
+            <!-- Rodapé com Metadados da Linha e Última Alteração -->
             <div id="obsModalFooterMeta" class="bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 text-[11px] text-slate-500 flex items-center justify-between">
                 <span><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> Linha Excel: <b id="obsMetaRow">-</b></span>
-                <span><i class="fa-solid fa-clock-rotate-left text-emerald-500 mr-1"></i> Status: <span id="obsMetaStatus">Pronto para edição</span></span>
+                <span><i class="fa-solid fa-clock-rotate-left text-emerald-500 mr-1"></i> <span id="obsMetaStatus">Pronto para edição</span></span>
             </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button onclick="closeObsModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition">Cancelar</button>
@@ -464,7 +464,7 @@
             }
         }
 
-        // LÓGICA DO MODAL DE OBSERVAÇÃO COM DATA AUTOMÁTICA E PARÁGRAFO (Problemas 1, 2 e 3)
+        // LÓGICA DO MODAL DE OBSERVAÇÃO COM HISTÓRICO DE ALTERAÇÃO DA LINHA
         function openObsModal(inputId, headerName) {
             const inputEl = document.getElementById(inputId);
             if (!inputEl) return;
@@ -472,35 +472,42 @@
             activeObsInputId = inputId;
             document.getElementById('obsModalTitle').innerText = `Editar ${headerName || 'Observação'}`;
             
+            const tr = inputEl.closest('tr');
+            let excelRowIndex = "-";
+            let ultimaAltLinha = "Nunca alterada localmente";
+
+            if (tr) {
+                excelRowIndex = tr.dataset.excelRowIndex || "-";
+                
+                // Recupera a última data de alteração salva para esta linha específica no LocalStorage
+                const savedHistories = JSON.parse(localStorage.getItem('GF_ROW_LAST_UPDATES') || '{}');
+                if (savedHistories[excelRowIndex]) {
+                    ultimaAltLinha = savedHistories[excelRowIndex];
+                }
+            }
+
             const existingText = inputEl.value.trim();
             const today = new Date();
             const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
             
             let newContent = "";
             if (existingText) {
-                // Adiciona um novo parágrafo com a data automática no final se já houver texto
                 newContent = existingText + `\n\n[${dateStr}] - `;
             } else {
-                // Se estiver vazio, inicia com a data
                 newContent = `[${dateStr}] - `;
             }
 
             document.getElementById('obsModalTextarea').value = newContent;
 
-            // Atualiza rodapé de metadados com a linha do Excel e status
-            const tr = inputEl.closest('tr');
-            if (tr) {
-                const excelRowIndex = tr.dataset.excelRowIndex || "-";
-                document.getElementById('obsMetaRow').innerText = excelRowIndex;
-            }
-            document.getElementById('obsMetaStatus').innerText = "Editando com data automática";
+            // Atualiza o rodapé com a Linha do Excel e a data da última alteração da linha
+            document.getElementById('obsMetaRow').innerText = excelRowIndex;
+            document.getElementById('obsMetaStatus').innerHTML = `Última alt. da linha: <b class="text-indigo-600">${ultimaAltLinha}</b>`;
 
             document.getElementById('obsModal').classList.remove('hidden');
             
             setTimeout(() => {
                 const txt = document.getElementById('obsModalTextarea');
                 txt.focus();
-                // Posiciona o cursor no final do texto para digitação imediata
                 txt.setSelectionRange(txt.value.length, txt.value.length);
             }, 50);
         }
@@ -523,11 +530,9 @@
             const newVal = document.getElementById('obsModalTextarea').value;
             const originalVal = inputEl.dataset.original || "";
 
-            // Atualiza o valor visual na célula da tabela com quebras preservadas
             inputEl.value = newVal;
             inputEl.title = newVal;
 
-            // Se houve alteração no conteúdo, solicita senha e grava individualmente no Drive
             if (newVal !== originalVal) {
                 const tr = inputEl.closest('tr');
                 if (tr) {
@@ -550,7 +555,6 @@
 
                         closeObsModal();
 
-                        // Abre o modal de confirmação por senha (gf01)
                         document.getElementById('confirmCodeInput').value = '';
                         document.getElementById('confirmError').classList.add('hidden');
                         document.getElementById('confirmModal').classList.remove('hidden');
@@ -1283,6 +1287,13 @@
                 const dateStr = now.toLocaleDateString('pt-BR');
                 const timeStr = now.toLocaleTimeString('pt-BR');
                 const timestampStr = `${dateStr} às ${timeStr}`;
+
+                // Salva o histórico de alteração por linha no localStorage
+                let savedHistories = JSON.parse(localStorage.getItem('GF_ROW_LAST_UPDATES') || '{}');
+                batch.forEach(item => {
+                    savedHistories[item.rowIndex] = timestampStr;
+                });
+                localStorage.setItem('GF_ROW_LAST_UPDATES', JSON.stringify(savedHistories));
 
                 localStorage.setItem(DB_KEY_LAST_SAVE, timestampStr);
 
