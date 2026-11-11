@@ -50,6 +50,28 @@
 </head>
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800">
 
+    <!-- MODAL DE OBSERVAÇÃO / EDIÇÃO EXPANDIDA -->
+    <div id="observationModal" class="fixed inset-0 bg-slate-900/80 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full space-y-4 border border-slate-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Edição de Campo Detalhado
+                </h3>
+                <button onclick="fecharModalObservacao()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label id="obsModalLabel" class="block text-xs font-bold text-slate-600 mb-1">Conteúdo do Campo:</label>
+                <textarea id="obsModalTextarea" rows="6" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium bg-slate-50 text-slate-800"></textarea>
+            </div>
+            <div class="flex gap-2 justify-end">
+                <button onclick="fecharModalObservacao()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg text-xs transition">Cancelar</button>
+                <button onclick="aplicarAlteracaoObservacao()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk"></i> Aplicar e Salvar Registro
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE CONFIRMAÇÃO DE ALTERAÇÃO (GF01) -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/80 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full text-center space-y-4 border border-slate-200">
@@ -58,7 +80,7 @@
             </div>
             <div>
                 <h3 class="text-lg font-bold text-slate-800">Confirmar Alterações Modificadas</h3>
-                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação dos registros alterados no Google Drive, digite o código de confirmação:</p>
+                <p class="text-xs text-slate-500 mt-1">Para autorizar a gravação dos registros no Google Drive, digite o código de confirmação:</p>
             </div>
             <div>
                 <input type="text" id="confirmCodeInput" placeholder="Digite gf01..." class="w-full text-sm px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold tracking-wider bg-slate-50 uppercase">
@@ -325,6 +347,7 @@
         let driveTimer = null;
 
         let pendingEdit = null;
+        let currentObsTarget = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem(AUTH_KEY) === 'true') {
@@ -626,10 +649,14 @@
         function parseWorkbook(workbook) {
             let sheetAtivos = null, sheetBD = null;
 
+            // Busca EXCLUSIVAMENTE nas abas ATIVOS_VIVO_CLARO e BD_AUXILIAR (Aba LINK desconsiderada)
             workbook.SheetNames.forEach(name => {
                 const norm = name.trim().toUpperCase();
-                if (norm.includes("ATIVO") || norm.includes("VIVO") || norm.includes("CLARO") || norm.includes("LINK")) sheetAtivos = workbook.Sheets[name];
-                else if (norm.includes("BD") || norm.includes("AUXILIAR") || norm.includes("CADASTRO")) sheetBD = workbook.Sheets[name];
+                if (norm.includes("ATIVO") || norm.includes("VIVO") || norm.includes("CLARO")) {
+                    sheetAtivos = workbook.Sheets[name];
+                } else if (norm.includes("BD") || norm.includes("AUXILIAR") || norm.includes("CADASTRO")) {
+                    sheetBD = workbook.Sheets[name];
+                }
             });
 
             if (!sheetAtivos) sheetAtivos = workbook.Sheets[workbook.SheetNames[0]];
@@ -844,6 +871,59 @@
             resultBox.classList.remove('hidden');
         }
 
+        function abrirModalObservacao(inputId, headerName, excelRowIndex, colIdx) {
+            const inputEl = document.getElementById(inputId);
+            if (!inputEl) return;
+
+            currentObsTarget = {
+                inputId: inputId,
+                headerName: headerName,
+                excelRowIndex: excelRowIndex,
+                colIdx: colIdx
+            };
+
+            document.getElementById('obsModalLabel').innerText = `Edição do Campo: ${headerName}`;
+            document.getElementById('obsModalTextarea').value = inputEl.value;
+            document.getElementById('observationModal').classList.remove('hidden');
+        }
+
+        function fecharModalObservacao() {
+            currentObsTarget = null;
+            document.getElementById('observationModal').classList.add('hidden');
+        }
+
+        function aplicarAlteracaoObservacao() {
+            if (!currentObsTarget) return;
+
+            const inputEl = document.getElementById(currentObsTarget.inputId);
+            const textVal = document.getElementById('obsModalTextarea').value;
+
+            if (inputEl) {
+                inputEl.value = textVal;
+            }
+
+            const changes = [{
+                colIndex: currentObsTarget.colIdx + 1,
+                header: currentObsTarget.headerName,
+                value: textVal
+            }];
+
+            pendingEdit = {
+                type: 'single',
+                batch: [{
+                    rowIndex: currentObsTarget.excelRowIndex,
+                    changes: changes
+                }]
+            };
+
+            fecharModalObservacao();
+
+            document.getElementById('confirmCodeInput').value = '';
+            document.getElementById('confirmError').classList.add('hidden');
+            document.getElementById('confirmModal').classList.remove('hidden');
+            document.getElementById('confirmCodeInput').focus();
+        }
+
         function solicitarSalvarEmMassa() {
             const startIdx = getEnderecoStartIndex();
             const batch = [];
@@ -895,7 +975,7 @@
                 return;
             }
 
-            pendingEdit = { batch: batch };
+            pendingEdit = { type: 'batch', batch: batch };
 
             document.getElementById('confirmCodeInput').value = '';
             document.getElementById('confirmError').classList.add('hidden');
@@ -990,8 +1070,13 @@
                                 <input type="date" id="${inputId}" data-original="${formattedIsoDate}" value="${formattedIsoDate}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
                             `;
                         } else {
+                            const isLongField = header.toUpperCase().includes("OBS") || header.toUpperCase().includes("ENDEREÇO") || header.toUpperCase().includes("ENDERECO");
+                            const safeHeader = header.replace(/'/g, "\\'");
                             td.innerHTML = `
-                                <input type="text" id="${inputId}" data-original="${rawVal}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full min-w-[150px]">
+                                <div class="flex items-center gap-1">
+                                    <input type="text" id="${inputId}" data-original="${rawVal}" value="${rawVal}" class="text-[11px] bg-white border border-slate-300 rounded px-2 py-1 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500 w-full min-w-[150px]">
+                                    ${isLongField ? `<button onclick="abrirModalObservacao('${inputId}', '${safeHeader}', ${item.excelRowIndex}, ${colIdx})" class="text-slate-400 hover:text-indigo-600 p-1 rounded" title="Expandir edição"><i class="fa-solid fa-expand text-xs"></i></button>` : ''}
+                                </div>
                             `;
                         }
                     } else {
